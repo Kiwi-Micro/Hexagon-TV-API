@@ -1,0 +1,57 @@
+[
+	{
+		"id": "1",
+		"name": "TV Show 1",
+		"description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, distinctio! Explicabo consequatur voluptatum praesentium odio totam. Fugiat possimus quidem, excepturi nulla et quam corrupti impedit natus animi architecto quia quas.",
+		"thumbnailURL": "https://github.com/Mooshay105/Hex-TV-Assests/blob/main/img/thumbnails/development1.png?raw=true",
+		"videoURL": "https://github.com/Mooshay105/Hex-TV-Assests/raw/refs/heads/main/development.mp4",
+		"date": "01-01-2024",
+		"urlName": "tvshow1",
+		"rating": "G",
+		"category": "tvshows"
+	},
+	{
+		"id": "2",
+		"name": "TV Show 2",
+		"description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, distinctio! Explicabo consequatur voluptatum praesentium odio totam. Fugiat possimus quidem, excepturi nulla et quam corrupti impedit natus animi architecto quia quas.",
+		"thumbnailURL": "https://github.com/Mooshay105/Hex-TV-Assests/blob/main/img/thumbnails/development2.png?raw=true",
+		"videoURL": "https://github.com/Mooshay105/Hex-TV-Assests/raw/refs/heads/main/development.mp4",
+		"date": "01-01-2024",
+		"urlName": "tvshow2",
+		"rating": "G",
+		"category": "tvshows"
+	},
+	{
+		"id": "3",
+		"name": "TV Show 3",
+		"description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, distinctio! Explicabo consequatur voluptatum praesentium odio totam. Fugiat possimus quidem, excepturi nulla et quam corrupti impedit natus animi architecto quia quas.",
+		"thumbnailURL": "https://github.com/Mooshay105/Hex-TV-Assests/blob/main/img/thumbnails/development3.png?raw=true",
+		"videoURL": "https://github.com/Mooshay105/Hex-TV-Assests/raw/refs/heads/main/development.mp4",
+		"date": "01-01-2024",
+		"urlName": "tvshow3",
+		"rating": "PG",
+		"category": "tvshows"
+	},
+	{
+		"id": "4",
+		"name": "TV Show 4",
+		"description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, distinctio! Explicabo consequatur voluptatum praesentium odio totam. Fugiat possimus quidem, excepturi nulla et quam corrupti impedit natus animi architecto quia quas.",
+		"thumbnailURL": "https://github.com/Mooshay105/Hex-TV-Assests/blob/main/img/thumbnails/development4.png?raw=true",
+		"videoURL": "https://github.com/Mooshay105/Hex-TV-Assests/raw/refs/heads/main/development.mp4",
+		"date": "01-01-2024",
+		"urlName": "tvshow4",
+		"rating": "PG",
+		"category": "tvshows"
+	},
+	{
+		"id": "5",
+		"name": "TV Show 5",
+		"description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, distinctio! Explicabo consequatur voluptatum praesentium odio totam. Fugiat possimus quidem, excepturi nulla et quam corrupti impedit natus animi architecto quia quas.",
+		"thumbnailURL": "https://github.com/Mooshay105/Hex-TV-Assests/blob/main/img/thumbnails/development1.png?raw=true",
+		"videoURL": "https://github.com/Mooshay105/Hex-TV-Assests/raw/refs/heads/main/development.mp4",
+		"date": "01-01-2024",
+		"urlName": "tvshow5",
+		"rating": "CTC",
+		"category": "tvshows"
+	}
+]

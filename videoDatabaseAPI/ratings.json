@@ -1,0 +1,14 @@
+[
+	{
+		"rating": "G",
+		"description": "Suitable for all ages"
+	},
+	{
+		"rating": "PG",
+		"description": "Some material may not be suitable for children"
+	},
+	{
+		"rating": "CTC",
+		"description": "Check the classification closer to its release date"
+	}
+]
