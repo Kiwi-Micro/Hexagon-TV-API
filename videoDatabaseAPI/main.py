@@ -8,7 +8,7 @@ def loadData(path):
         return json.load(file)
 
 def setCorsHeaders(response):
-    response.headers['Access-Control-Allow-Origin'] = 'https://hexagon.kiwi-micro.com'
+    response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     return response
 
