@@ -12,14 +12,9 @@ def setCorsHeaders(response):
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     return response
 
-ratings = loadData('ratings.json')
 movies = loadData('videoDatabases/movies.json')
 tvshows = loadData('videoDatabases/tvshows.json')
 documentaries = loadData('videoDatabases/documentaries.json')
-
-@app.route('/ratings', methods=['GET'])
-def getRatings():
-    return setCorsHeaders(jsonify(ratings))
 
 @app.route('/movies', methods=['GET'])
 def getMovies():
