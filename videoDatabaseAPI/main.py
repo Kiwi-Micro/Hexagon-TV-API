@@ -56,5 +56,31 @@ def getTVShows():
 def getDocumentaries():
     return setCorsHeaders(jsonify(documentaries))
 
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query')
+    if query is None:
+        return setCorsHeaders(jsonify({'error': 'No query provided'}))
+    if query == '':
+        return setCorsHeaders(jsonify({'error': 'Empty query'}))
+    
+    query = query.lower()
+    results = []
+    
+    for movie in movies:
+        if query in movie['name'].lower() or movie['name'].lower().startswith(query) or movie['name'].lower() == query:
+            results.append(movie)
+    
+    for tvshow in tvshows:
+        if query in tvshow['name'].lower() or tvshow['name'].lower().startswith(query) or tvshow['name'].lower() == query:
+            results.append(tvshow)
+    
+    for documentary in documentaries:
+        if query in documentary['name'].lower() or documentary['name'].lower().startswith(query) or documentary['name'].lower() == query:
+            results.append(documentary)
+    
+    return setCorsHeaders(jsonify(results))
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
