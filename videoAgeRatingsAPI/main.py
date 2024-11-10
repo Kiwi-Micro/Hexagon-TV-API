@@ -3,16 +3,25 @@ import json
 
 app = Flask(__name__)
 
-def loadData(path):
-    with open(path, 'r') as file:
-        return json.load(file)
-
 def setCorsHeaders(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     return response
 
-ratings = loadData('ratings.json')
+ratings = [
+    {
+		"rating": "G",
+		"description": "Suitable for all ages"
+	},
+	{
+		"rating": "PG",
+		"description": "Some material may not be suitable for children"
+	},
+	{
+		"rating": "CTC",
+		"description": "Check the classification closer to its release date"
+	}
+]
 
 @app.route('/ratings', methods=['GET'])
 def getRatings():
