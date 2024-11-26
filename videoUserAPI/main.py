@@ -21,10 +21,45 @@ def getDbConnection():
 			host="localhost",
 			user="hexagon",
 			password=dbPassword,
-			database="hexagonUsersInfodb"
+			database="hexagonUsersdb"
 		)
 	except mysql.connector.Error as err:
 		raise RuntimeError(f"Database connection failed: {err}")
+
+try:
+	connection = getDbConnection()
+	cursor = connection.cursor()
+	query = """
+	CREATE TABLE IF NOT EXISTS watchlist (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		username VARCHAR(255) NOT NULL,
+		name VARCHAR(255) NOT NULL,
+		urlName VARCHAR(255) NOT NULL,
+		thumbnailURL VARCHAR(255) NOT NULL
+	)
+	"""
+	cursor.execute(query)
+	connection.commit()
+except mysql.connector.Error as err:
+	raise RuntimeError(f"Database creation failed: {err}")
+
+def auth(userId, username):
+	connection = getDbConnection()
+	cursor = connection.cursor()
+
+	try:
+		query = """
+		SELECT sessionUUID FROM sessions
+		WHERE sessionUUID = %s AND username = %s
+		"""
+		cursor.execute(query, (userId, username))
+		results = cursor.fetchall()
+		if results:
+			return True
+		else:
+			return False
+	except Exception as e:
+		return False
 
 @app.route('/getWatchlist', methods=['GET'])
 def getWatchlist():
@@ -55,12 +90,16 @@ def getWatchlist():
 
 @app.route('/addToWatchlist', methods=['POST'])
 def addToWatchlist():
+	userId = request.json.get('id')
 	name = request.json.get('name')
 	urlName = request.json.get('urlName')
 	thumbnailUrl = request.json.get('thumbnailURL')
 	username = request.json.get('username')
 
-	if not all([name, urlName, thumbnailUrl, username]):
+	if not auth(userId, username):
+		return jsonify({"error": "Invalid credentials"}), 401
+
+	if not all([userId, name, urlName, thumbnailUrl, username]):
 		return jsonify({"error": "Missing required parameters"}), 400
 
 	connection = getDbConnection()
@@ -88,8 +127,12 @@ def addToWatchlist():
 
 @app.route('/removeFromWatchlist', methods=['DELETE'])
 def removeFromWatchlist():
+	userId = request.json.get('id')
 	urlName = request.json.get('urlName')
 	username = request.json.get('username')
+
+	if not auth(userId, username):
+		return jsonify({"error": "Invalid credentials"}), 401
 
 	if not urlName or not username:
 		return jsonify({"error": "Missing required parameters"})
