@@ -9,66 +9,22 @@ CORS(app)
 debug = True
 configPath = "/hexagontv/password.txt"
 
-def getDbConnection():
-	try:
-		with open(configPath, 'r') as file:
-			dbPassword = file.readline().strip()
-	except FileNotFoundError:
-		raise RuntimeError(f"Configuration file not found at {configPath}")
+try:
+	with open(configPath, 'r') as file:
+		dbPassword = file.readline().strip()
+except FileNotFoundError:
+	raise RuntimeError(f"Configuration file not found at {configPath}")
 
-	try:
-		connection = mysql.connector.connect(
-			host="localhost",
-			user="hexagon",
-			password=dbPassword,
-			database="hexagonMoviedb"
-		)
-		return connection
-	except mysql.connector.Error as err:
-		raise RuntimeError(f"Database connection failed: {err}")
-
-connection = getDbConnection()
-cursor = connection.cursor()
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS movies (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(255) NOT NULL,
-	description TEXT,
-	thumbnailURL VARCHAR(255),
-	videoURL VARCHAR(255),
-	date DATE,
-	urlName VARCHAR(255) UNIQUE,
-	rating VARCHAR(10),
-	category VARCHAR(50)
-);
-""")
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS tvshows (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(255) NOT NULL,
-	description TEXT,
-	thumbnailURL VARCHAR(255),
-	videoURL VARCHAR(255),
-	date DATE,
-	urlName VARCHAR(255) UNIQUE,
-	rating VARCHAR(10),
-	category VARCHAR(50)
-);
-""")
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS documentaries (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(255) NOT NULL,
-	description TEXT,
-	thumbnailURL VARCHAR(255),
-	videoURL VARCHAR(255),
-	date DATE,
-	urlName VARCHAR(255) UNIQUE,
-	rating VARCHAR(10),
-	category VARCHAR(50)
-);
-""")
+try:
+	connection = mysql.connector.connect(
+		host="localhost",
+		user="hexagon",
+		password=dbPassword,
+		database="hexagonMoviedb"
+	)
+	cursor = connection.cursor()
+except mysql.connector.Error as err:
+	raise RuntimeError(f"Database connection failed: {err}")
 
 def loadData(tableName):
 	try:
@@ -109,8 +65,6 @@ def search():
 		return jsonify({'error': 'No query provided'})
 	
 	query = query.strip().lower()
-	if query == '':
-		return jsonify({'error': 'Empty query'})
 
 	results = []
 	for content in [movies, tvshows, documentaries]:
