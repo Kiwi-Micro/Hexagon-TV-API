@@ -30,21 +30,6 @@ try:
 except mysql.connector.Error as err:
 	raise RuntimeError(f"Database connection failed: {err}")
 
-dbCursor.execute("""
-CREATE TABLE IF NOT EXISTS users (
-	username VARCHAR(32) PRIMARY KEY,
-	passwordCheckSum LONGTEXT,
-	email VARCHAR(255)
-)
-""")
-dbCursor.execute("""
-CREATE TABLE IF NOT EXISTS sessions (
-	username VARCHAR(32),
-	sessionUUID CHAR(36) PRIMARY KEY,
-	expires DATE
-)
-""")
-
 def isValidEmail(email):
 	return re.match(emailPattern, email) is not None
 

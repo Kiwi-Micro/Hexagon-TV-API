@@ -26,23 +26,6 @@ def getDbConnection():
 	except mysql.connector.Error as err:
 		raise RuntimeError(f"Database connection failed: {err}")
 
-try:
-	connection = getDbConnection()
-	cursor = connection.cursor()
-	query = """
-	CREATE TABLE IF NOT EXISTS watchlist (
-		id INT AUTO_INCREMENT PRIMARY KEY,
-		username VARCHAR(255) NOT NULL,
-		name VARCHAR(255) NOT NULL,
-		urlName VARCHAR(255) NOT NULL,
-		thumbnailURL VARCHAR(255) NOT NULL
-	)
-	"""
-	cursor.execute(query)
-	connection.commit()
-except mysql.connector.Error as err:
-	raise RuntimeError(f"Database creation failed: {err}")
-
 def auth(userId, username):
 	connection = getDbConnection()
 	cursor = connection.cursor()
