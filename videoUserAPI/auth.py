@@ -99,7 +99,7 @@ def registerUser():
 def options():
 	return jsonify()
 
-@app.route('/deleteAccount', methods=['DELETE'])
+@app.route('/delete', methods=['DELETE'])
 def deleteUser():
 	data = request.get_json()
 	username = data.get('username')
