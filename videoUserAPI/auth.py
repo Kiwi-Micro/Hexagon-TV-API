@@ -125,5 +125,33 @@ def deleteUser():
 	except Exception as e:
 		return jsonify({"status": "There was an error deleting your account! Please try again later. (500)"})
 
+@app.route('/wipe', methods=['DELETE'])
+def wipe():
+	data = request.get_json()
+	username = data.get('username')
+	passwordCheckSum = data.get('passwordCheckSum')
+
+	if not username or not passwordCheckSum:
+		return jsonify({"status": "Please fill in all fields! (400)"})
+
+	try:
+		query = "SELECT passwordCheckSum FROM users WHERE username = %s"
+		dbCursor.execute(query, (username,))
+		result = dbCursor.fetchone()
+
+		if result and result[0] == passwordCheckSum:
+			dbCursor.execute("DELETE FROM watchlist WHERE username = %s", (username,))
+			dbCursor.execute("DELETE FROM continueWatching WHERE username = %s", (username,))
+			dbConnection.commit()
+			return jsonify({"status": "success"})
+		else:
+			return jsonify({"status": "Incorrect Username or Password. (400)"})
+	except Exception as e:
+		return jsonify({"status": "There was an error deleting your account! Please try again later. (500)"})
+
+@app.route('/wipe', methods=['OPTIONS'])
+def wipeOptions():
+	return jsonify({"status": "success"})
+
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8071)
