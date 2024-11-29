@@ -49,7 +49,7 @@ def getWatchlist():
 	username = request.args.get('username')
 
 	if not username:
-		return jsonify({"error": "Missing username parameter"}), 400
+		return jsonify({"error": "Missing username parameter"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor(dictionary=True)
@@ -80,10 +80,10 @@ def addToWatchlist():
 	username = request.json.get('username')
 
 	if not auth(userId, username):
-		return jsonify({"error": "Invalid credentials"}), 401
+		return jsonify({"error": "Invalid credentials"})
 
 	if not all([userId, name, urlName, thumbnailUrl, username]):
-		return jsonify({"error": "Missing required parameters"}), 400
+		return jsonify({"error": "Missing required parameters"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor()
@@ -115,7 +115,7 @@ def removeFromWatchlist():
 	username = request.json.get('username')
 
 	if not auth(userId, username):
-		return jsonify({"error": "Invalid credentials"}), 401
+		return jsonify({"error": "Invalid credentials"})
 
 	if not urlName or not username:
 		return jsonify({"error": "Missing required parameters"})
@@ -145,7 +145,7 @@ def getContinueWatching():
 	username = request.args.get('username')
 
 	if not username:
-		return jsonify({"error": "Missing username parameter"}), 400
+		return jsonify({"error": "Missing username parameter"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor(dictionary=True)
@@ -176,10 +176,10 @@ def addToContinueWatching():
 	username = request.json.get('username')
 
 	if not auth(userId, username):
-		return jsonify({"error": "Invalid credentials"}), 401
+		return jsonify({"error": "Invalid credentials"})
 
 	if not all([userId, name, urlName, thumbnailUrl, username]):
-		return jsonify({"error": "Missing required parameters"}), 400
+		return jsonify({"error": "Missing required parameters"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor()
@@ -211,7 +211,7 @@ def removeFromContinueWatching():
 	username = request.json.get('username')
 
 	if not auth(userId, username):
-		return jsonify({"error": "Invalid credentials"}), 401
+		return jsonify({"error": "Invalid credentials"})
 
 	if not urlName or not username:
 		return jsonify({"error": "Missing required parameters"})
