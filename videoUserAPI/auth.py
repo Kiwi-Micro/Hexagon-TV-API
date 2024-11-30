@@ -157,5 +157,54 @@ def wipe():
 def wipeOptions():
 	return jsonify()
 
+@app.route('/logout', methods=['POST'])
+def logout():
+	data = request.get_json()
+	username = data.get('username')
+	userId = data.get('id')
+
+	if not username or not userId:
+		return jsonify({"status": "Please fill in all fields! (400)"})
+	
+	try:
+		query = "DELETE FROM sessions WHERE username = %s AND sessionUUID = %s"
+		dbCursor.execute(query, (username, userId))
+		dbConnection.commit()
+		return jsonify({"status": "success"})
+	except Exception as e:
+		return jsonify({"status": "server error"})
+
+@app.route('/logout', methods=['OPTIONS'])
+def logoutOptions():
+	return jsonify()
+
+@app.route('/changePassword', methods=['PATCH'])
+def changePassword():
+	data = request.get_json()
+	username = data.get('username')
+	passwordCheckSum = data.get('oldPassword')
+	newPassword = data.get('newPassword')
+
+	if not username or not passwordCheckSum or not newPassword:
+		return jsonify({"status": "Please fill in all fields!"})
+
+	try:
+		query = "SELECT passwordCheckSum FROM users WHERE username = %s"
+		dbCursor.execute(query, (username,))
+		result = dbCursor.fetchone()
+
+		if result and result[0] == passwordCheckSum:
+			dbCursor.execute("UPDATE users SET passwordCheckSum = %s WHERE username = %s", (newPassword, username))
+			dbConnection.commit()
+			return jsonify({"status": "success"})
+		else:
+			return jsonify({"status": "Incorrect Username or Password."})
+	except Exception as e:
+		return jsonify({"status": "Internal server error"})
+
+@app.route('/changePassword', methods=['OPTIONS'])
+def changePasswordOptions():
+	return jsonify()
+
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8071)
