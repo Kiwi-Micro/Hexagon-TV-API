@@ -26,11 +26,7 @@ def getRatings():
 		response = ratings
 		return jsonify(response)
 	except Exception as e:
-		if debug:
-			errorMessage = {"error": str(e)}
-		else:
-			errorMessage = {"error": "Internal server error"}
-		return jsonify(errorMessage), 500
+		return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8081)

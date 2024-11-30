@@ -6,7 +6,6 @@ app = Flask(__name__)
 
 CORS(app)
 
-debug = True
 configPath = "/hexagontv/password.txt"
 
 def getDbConnection():
@@ -49,7 +48,7 @@ def getWatchlist():
 	username = request.args.get('username')
 
 	if not username:
-		return jsonify({"error": "Missing username parameter"})
+		return jsonify({"status": "missing parameters"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor(dictionary=True)
@@ -64,7 +63,7 @@ def getWatchlist():
 		results = cursor.fetchall()
 		response = results if results else []
 	except Exception as e:
-		response = {"error": str(e)} if debug else {"error": "Internal server error"}
+		response = {"status": "server error"}
 	finally:
 		cursor.close()
 		connection.close()
@@ -79,11 +78,11 @@ def addToWatchlist():
 	thumbnailUrl = request.json.get('thumbnailURL')
 	username = request.json.get('username')
 
-	if not auth(userId, username):
-		return jsonify({"error": "Invalid credentials"})
-
 	if not all([userId, name, urlName, thumbnailUrl, username]):
-		return jsonify({"error": "Missing required parameters"})
+		return jsonify({"status": "missing parameters"})
+
+	if not auth(userId, username):
+		return jsonify({"status": "invalid credentials"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor()
@@ -95,12 +94,12 @@ def addToWatchlist():
 		"""
 		cursor.execute(query, (username, name, urlName, thumbnailUrl))
 		connection.commit()
-		response = {"message": "Data inserted successfully"}
+		response = {"status": "success"}
 	except mysql.connector.IntegrityError:
-		response = {"error": "Entry already exists"}
+		response = {"status": "entry already exists"}
 		return jsonify(response)
 	except Exception as e:
-		response = {"error": str(e)} if debug else {"error": "Internal server error"}
+		response = {"status": "server error"}
 		return jsonify(response)
 	finally:
 		cursor.close()
@@ -114,11 +113,11 @@ def removeFromWatchlist():
 	urlName = request.json.get('urlName')
 	username = request.json.get('username')
 
-	if not auth(userId, username):
-		return jsonify({"error": "Invalid credentials"})
-
 	if not urlName or not username:
-		return jsonify({"error": "Missing required parameters"})
+		return jsonify({"status": "missing parameters"})
+
+	if not auth(userId, username):
+		return jsonify({"status": "invalid credentials"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor()
@@ -130,9 +129,9 @@ def removeFromWatchlist():
 		"""
 		cursor.execute(query, (urlName, username))
 		connection.commit()
-		response = {"message": "Data removed successfully"}
+		response = {"status": "success"}
 	except Exception as e:
-		response = {"error": str(e)} if debug else {"error": "Internal server error"}
+		response = {"status": "server error"}
 		return jsonify(response)
 	finally:
 		cursor.close()
@@ -145,7 +144,7 @@ def getContinueWatching():
 	username = request.args.get('username')
 
 	if not username:
-		return jsonify({"error": "Missing username parameter"})
+		return jsonify({"status": "missing parameters"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor(dictionary=True)
@@ -160,7 +159,7 @@ def getContinueWatching():
 		results = cursor.fetchall()
 		response = results if results else []
 	except Exception as e:
-		response = {"error": str(e)} if debug else {"error": "Internal server error"}
+		response = {"status": "server error"}
 	finally:
 		cursor.close()
 		connection.close()
@@ -175,11 +174,11 @@ def addToContinueWatching():
 	thumbnailUrl = request.json.get('thumbnailURL')
 	username = request.json.get('username')
 
-	if not auth(userId, username):
-		return jsonify({"error": "Invalid credentials"})
-
 	if not all([userId, name, urlName, thumbnailUrl, username]):
-		return jsonify({"error": "Missing required parameters"})
+		return jsonify({"status": "missing parameters"})
+
+	if not auth(userId, username):
+		return jsonify({"status": "invalid credentials"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor()
@@ -191,12 +190,12 @@ def addToContinueWatching():
 		"""
 		cursor.execute(query, (username, name, urlName, thumbnailUrl))
 		connection.commit()
-		response = {"message": "Data inserted successfully"}
+		response = {"status": "success"}
 	except mysql.connector.IntegrityError:
-		response = {"error": "Entry already exists"}
+		response = {"status": "entry already exists"}
 		return jsonify(response)
 	except Exception as e:
-		response = {"error": str(e)} if debug else {"error": "Internal server error"}
+		response = {"status": "server error"}
 		return jsonify(response)
 	finally:
 		cursor.close()
@@ -210,11 +209,11 @@ def removeFromContinueWatching():
 	urlName = request.json.get('urlName')
 	username = request.json.get('username')
 
-	if not auth(userId, username):
-		return jsonify({"error": "Invalid credentials"})
-
 	if not urlName or not username:
-		return jsonify({"error": "Missing required parameters"})
+		return jsonify({"status": "missing parameters"})
+
+	if not auth(userId, username):
+		return jsonify({"status": "invalid credentials"})
 
 	connection = getDbConnection()
 	cursor = connection.cursor()
@@ -226,9 +225,9 @@ def removeFromContinueWatching():
 		"""
 		cursor.execute(query, (urlName, username))
 		connection.commit()
-		response = {"message": "Data removed successfully"}
+		response = {"status": "success"}
 	except Exception as e:
-		response = {"error": str(e)} if debug else {"error": "Internal server error"}
+		response = {"status": "server error"}
 		return jsonify(response)
 	finally:
 		cursor.close()

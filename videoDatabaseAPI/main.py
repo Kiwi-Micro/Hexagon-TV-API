@@ -62,7 +62,7 @@ def getDocumentaries():
 def search():
 	query = request.args.get('query')
 	if not query:
-		return jsonify({'error': 'No query provided'})
+		return jsonify({'status': 'Please fill in all fields! (400)'})
 	
 	query = query.strip().lower()
 

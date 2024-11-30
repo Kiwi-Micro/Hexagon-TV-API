@@ -66,7 +66,7 @@ def authenticateUser():
 		else:
 			return jsonify({"status": "Incorrect Username or Password. (400)", "ID": "NONE"})
 	except Exception as e:
-		return jsonify({"status": "There was an error logging you in! Please try again later. (500)"})
+		return jsonify({"status": "Internal server error (500)"})
 
 @app.route('/register', methods=['POST'])
 def registerUser():
@@ -93,10 +93,10 @@ def registerUser():
 	except mysql.connector.IntegrityError:
 		return jsonify({"status": "User already exists (400)"})
 	except Exception as e:
-		return jsonify({"status": "There was an error registering your account! Please try again later. (500)"})
+		return jsonify({"status": "Internal server error (500)"})
 
 @app.route('/register', methods=['OPTIONS'])
-def options():
+def registerOptions():
 	return jsonify()
 
 @app.route('/delete', methods=['DELETE'])
@@ -123,7 +123,11 @@ def deleteUser():
 		else:
 			return jsonify({"status": "Incorrect Username or Password. (400)"})
 	except Exception as e:
-		return jsonify({"status": "There was an error deleting your account! Please try again later. (500)"})
+		return jsonify({"status": "Internal server error (500)"})
+
+@app.route('/delete', methods=['OPTIONS'])
+def deleteOptions():
+	return jsonify()
 
 @app.route('/wipe', methods=['DELETE'])
 def wipe():
@@ -147,11 +151,11 @@ def wipe():
 		else:
 			return jsonify({"status": "Incorrect Username or Password. (400)"})
 	except Exception as e:
-		return jsonify({"status": "There was an error deleting your account! Please try again later. (500)"})
+		return jsonify({"status": "Internal server error (500)"})
 
 @app.route('/wipe', methods=['OPTIONS'])
 def wipeOptions():
-	return jsonify({"status": "success"})
+	return jsonify()
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8071)
