@@ -159,20 +159,27 @@ def wipeOptions():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-	data = request.get_json()
-	username = data.get('username')
-	userId = data.get('id')
+        data = request.get_json()
+        username = data.get('username')
+        userId = data.get('id')
+        allSessions = data.get('all', False)  
 
-	if not username or not userId:
-		return jsonify({"status": "Please fill in all fields! (400)"})
-	
-	try:
-		query = "DELETE FROM sessions WHERE username = %s AND sessionUUID = %s"
-		dbCursor.execute(query, (username, userId))
-		dbConnection.commit()
-		return jsonify({"status": "success"})
-	except Exception as e:
-		return jsonify({"status": "server error"})
+        if not username or (not userId and not allSessions):
+                return jsonify({"status": "Please fill in all fields!"}), 400
+
+        try:
+                if allSessions:
+                        query = "DELETE FROM sessions WHERE username = %s"
+                        dbCursor.execute(query, (username,))
+                else:
+                        query = "DELETE FROM sessions WHERE username = %s AND sessionUUID = %s"
+                        dbCursor.execute(query, (username, userId))
+
+                dbConnection.commit()
+                return jsonify({"status": "success"}), 200
+        except Exception as e:
+                print(f"Error: {e}")
+                return jsonify({"status": "server error"}), 500
 
 @app.route('/logout', methods=['OPTIONS'])
 def logoutOptions():
