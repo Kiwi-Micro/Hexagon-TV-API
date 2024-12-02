@@ -52,7 +52,7 @@ def authenticateUser():
 	passwordCheckSum = data.get('passwordCheckSum')
 
 	if not username or not passwordCheckSum:
-		return jsonify({"status": "Please fill in all fields! (400)", "ID": "NONE"})
+		return jsonify({"status": "Please fill in all fields!", "ID": "NONE"})
 
 	try:
 		query = "SELECT passwordCheckSum FROM users WHERE username = %s"
@@ -64,9 +64,9 @@ def authenticateUser():
 			setSessionUuid(newUuid, username)
 			return jsonify({"status": "success", "ID": str(newUuid)})
 		else:
-			return jsonify({"status": "Incorrect Username or Password. (400)", "ID": "NONE"})
+			return jsonify({"status": "Incorrect Username or Password.", "ID": "NONE"})
 	except Exception as e:
-		return jsonify({"status": "Internal server error (500)"})
+		return jsonify({"status": "Internal server error"})
 
 @app.route('/register', methods=['POST'])
 def registerUser():
@@ -77,10 +77,10 @@ def registerUser():
 	passwordCheckSum = data.get('passwordCheckSum')
 
 	if not isValidEmail(email):
-		return jsonify({"status": "That is not a valid Email (400)"})
+		return jsonify({"status": "That is not a valid Email"})
 
 	if not username or not passwordCheckSum or not email:
-		return jsonify({"status": "Please fill in all fields! (400)"})
+		return jsonify({"status": "Please fill in all fields!"})
 
 	try:
 		query = """
@@ -91,9 +91,9 @@ def registerUser():
 		dbConnection.commit()
 		return jsonify({"status": "success"})
 	except mysql.connector.IntegrityError:
-		return jsonify({"status": "User already exists (400)"})
+		return jsonify({"status": "User already exists"})
 	except Exception as e:
-		return jsonify({"status": "Internal server error (500)"})
+		return jsonify({"status": "Internal server error"})
 
 @app.route('/register', methods=['OPTIONS'])
 def registerOptions():
@@ -106,7 +106,7 @@ def deleteUser():
 	passwordCheckSum = data.get('passwordCheckSum')
 
 	if not username or not passwordCheckSum:
-		return jsonify({"status": "Please fill in all fields! (400)"})
+		return jsonify({"status": "Please fill in all fields!"})
 
 	try:
 		query = "SELECT passwordCheckSum FROM users WHERE username = %s"
@@ -121,9 +121,9 @@ def deleteUser():
 			dbConnection.commit()
 			return jsonify({"status": "success"})
 		else:
-			return jsonify({"status": "Incorrect Username or Password. (400)"})
+			return jsonify({"status": "Incorrect Username or Password."})
 	except Exception as e:
-		return jsonify({"status": "Internal server error (500)"})
+		return jsonify({"status": "Internal server error"})
 
 @app.route('/delete', methods=['OPTIONS'])
 def deleteOptions():
@@ -136,7 +136,7 @@ def wipe():
 	passwordCheckSum = data.get('passwordCheckSum')
 
 	if not username or not passwordCheckSum:
-		return jsonify({"status": "Please fill in all fields! (400)"})
+		return jsonify({"status": "Please fill in all fields!"})
 
 	try:
 		query = "SELECT passwordCheckSum FROM users WHERE username = %s"
@@ -149,9 +149,9 @@ def wipe():
 			dbConnection.commit()
 			return jsonify({"status": "success"})
 		else:
-			return jsonify({"status": "Incorrect Username or Password. (400)"})
+			return jsonify({"status": "Incorrect Username or Password."})
 	except Exception as e:
-		return jsonify({"status": "Internal server error (500)"})
+		return jsonify({"status": "Internal server error"})
 
 @app.route('/wipe', methods=['OPTIONS'])
 def wipeOptions():
