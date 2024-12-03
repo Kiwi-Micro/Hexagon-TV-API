@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import mysql.connector
 import uuid
 import re
+import bcrypt
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -12,6 +13,21 @@ CORS(app)
 debug = True
 configPath = "/hexagontv/password.txt"
 emailPattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+def hashPassword(password):
+	if isinstance(password, str):
+		password = password.encode('utf-8')
+
+	return bcrypt.hashpw(password, bcrypt.gensalt())
+
+def verifyPassword(password, storedPassword):
+	if isinstance(password, str):
+		password = password.encode('utf-8')
+
+	if isinstance(storedPassword, str):
+		storedPassword = storedPassword.encode('utf-8')
+
+	return bcrypt.checkpw(password, storedPassword)
 
 try:
 	with open(configPath, 'r') as file:
@@ -59,7 +75,7 @@ def authenticateUser():
 		dbCursor.execute(query, (username,))
 		result = dbCursor.fetchone()
 
-		if result and result[0] == passwordCheckSum:
+		if result and verifyPassword(passwordCheckSum, result[0]):
 			newUuid = uuid.uuid4()
 			setSessionUuid(newUuid, username)
 			return jsonify({"status": "success", "ID": str(newUuid)})
@@ -71,10 +87,9 @@ def authenticateUser():
 @app.route('/register', methods=['POST'])
 def registerUser():
 	data = request.get_json()
-
 	username = data.get('username')
 	email = data.get('email')
-	passwordCheckSum = data.get('passwordCheckSum')
+	passwordCheckSum = hashPassword(data.get('passwordCheckSum'))
 
 	if not isValidEmail(email):
 		return jsonify({"status": "That is not a valid Email"})
@@ -113,7 +128,7 @@ def deleteUser():
 		dbCursor.execute(query, (username,))
 		result = dbCursor.fetchone()
 
-		if result and result[0] == passwordCheckSum:
+		if result and verifyPassword(passwordCheckSum, result[0]):
 			dbCursor.execute("DELETE FROM users WHERE username = %s", (username,))
 			dbCursor.execute("DELETE FROM sessions WHERE username = %s", (username,))
 			dbCursor.execute("DELETE FROM watchlist WHERE username = %s", (username,))
@@ -143,7 +158,7 @@ def wipe():
 		dbCursor.execute(query, (username,))
 		result = dbCursor.fetchone()
 
-		if result and result[0] == passwordCheckSum:
+		if result and verifyPassword(passwordCheckSum, result[0]):
 			dbCursor.execute("DELETE FROM watchlist WHERE username = %s", (username,))
 			dbCursor.execute("DELETE FROM continueWatching WHERE username = %s", (username,))
 			dbConnection.commit()
@@ -159,27 +174,37 @@ def wipeOptions():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-        data = request.get_json()
-        username = data.get('username')
-        userId = data.get('id')
-        allSessions = data.get('all', False)  
+		data = request.get_json()
+		username = data.get('username')
+		userId = data.get('id')
+		allSessions = data.get('all', False)  
 
-        if not username or (not userId and not allSessions):
-                return jsonify({"status": "Please fill in all fields!"}), 400
+		if not username or (not userId and not allSessions):
+			return jsonify({"status": "Please fill in all fields!"})
 
-        try:
-                if allSessions:
-                        query = "DELETE FROM sessions WHERE username = %s"
-                        dbCursor.execute(query, (username,))
-                else:
-                        query = "DELETE FROM sessions WHERE username = %s AND sessionUUID = %s"
-                        dbCursor.execute(query, (username, userId))
+		isValidSession = False
+		getSessions = dbCursor.execute("SELECT sessionUUID FROM sessions WHERE username = %s", (username,))
+		results = dbCursor.fetchall()
+		for result in results:
+			if result[0] == userId:
+				isValidSession = True
+				break
 
-                dbConnection.commit()
-                return jsonify({"status": "success"}), 200
-        except Exception as e:
-                print(f"Error: {e}")
-                return jsonify({"status": "server error"}), 500
+		if isValidSession:
+			try:
+				if allSessions:
+					query = "DELETE FROM sessions WHERE username = %s"
+					dbCursor.execute(query, (username,))
+				else:
+					query = "DELETE FROM sessions WHERE username = %s AND sessionUUID = %s"
+					dbCursor.execute(query, (username, userId))
+
+				dbConnection.commit()
+				return jsonify({"status": "success"})
+			except Exception as e:
+				return jsonify({"status": "server error"})
+		else:
+			return jsonify({"status": "invalid credentials"})
 
 @app.route('/logout', methods=['OPTIONS'])
 def logoutOptions():
@@ -190,7 +215,7 @@ def changePassword():
 	data = request.get_json()
 	username = data.get('username')
 	passwordCheckSum = data.get('oldPassword')
-	newPassword = data.get('newPassword')
+	newPassword = hashPassword(data.get('newPassword'))
 
 	if not username or not passwordCheckSum or not newPassword:
 		return jsonify({"status": "Please fill in all fields!"})
@@ -200,7 +225,7 @@ def changePassword():
 		dbCursor.execute(query, (username,))
 		result = dbCursor.fetchone()
 
-		if result and result[0] == passwordCheckSum:
+		if result and verifyPassword(passwordCheckSum, result[0]):
 			dbCursor.execute("UPDATE users SET passwordCheckSum = %s WHERE username = %s", (newPassword, username))
 			dbConnection.commit()
 			return jsonify({"status": "success"})
