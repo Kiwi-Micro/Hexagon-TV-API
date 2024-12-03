@@ -161,6 +161,7 @@ def wipe():
 		if result and verifyPassword(passwordCheckSum, result[0]):
 			dbCursor.execute("DELETE FROM watchlist WHERE username = %s", (username,))
 			dbCursor.execute("DELETE FROM continueWatching WHERE username = %s", (username,))
+			dbCursor.execute("DELETE FROM sessions WHERE username = %s", (username,))
 			dbConnection.commit()
 			return jsonify({"status": "success"})
 		else:
