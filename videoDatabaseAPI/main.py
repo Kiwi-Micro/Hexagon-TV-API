@@ -42,20 +42,19 @@ def loadData(tableName):
 			print(f"Error loading data from {tableName}: {e}")
 		return []
 
-movies = loadData('movies')
-tvshows = loadData('tvshows')
-documentaries = loadData('documentaries')
-
 @app.route('/movies', methods=['GET'])
 def getMovies():
+	movies = loadData('movies')
 	return jsonify(movies)
 
 @app.route('/tvshows', methods=['GET'])
 def getTvShows():
+	tvshows = loadData('tvshows')
 	return jsonify(tvshows)
 
 @app.route('/documentaries', methods=['GET'])
 def getDocumentaries():
+	documentaries = loadData('documentaries')
 	return jsonify(documentaries)
 
 @app.route('/search', methods=['GET'])
@@ -65,6 +64,10 @@ def search():
 		return jsonify({'status': 'Please fill in all fields! (400)'})
 	
 	query = query.strip().lower()
+
+	movies = loadData('movies')
+	tvshows = loadData('tvshows')
+	documentaries = loadData('documentaries')
 
 	results = []
 	for content in [movies, tvshows, documentaries]:
