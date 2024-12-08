@@ -38,7 +38,6 @@ def loadData(category):
 		"""
 		cursor.execute(query, (category,))
 		result = cursor.fetchall()
-		print(result)
 		columnNames = [desc[0] for desc in cursor.description]
 		data = [
 			{columnNames[i]: str(row[i]) if isinstance(row[i], (int, float)) else row[i] for i in range(len(row))}
