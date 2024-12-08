@@ -6,77 +6,96 @@ app = Flask(__name__)
 
 CORS(app)
 
-debug = True
 configPath = "/hexagontv/password.txt"
 
-try:
-	with open(configPath, 'r') as file:
-		dbPassword = file.readline().strip()
-except FileNotFoundError:
-	raise RuntimeError(f"Configuration file not found at {configPath}")
-
-try:
-	connection = mysql.connector.connect(
-		host="localhost",
-		user="hexagon",
-		password=dbPassword,
-		database="hexagonMoviedb"
-	)
-	cursor = connection.cursor()
-except mysql.connector.Error as err:
-	raise RuntimeError(f"Database connection failed: {err}")
-
-def loadData(tableName):
+def cleanUp(cursor, connection):
 	try:
-		query = f"SELECT * FROM {tableName}"
-		cursor.execute(query)
+		cursor.close()
+		connection.close()
+	except Exception as e:
+		raise RuntimeError(f"Error cleaning up: {e}")
+
+def getDbConnection():
+	try:
+		with open(configPath, 'r') as file:
+			dbPassword = file.readline().strip()
+
+		return mysql.connector.connect(
+			host="localhost",
+			user="hexagon",
+			password=dbPassword,
+			database="hexagonTVdb"
+		)
+	except mysql.connector.Error as err:
+		raise RuntimeError(f"Database connection failed: {err}")
+
+def loadData(category):
+	try:
+		connection = getDbConnection()
+		cursor = connection.cursor()
+		query = """
+		SELECT * FROM videos WHERE category = %s
+		"""
+		cursor.execute(query, (category,))
 		result = cursor.fetchall()
+		print(result)
 		columnNames = [desc[0] for desc in cursor.description]
 		data = [
 			{columnNames[i]: str(row[i]) if isinstance(row[i], (int, float)) else row[i] for i in range(len(row))}
 			for row in result
 		]
+		cleanUp(cursor, connection)
 		return data
-	except mysql.connector.Error as e:
-		if debug:
-			print(f"Error loading data from {tableName}: {e}")
-		return []
+	except Exception as e:
+		cleanUp(cursor, connection)
+		raise RuntimeError(f"Error loading data: {e}")
 
 @app.route('/movies', methods=['GET'])
-def getMovies():
-	movies = loadData('movies')
-	return jsonify(movies)
+def getMovies(): 
+	try:
+		movies = loadData('movies')
+		return jsonify({"status": "success", "data": movies})
+	except Exception as e:
+		return jsonify({"status": "server error"}), 500
 
 @app.route('/tvshows', methods=['GET'])
 def getTvShows():
-	tvshows = loadData('tvshows')
-	return jsonify(tvshows)
+	try:
+		tvshows = loadData('tvshows')
+		return jsonify(tvshows)
+	except Exception as e:
+		return jsonify({"status": "server error"}), 500
 
 @app.route('/documentaries', methods=['GET'])
 def getDocumentaries():
-	documentaries = loadData('documentaries')
-	return jsonify(documentaries)
+	try:
+		documentaries = loadData('documentaries')
+		return jsonify(documentaries)
+	except Exception as e:
+		return jsonify({"status": "server error"}), 500
 
 @app.route('/search', methods=['GET'])
 def search():
-	query = request.args.get('query')
-	if not query:
-		return jsonify({'status': 'Please fill in all fields! (400)'})
+	try:
+		movies = loadData('movies')
+		tvshows = loadData('tvshows')
+		documentaries = loadData('documentaries')
+		query = request.args.get('query')
+		if not query:
+			return jsonify({'status': 'missing parameters'}), 400
 	
-	query = query.strip().lower()
+		query = query.strip().lower()
 
-	movies = loadData('movies')
-	tvshows = loadData('tvshows')
-	documentaries = loadData('documentaries')
+		results = []
+		for content in [movies, tvshows, documentaries]:
+			for item in content:
+				name = item['name'].lower()
+				if query in name or name.startswith(query) or name == query:
+					results.append(item)
 
-	results = []
-	for content in [movies, tvshows, documentaries]:
-		for item in content:
-			name = item['name'].lower()
-			if query in name or name.startswith(query) or name == query:
-				results.append(item)
-
-	return jsonify(results)
+		return jsonify(results)
+	except Exception as e:
+		return jsonify({"status": "server error"}), 500
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8080)
