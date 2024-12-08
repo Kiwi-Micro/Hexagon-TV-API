@@ -53,7 +53,7 @@ def loadData(category):
 def getMovies(): 
 	try:
 		movies = loadData('movies')
-		return jsonify({movies})
+		return jsonify(movies)
 	except Exception as e:
 		return jsonify({"status": "server error"}), 500
 
