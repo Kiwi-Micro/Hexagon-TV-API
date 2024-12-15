@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS users (
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS sessions (
 	username VARCHAR(32),
-	sessionUUID CHAR(36) PRIMARY KEY,
+	sessionId CHAR(36) PRIMARY KEY,
 	expires DATE
 )
 """)
