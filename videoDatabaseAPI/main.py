@@ -29,6 +29,39 @@ def getDbConnection():
 	except mysql.connector.Error as err:
 		raise RuntimeError(f"Database connection failed: {err}")
 
+def auth(sessionId, username):
+	connection = getDbConnection()
+	cursor = connection.cursor()
+
+	try:
+		query = """
+		SELECT isAdmin FROM users
+		WHERE username = %s
+		"""
+		cursor.execute(query, (username,))
+		isAdmin = cursor.fetchall()
+		print(query, (username,))
+		print(isAdmin[0])
+		if isAdmin[0] == (1,):
+			query = """
+			SELECT sessionId FROM sessions
+			WHERE sessionId = %s AND username = %s
+			"""
+			cursor.execute(query, (sessionId, username))
+			results = cursor.fetchall()
+			cleanUp(cursor, connection)
+			if results:
+				return True
+			else:
+				return False
+		else:
+			cleanUp(cursor, connection)
+			return False
+	except Exception as e:
+		cleanUp(cursor, connection)
+		raise RuntimeError(f"Error checking auth: {e}")
+		return False
+
 def loadData(category):
 	try:
 		connection = getDbConnection()
@@ -94,6 +127,72 @@ def search():
 
 		return jsonify(results)
 	except Exception as e:
+		return jsonify({"status": "server error"}), 500
+
+@app.route('/add', methods=['POST'])
+def add():
+	connection = getDbConnection()
+	cursor = connection.cursor()
+	data = request.get_json()
+	name = data.get('name')
+	thumbnailURL = data.get('thumbnailURL')
+	videoURL = data.get('videoURL')
+	description = data.get('description')
+	urlName = data.get('urlName')
+	ageRating = data.get('ageRating')
+	category = data.get('category')
+	username = data.get('username')
+	sessionId = data.get('sessionId')
+
+	if not all([name, thumbnailURL, videoURL, description, urlName, ageRating, category, username, sessionId]):
+		return jsonify({"status": "missing parameters"}), 400
+
+	if not auth(sessionId, username):
+		return jsonify({"status": "invalid credentials"}), 403
+
+	try:
+		query = """
+		INSERT INTO videos (name, description, thumbnailURL, videoURL, urlName, rating, category)
+		VALUES (%s, %s, %s, %s, %s, %s, %s)
+		"""
+		cursor.execute(query, (name, description, thumbnailURL, videoURL, urlName, ageRating, category))
+		connection.commit()
+		cleanUp(cursor, connection)
+		return jsonify({"status": "success"})
+	except mysql.connector.IntegrityError:
+		cleanUp(cursor, connection)
+		return jsonify({"status": "entry already exists"}), 409
+	except Exception as e:
+		cleanUp(cursor, connection)
+		return jsonify({"status": "server error"}), 500
+
+@app.route('/delete', methods=['DELETE'])
+def delete():
+	connection = getDbConnection()
+	cursor = connection.cursor()
+
+	data = request.get_json()
+	username = data.get('username')
+	sessionId = data.get('sessionId')
+	urlName = data.get('urlName')
+
+	if not all([username, sessionId, urlName]):
+		return jsonify({"status": "missing parameters"}), 400
+
+	if not auth(sessionId, username):
+		return jsonify({"status": "invalid credentials"}), 403
+
+	try:
+		query = """
+		DELETE FROM videos
+		WHERE urlName = %s
+		"""
+		cursor.execute(query, (urlName,))
+		connection.commit()
+		cleanUp(cursor, connection)
+		return jsonify({"status": "success"})
+	except Exception as e:
+		cleanUp(cursor, connection)
 		return jsonify({"status": "server error"}), 500
 
 if __name__ == '__main__':
