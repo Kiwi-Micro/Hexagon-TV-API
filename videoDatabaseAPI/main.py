@@ -40,9 +40,7 @@ def auth(sessionId, username):
 		"""
 		cursor.execute(query, (username,))
 		isAdmin = cursor.fetchall()
-		print(query, (username,))
-		print(isAdmin[0])
-		if isAdmin[0] == (1,):
+		if len(isAdmin) > 0 and isAdmin[0] == (1,):
 			query = """
 			SELECT sessionId FROM sessions
 			WHERE sessionId = %s AND username = %s
