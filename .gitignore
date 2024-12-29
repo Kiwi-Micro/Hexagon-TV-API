@@ -1,2 +1,6 @@
 deploy.sh
 query.sql
+.venv
+
+# Still INDEV:
+setup
