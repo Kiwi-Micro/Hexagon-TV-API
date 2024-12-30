@@ -17,7 +17,7 @@ def cleanUp(cursor, connection):
 
 def getDbConnection():
 	try:
-		with open(configPath, 'r') as file:
+		with open(configPath, "r") as file:
 			dbPassword = file.readline().strip()
 
 		return mysql.connector.connect(
@@ -50,11 +50,11 @@ def auth(sessionId, username):
 		raise RuntimeError(f"Error checking auth: {e}")
 		return False
 
-@app.route('/getWatchlist', methods=['GET'])
+@app.route("/getWatchlist", methods=["GET"])
 def getWatchlist():
 	connection = getDbConnection()
 	cursor = connection.cursor()
-	username = request.args.get('username')
+	username = request.args.get("username")
 
 	if not username:
 		return jsonify({"status": "missing parameters"}), 400
@@ -78,15 +78,15 @@ def getWatchlist():
 		cleanUp(cursor, connection)
 		return jsonify({"status": "server error"}), 500
 
-@app.route('/addToWatchlist', methods=['POST'])
+@app.route("/addToWatchlist", methods=["POST"])
 def addToWatchlist():
 	connection = getDbConnection()
 	cursor = connection.cursor()
-	sessionId = request.json.get('sessionId')
-	name = request.json.get('name')
-	urlName = request.json.get('urlName')
-	thumbnailUrl = request.json.get('thumbnailURL')
-	username = request.json.get('username')
+	sessionId = request.json.get("sessionId")
+	name = request.json.get("name")
+	urlName = request.json.get("urlName")
+	thumbnailUrl = request.json.get("thumbnailURL")
+	username = request.json.get("username")
 
 	if not all([sessionId, name, urlName, thumbnailUrl, username]):
 		return jsonify({"status": "missing parameters"}), 400
@@ -110,13 +110,13 @@ def addToWatchlist():
 		cleanUp(cursor, connection)
 		return jsonify({"status": "server error"}), 500
 
-@app.route('/removeFromWatchlist', methods=['DELETE'])
+@app.route("/removeFromWatchlist", methods=["DELETE"])
 def removeFromWatchlist():
 	connection = getDbConnection()
 	cursor = connection.cursor()
-	sessionId = request.json.get('sessionId')
-	urlName = request.json.get('urlName')
-	username = request.json.get('username')
+	sessionId = request.json.get("sessionId")
+	urlName = request.json.get("urlName")
+	username = request.json.get("username")
 
 	if not urlName or not username:
 		return jsonify({"status": "missing parameters"}), 400
@@ -137,5 +137,5 @@ def removeFromWatchlist():
 		cleanUp(cursor, connection)
 		return jsonify({"status": "server error"}), 500
 
-if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=8070)
+if __name__ == "__main__":
+	app.run(host="0.0.0.0", port=8070)
