@@ -15,11 +15,6 @@ jobs:
         node-version: [22.x]
 
     steps:
-        env:
-          TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
-          TURSO_DB_AUTH_TOKEN_R: ${{ secrets.TURSO_DB_AUTH_TOKEN_R }}
-          TURSO_DB_AUTH_TOKEN_RW: ${{ secrets.TURSO_DB_AUTH_TOKEN_RW }}
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
