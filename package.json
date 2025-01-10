@@ -6,7 +6,8 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "npx tsc && node dist/index.js",
 		"lint": "npx eslint .",
-		"lint:fix": "npx eslint . --fix"
+		"lint:fix": "npx eslint . --fix",
+		"server": "npx tsc && node dist/index.js"
 	},
 	"keywords": [],
 	"author": "Malcolm Hauser (Mooshay105)",
