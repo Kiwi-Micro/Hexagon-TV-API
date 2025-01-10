@@ -138,4 +138,4 @@ def removeFromWatchlist():
 		return jsonify({"status": "server error"}), 500
 
 if __name__ == "__main__":
-	app.run(host="0.0.0.0", port=8070)
+	app.run(host="0.0.0.0", port=8073)

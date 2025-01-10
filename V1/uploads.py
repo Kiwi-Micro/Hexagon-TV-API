@@ -1,40 +1,19 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, json
 import mysql.connector
 import os
 from flask_cors import CORS
+import libsql_experimental as libsql
+from datetime import datetime
 
 app = Flask(__name__)
 
 CORS(app)
 
-emailPattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 thumbnailsUploadFolder = "/var/www/hexCDN/thumbnails/"
 videosUploadFolder = "/var/www/hexCDN/videos/"
-configPath = "/hexagontv/password.txt"
 
 os.makedirs(thumbnailsUploadFolder, exist_ok=True)
 os.makedirs(videosUploadFolder, exist_ok=True)
-
-def cleanUp(cursor, connection):
-	try:
-		cursor.close()
-		connection.close()
-	except Exception as e:
-		raise RuntimeError(f"Error cleaning up: {e}")
-
-def getDbConnection():
-	try:
-		with open(configPath, "r") as file:
-			dbPassword = file.readline().strip()
-
-		return mysql.connector.connect(
-			host="localhost",
-			user="hexagon",
-			password=dbPassword,
-			database="hexagonTVdb"
-		)
-	except mysql.connector.Error as err:
-		raise RuntimeError(f"Database connection failed: {err}")
 
 def auth(sessionId, username):
 	connection = getDbConnection()
@@ -106,4 +85,4 @@ def uploadVideo():
 	return jsonify({"status": "success"}), 200
 
 if __name__ == "__main__":
-	app.run(host="0.0.0.0", port=8081)
+	app.run(host="0.0.0.0", port=8072)
