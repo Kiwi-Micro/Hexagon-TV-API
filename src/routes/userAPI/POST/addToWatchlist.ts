@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { addToWatchlist, auth } from "../../../utils/watchlist";
+import { addToWatchlist } from "../../../utils/watchlist";
+import { auth } from "../../../utils/database";
 
 const router = Router();
 

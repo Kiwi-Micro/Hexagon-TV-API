@@ -46,41 +46,4 @@ async function deleteFromWatchlist(data: any) {
 	}
 }
 
-/*
-To Implemant:
-def auth(sessionId, username):
-	connection = getDbConnection()
-	cursor = connection.cursor()
-
-	try:
-		query = """
-		SELECT sessionId FROM sessions
-		WHERE sessionId = %s AND username = %s
-		"""
-		cursor.execute(query, (sessionId, username))
-		results = cursor.fetchall()
-		cleanUp(cursor, connection)
-		if results:
-			return True
-		else:
-			return False
-	except Exception as e:
-		cleanUp(cursor, connection)
-		raise RuntimeError(f"Error checking auth: {e}")
-		return False
-*/
-
-async function auth(sessionId: string, username: string) {
-	try {
-		const dbResults: ResultSet = await getDbConnection(false).execute({
-			sql: "SELECT sessionId FROM sessions WHERE sessionId = ? AND username = ?",
-			args: [sessionId, username],
-		});
-		return dbResults.rows.length > 0;
-	} catch (error) {
-		console.error("Error checking auth:", error);
-		return false;
-	}
-}
-
-export { getWatchlist, addToWatchlist, deleteFromWatchlist, auth };
+export { getWatchlist, addToWatchlist, deleteFromWatchlist };

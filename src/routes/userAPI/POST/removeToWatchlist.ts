@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { deleteFromWatchlist, auth } from "../../../utils/watchlist";
+import { deleteFromWatchlist } from "../../../utils/watchlist";
+import { auth } from "../../../utils/database";
 
 const router = Router();
 

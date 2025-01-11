@@ -76,4 +76,17 @@ async function deleteVideo(data: any) {
 	return dbResults.rowsAffected > 0;
 }
 
-export { getVideos, getVideosForSearch, addVideo, deleteVideo };
+async function auth(sessionId: string, username: string) {
+	try {
+		const dbResults: ResultSet = await getDbConnection(false).execute({
+			sql: "SELECT sessionId FROM sessions WHERE sessionId = ? AND username = ?",
+			args: [sessionId, username],
+		});
+		return dbResults.rows.length > 0;
+	} catch (error) {
+		console.error("Error checking auth:", error);
+		return false;
+	}
+}
+
+export { getVideos, getVideosForSearch, addVideo, deleteVideo, auth };
