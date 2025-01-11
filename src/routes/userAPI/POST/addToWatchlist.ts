@@ -20,7 +20,6 @@ router.post("/addToWatchlist", async (req, res) => {
 	} else {
 		res.status(403).json({ status: "invalid credentials" });
 	}
-	//res.status(403).json({ status: "ACCESS CONTROL NOT DONE" });
 });
 
 export default router;
