@@ -43,7 +43,7 @@ router.delete("/delete", async (req, res) => {
 		if (status) {
 			res.json({ status: "success" });
 		} else {
-			res.status(409).json({ status: "entry does not exist" });
+			res.status(409).json({ status: "server error" });
 		}
 	} catch (error) {
 		console.error("Error deleting video:", error);

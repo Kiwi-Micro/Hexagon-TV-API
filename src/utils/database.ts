@@ -1,10 +1,10 @@
 import { ResultSet } from "@libsql/client";
 import { getDbConnection } from "./databaseConnection";
 
-async function getVideos(category: string) {
+async function getVideosForSearch(query: string) {
 	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "SELECT * FROM videos WHERE category = ?",
-		args: [category],
+		sql: "SELECT * FROM videos WHERE name LIKE ?",
+		args: [`%${query}%`],
 	});
 
 	const rows = dbResults.rows || [];
@@ -24,10 +24,10 @@ async function getVideos(category: string) {
 	return results;
 }
 
-async function getVideosForSearch(query: string) {
+async function getVideos(category: string) {
 	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "SELECT * FROM videos WHERE name LIKE ?",
-		args: [`%${query}%`],
+		sql: "SELECT * FROM videos WHERE category = ?",
+		args: [category],
 	});
 
 	const rows = dbResults.rows || [];

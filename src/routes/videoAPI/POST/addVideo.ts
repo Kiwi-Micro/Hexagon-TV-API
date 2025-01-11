@@ -43,7 +43,7 @@ router.post("/add", async (req, res) => {
 		if (status) {
 			res.json({ status: "success" });
 		} else {
-			res.status(409).json({ status: "entry already exists" });
+			res.status(409).json({ status: "server error" });
 		}
 	} catch (error) {
 		console.error("Error adding video:", error);
