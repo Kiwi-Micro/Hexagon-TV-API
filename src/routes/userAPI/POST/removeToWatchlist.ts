@@ -5,7 +5,7 @@ import { auth } from "../../../utils/database";
 const router = Router();
 
 router.delete("/deleteFromWatchlist", async (req, res) => {
-	if (await auth(req.body.sessionId, req.body.username)) {
+	if (await auth(req.body.sessionId, req.body.username, false)) {
 		try {
 			const status = await deleteFromWatchlist(req.body);
 			if (status) {

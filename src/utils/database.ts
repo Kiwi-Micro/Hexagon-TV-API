@@ -76,8 +76,25 @@ async function deleteVideo(data: any) {
 	return dbResults.rowsAffected > 0;
 }
 
-async function auth(sessionId: string, username: string) {
+async function auth(
+	sessionId: string,
+	username: string,
+	checkForIsAdmin?: boolean,
+) {
 	try {
+		if (checkForIsAdmin) {
+			const dbIsAdminResults: ResultSet = await getDbConnection(
+				false,
+			).execute({
+				sql: "SELECT isAdmin FROM users WHERE username = ?",
+				args: [username],
+			});
+			const isAdmin = dbIsAdminResults.rows[0][0] === 1;
+			if (!isAdmin) {
+				return false;
+			}
+		}
+
 		const dbResults: ResultSet = await getDbConnection(false).execute({
 			sql: "SELECT sessionId FROM sessions WHERE sessionId = ? AND username = ?",
 			args: [sessionId, username],

@@ -43,7 +43,6 @@ app.use("/videoAPI", videoAddEndpoint);
 //app.use("/userAPI", userLogoutEndpoint);
 
 // User API - Watchlist
-
 app.use("/userAPI", userGetWatchlistEndpoint);
 app.use("/userAPI", userAddToWatchlistEndpoint);
 app.use("/userAPI", userRemoveFromWatchlistEndpoint);
