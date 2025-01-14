@@ -205,48 +205,6 @@ def wipe():
 def wipeOptions():
 	return jsonify()
 
-@app.route("/logout", methods=["POST"])
-def logout():
-		connection = getDbConnection()
-		cursor = connection.cursor()
-		data = request.get_json()
-		username = data.get("username")
-		sessionId = data.get("sessionId")
-		allSessions = data.get("all", False)  
-
-		if not username or not sessionId and not allSessions:
-			return jsonify({"status": "missing parameters"}), 400
-
-		isValidSession = False
-		getSessions = cursor.execute("SELECT sessionId FROM sessions WHERE username = %s", (username,))
-		results = cursor.fetchall()
-		for result in results:
-			if result[0] == sessionId:
-				isValidSession = True
-				break
-
-		if isValidSession:
-			try:
-				if allSessions:
-					query = "DELETE FROM sessions WHERE username = %s"
-					cursor.execute(query, (username,))
-				else:
-					query = "DELETE FROM sessions WHERE username = %s AND sessionId = %s"
-					cursor.execute(query, (username, sessionId))
-				connection.commit()
-				cleanUp(cursor, connection)
-				return jsonify({"status": "success"})
-			except Exception as e:
-				cleanUp(cursor, connection)
-				return jsonify({"status": "server error"}), 500
-		else:
-			cleanUp(cursor, connection)
-			return jsonify({"status": "invalid credentials"}), 403
-
-@app.route("/logout", methods=["OPTIONS"])
-def logoutOptions():
-	return jsonify()
-
 @app.route("/changePassword", methods=["PATCH"])
 def changePassword():
 	connection = getDbConnection()
