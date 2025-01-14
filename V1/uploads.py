@@ -1,9 +1,6 @@
-from flask import Flask, request, jsonify, json
-import mysql.connector
+from flask import Flask, request, jsonify
 import os
 from flask_cors import CORS
-import libsql_experimental as libsql
-from datetime import datetime
 
 app = Flask(__name__)
 
