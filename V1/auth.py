@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
 from datetime import datetime, timedelta
+import libsql_experimental as libsql
+from flask_cors import CORS
 import mysql.connector
 import uuid
 import re
 import bcrypt
-from flask_cors import CORS
+import json
 
 app = Flask(__name__)
 
@@ -12,7 +14,12 @@ CORS(app)
 
 emailPattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
-configPath = "/hexagontv/password.txt"
+rawConfigData = json.load(open("../config.json"))
+config = rawConfigData[0]
+password = config["OLD_DB_PASSWORD"]
+TURSO_AUTH_TOKEN_R = config["TURSO_DB_AUTH_TOKEN_R"]
+TURSO_AUTH_TOKEN_RW = config["TURSO_DB_AUTH_TOKEN_RW"]
+TURSO_DATABASE_URL = config["TURSO_DB_URL"]
 
 def cleanUp(cursor, connection):
 	try:
@@ -23,13 +30,10 @@ def cleanUp(cursor, connection):
 
 def getDbConnection():
 	try:
-		with open(configPath, "r") as file:
-			dbPassword = file.readline().strip()
-
 		return mysql.connector.connect(
 			host="localhost",
 			user="hexagon",
-			password=dbPassword,
+			password=password,
 			database="hexagonTVdb"
 		)
 	except mysql.connector.Error as err:
@@ -68,17 +72,16 @@ def isValidEmail(email):
 	return re.match(emailPattern, email) is not None
 
 def registerSessionId(sessionId, username):
-	connection = getDbConnection()
-	cursor = connection.cursor()
+	conn = libsql.connect(TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN_RW)
+
 	expirationDate = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
 	try:
-		cursor.execute("INSERT INTO sessions (username, sessionId, expires) VALUES (%s, %s, %s);", (username, str(sessionId), expirationDate))
-		connection.commit()
-		cleanUp(cursor, connection)
+		query = "INSERT INTO sessions (username, sessionId, expires) VALUES (?, ?, ?);"
+		conn.execute(query, (username, str(sessionId), expirationDate))
+		conn.commit()
 		return True
 	except Exception as e:
-		cleanUp(cursor, connection)
-		raise RuntimeError(f"Error setting session UUID: {e}")
+		raise RuntimeError(f"Error registering session ID: {e}")
 		return False
 
 @app.route("/auth", methods=["POST"])
@@ -148,6 +151,7 @@ def registerOptions():
 
 @app.route("/delete", methods=["DELETE"])
 def deleteUser():
+	conn = libsql.connect(TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN_RW)
 	connection = getDbConnection()
 	cursor = connection.cursor()
 	data = request.get_json()
@@ -162,10 +166,11 @@ def deleteUser():
 
 		if password and verifyPassword(passwordCheckSum, password[0]):
 			cursor.execute("DELETE FROM users WHERE username = %s", (username,))
-			cursor.execute("DELETE FROM watchlist WHERE username = %s", (username,))
-			cursor.execute("DELETE FROM continueWatching WHERE username = %s", (username,))
-			cursor.execute("DELETE FROM sessions WHERE username = %s", (username,))
+			conn.execute("DELETE FROM watchlist WHERE username = ?", (username,))
+			conn.execute("DELETE FROM sessions WHERE username = ?", (username,))
 			connection.commit()
+			conn.commit()
+			cleanUp(cursor, connection)
 			return jsonify({"status": "success"})
 		else:
 			return jsonify({"status": "invalid credentials"}), 403
@@ -178,8 +183,7 @@ def deleteOptions():
 
 @app.route("/wipe", methods=["DELETE"])
 def wipe():
-	connection = getDbConnection()
-	cursor = connection.cursor()
+	conn = libsql.connect(TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN_RW)
 	data = request.get_json()
 	username = data.get("username")
 	passwordCheckSum = data.get("passwordCheckSum")
@@ -191,10 +195,9 @@ def wipe():
 		password = getPassword(username)
 
 		if password and verifyPassword(passwordCheckSum, password[0]):
-			cursor.execute("DELETE FROM watchlist WHERE username = %s", (username,))
-			cursor.execute("DELETE FROM continueWatching WHERE username = %s", (username,))
-			cursor.execute("DELETE FROM sessions WHERE username = %s", (username,))
-			connection.commit()
+			conn.execute("DELETE FROM watchlist WHERE username = ?", (username,))
+			conn.execute("DELETE FROM sessions WHERE username = ?", (username,))
+			conn.commit()
 			return jsonify({"status": "success"})
 		else:
 			return jsonify({"status": "invalid credentials"}), 403
