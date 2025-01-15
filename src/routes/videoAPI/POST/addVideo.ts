@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { addVideo, auth } from "../../../utils/database";
+import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
 router.post("/add", async (req, res) => {
+	printEndpointReached(req, res);
 	if (await auth(req.body.sessionId, req.body.username, true)) {
 		try {
 			const status = await addVideo(req.body);

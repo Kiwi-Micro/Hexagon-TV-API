@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { deleteFromWatchlist } from "../../../utils/watchlist";
 import { auth } from "../../../utils/database";
+import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
 router.delete("/deleteFromWatchlist", async (req, res) => {
+	printEndpointReached(req, res);
 	if (await auth(req.body.sessionId, req.body.username, false)) {
 		try {
 			const status = await deleteFromWatchlist(req.body);

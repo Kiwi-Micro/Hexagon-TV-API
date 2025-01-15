@@ -1,4 +1,5 @@
 import express, { Application } from "express";
+import cors from "cors";
 import moviesEndpoint from "./routes/videoAPI/GET/movies";
 import tvshowsEndpoint from "./routes/videoAPI/GET/tvshows";
 import documentariesEndpoint from "./routes/videoAPI/GET/documentaries";
@@ -12,6 +13,15 @@ import userLogoutEndpoint from "./routes/userAPI/POST/logout";
 
 const app: Application = express();
 const port = 8070;
+
+const corsOptions = {
+	origin: "*",
+	methods: ["GET", "POST"],
+	allowedHeaders: ["Content-Type", "Authorization"],
+	credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
