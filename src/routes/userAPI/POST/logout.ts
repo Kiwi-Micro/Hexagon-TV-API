@@ -2,6 +2,7 @@ import { Router } from "express";
 import { ResultSet } from "@libsql/client";
 import { auth } from "../../../utils/database";
 import { getDbConnection } from "../../../utils/databaseConnection";
+import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
@@ -27,6 +28,7 @@ async function logoutUser(data: any) {
 }
 
 router.delete("/logout", async (req, res) => {
+	printEndpointReached(req, res);
 	if (await auth(req.body.sessionId, req.body.username, false)) {
 		try {
 			const status = await logoutUser(req.body);
