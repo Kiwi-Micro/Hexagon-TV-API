@@ -1,5 +1,10 @@
 import { ResultSet } from "@libsql/client";
 import { getDbConnection } from "./databaseConnection";
+import { createClerkClient } from "@clerk/backend";
+
+const clerkClient = createClerkClient({
+	secretKey: "sk_test_B9Ptp11GkJGBQNzo4umIMVGkJoty2tqXsS7oOr42tM",
+});
 
 async function getVideosForSearch(query: string) {
 	const dbResults: ResultSet = await getDbConnection(true).execute({
@@ -76,32 +81,32 @@ async function deleteVideo(data: any) {
 	return dbResults.rowsAffected > 0;
 }
 
-async function auth(
-	sessionId: string,
-	username: string,
-	checkForIsAdmin?: boolean,
-) {
+async function auth(sessionId: string, userId: string, username: string) {
 	try {
-		if (checkForIsAdmin) {
-			const dbIsAdminResults: ResultSet = await getDbConnection(
-				false,
-			).execute({
-				sql: "SELECT isAdmin FROM users WHERE username = ?",
-				args: [username],
-			});
-			const isAdmin = dbIsAdminResults.rows[0][0] === 1;
-			if (!isAdmin) {
-				return false;
+		const status = "active";
+		const sessions = await clerkClient.sessions.getSessionList({
+			userId,
+			status,
+		});
+		const user = await clerkClient.users.getUser(userId);
+		const registeredUsername = user.username;
+		if (registeredUsername !== username) {
+			return false;
+		}
+		if (sessions.totalCount === 0) {
+			return false;
+		}
+		for (const session of sessions.data) {
+			if (session.id === sessionId) {
+				return true;
 			}
 		}
-
-		const dbResults: ResultSet = await getDbConnection(false).execute({
-			sql: "SELECT sessionId FROM sessions WHERE sessionId = ? AND username = ?",
-			args: [sessionId, username],
-		});
-		return dbResults.rows.length > 0;
-	} catch (error) {
-		console.error("Error checking auth:", error);
+		return false;
+	} catch (error: any) {
+		if (error.status === 404) {
+			return false;
+		}
+		console.error("Error authenticating:", error);
 		return false;
 	}
 }

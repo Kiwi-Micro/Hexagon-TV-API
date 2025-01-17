@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { addVideo, auth } from "../../../utils/database";
+//import { addVideo, auth } from "../../../utils/database";
 import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
 router.post("/add", async (req, res) => {
 	printEndpointReached(req, res);
-	if (await auth(req.body.sessionId, req.body.username, true)) {
+	/*if (await auth(req.body.sessionId, req.body.username, true)) {
 		try {
 			const status = await addVideo(req.body);
 			if (status) {
@@ -20,7 +20,10 @@ router.post("/add", async (req, res) => {
 		}
 	} else {
 		res.status(403).json({ status: "invalid credentials" });
-	}
+	}*/
+	res
+		.status(403)
+		.json({ status: "ADMIN ACCEESS CONTROL NOT IMPLEMENTED YET" });
 });
 
 export default router;

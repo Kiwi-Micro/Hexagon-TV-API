@@ -7,7 +7,7 @@ const router = Router();
 
 router.post("/addToWatchlist", async (req, res) => {
 	printEndpointReached(req, res);
-	if (await auth(req.body.sessionId, req.body.username, false)) {
+	if (await auth(req.body.sessionId, req.body.userId, req.body.username)) {
 		try {
 			const status = await addToWatchlist(req.body);
 			if (status) {

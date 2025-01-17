@@ -9,7 +9,6 @@ import videoAddEndpoint from "./routes/videoAPI/POST/addVideo";
 import userGetWatchlistEndpoint from "./routes/userAPI/GET/watchlist";
 import userAddToWatchlistEndpoint from "./routes/userAPI/POST/addToWatchlist";
 import userRemoveFromWatchlistEndpoint from "./routes/userAPI/POST/removeToWatchlist";
-import userLogoutEndpoint from "./routes/userAPI/POST/logout";
 
 const app: Application = express();
 const port = 8070;
@@ -44,14 +43,6 @@ app.use("/videoAPI", searchEndpoint);
 //app.use("/videoAPI", thumbnailUploadEndpoint);
 app.use("/videoAPI", videoDeleteEndpoint);
 app.use("/videoAPI", videoAddEndpoint);
-
-// User API - Auth
-//app.use("/userAPI", userAuthEndpoint);
-//app.use("/userAPI", userRegisterEndpoint);
-//app.use("/userAPI", userDeleteEndpoint);
-//app.use("/userAPI", userWipeEndpoint);
-//app.use("/userAPI", userChangePasswordEndpoint);
-app.use("/userAPI", userLogoutEndpoint);
 
 // User API - Watchlist
 app.use("/userAPI", userGetWatchlistEndpoint);
