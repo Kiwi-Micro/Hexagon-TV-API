@@ -114,6 +114,10 @@ def authenticateUser():
 		cleanUp(cursor, connection)
 		return jsonify({"status": "server error", "sessionId": ""}), 500
 
+@app.route("/auth", methods=["OPTIONS"])
+def authOptions():
+	return jsonify()
+
 @app.route("/register", methods=["POST"])
 def registerUser():
 	connection = getDbConnection()
