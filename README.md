@@ -1,6 +1,6 @@
 # Hexagon TV API
 
-# NOTE: This is the API NOT the site for the site code: [https://github.com/Mooshay105/Hexagon-TV](https://github.com/Mooshay105/Hexagon-TV)
+## NOTE: This is the API NOT the site for the site code: [https://github.com/Mooshay105/Hexagon-TV](https://github.com/Mooshay105/Hexagon-TV)
 
 ## Contributing
 
