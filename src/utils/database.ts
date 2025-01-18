@@ -1,9 +1,11 @@
 import { ResultSet } from "@libsql/client";
 import { getDbConnection } from "./databaseConnection";
 import { createClerkClient } from "@clerk/backend";
+import config from "../../config.json";
 
+const CLERK_SECRET_KEY = config[0]["CLERK_SECRET_KEY"];
 const clerkClient = createClerkClient({
-	secretKey: "sk_test_B9Ptp11GkJGBQNzo4umIMVGkJoty2tqXsS7oOr42tM",
+	secretKey: CLERK_SECRET_KEY,
 });
 
 async function getVideosForSearch(query: string) {
