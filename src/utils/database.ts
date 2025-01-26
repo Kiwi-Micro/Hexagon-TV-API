@@ -16,6 +16,14 @@ async function getVideosForSearch(query: string) {
 
 	const rows = dbResults.rows || [];
 
+	const ratings = {
+		G: "Suitable for all ages",
+		PG: "Some material may not be suitable for children",
+		CTC: "Check the classification closer to its release date",
+	};
+
+	type RatingKey = keyof typeof ratings;
+
 	const results = rows.map((row) => ({
 		id: row[0],
 		name: row[1],
@@ -25,6 +33,7 @@ async function getVideosForSearch(query: string) {
 		date: row[5],
 		urlName: row[6],
 		rating: row[7],
+		ratingInfo: ratings[row[7] as RatingKey] || "Rating not found",
 		category: row[8],
 	}));
 
@@ -39,6 +48,14 @@ async function getVideos(category: string) {
 
 	const rows = dbResults.rows || [];
 
+	const ratings = {
+		G: "Suitable for all ages",
+		PG: "Some material may not be suitable for children",
+		CTC: "Check the classification closer to its release date",
+	};
+
+	type RatingKey = keyof typeof ratings;
+
 	const results = rows.map((row) => ({
 		id: row[0],
 		name: row[1],
@@ -48,6 +65,7 @@ async function getVideos(category: string) {
 		date: row[5],
 		urlName: row[6],
 		rating: row[7],
+		ratingInfo: ratings[row[7] as RatingKey] || "Rating not found",
 		category: row[8],
 	}));
 

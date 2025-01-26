@@ -213,6 +213,7 @@ Response:
 	"date": "2022-01-01",
 	"urlName": "movieName",
 	"rating": "G",
+	"ratingInfo": "Age Rating Info",
 	"category": "movies"
 }
 ```
