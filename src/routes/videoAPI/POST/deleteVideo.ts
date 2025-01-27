@@ -17,7 +17,7 @@ router.delete("/delete", async (req, res) => {
 			}
 		} catch (error) {
 			console.error("Error deleting video:", error);
-			res.status(500).json({ error: "server srror" });
+			res.status(500).json({ status: "server srror" });
 		}
 	} else {
 		res.status(403).json({ status: "invalid credentials" });

@@ -17,7 +17,7 @@ router.post("/addToWatchlist", async (req, res) => {
 			}
 		} catch (error) {
 			console.error("Error adding to watchlist:", error);
-			res.status(500).json({ error: "server srror" });
+			res.status(500).json({ status: "server srror" });
 		}
 	} else {
 		res.status(403).json({ status: "invalid credentials" });
