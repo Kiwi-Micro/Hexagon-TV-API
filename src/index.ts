@@ -1,8 +1,6 @@
 import express, { Application } from "express";
 import cors from "cors";
-import moviesEndpoint from "./routes/videoAPI/GET/movies";
-import tvshowsEndpoint from "./routes/videoAPI/GET/tvshows";
-import documentariesEndpoint from "./routes/videoAPI/GET/documentaries";
+import getVideoDataEndpoint from "./routes/videoAPI/GET/getVideoData";
 import searchEndpoint from "./routes/videoAPI/GET/search";
 import videoDeleteEndpoint from "./routes/videoAPI/POST/deleteVideo";
 import videoAddEndpoint from "./routes/videoAPI/POST/addVideo";
@@ -33,9 +31,7 @@ app.listen(port, () => {
 });
 
 // Video API - GET
-app.use("/videoAPI", moviesEndpoint);
-app.use("/videoAPI", tvshowsEndpoint);
-app.use("/videoAPI", documentariesEndpoint);
+app.use("/videoAPI", getVideoDataEndpoint);
 app.use("/videoAPI", searchEndpoint);
 
 // Video API - POST

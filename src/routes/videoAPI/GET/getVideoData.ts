@@ -4,14 +4,14 @@ import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
-router.get("/tvshows", async (req, res) => {
+router.get("/getVideoData", async (req, res) => {
 	printEndpointReached(req, res);
 	try {
-		const results = await getVideos("tvshows");
+		const results = await getVideos(req.query.category as string);
 		res.json(results);
 	} catch (error) {
 		console.error("Error fetching videos:", error);
-		res.status(500).json({ error: "Internal Server Error" });
+		res.status(500).json({ status: "server error" });
 	}
 });
 

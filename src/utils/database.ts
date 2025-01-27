@@ -8,12 +8,7 @@ const clerkClient = createClerkClient({
 	secretKey: CLERK_SECRET_KEY,
 });
 
-async function getVideosForSearch(query: string) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "SELECT * FROM videos WHERE name LIKE ?",
-		args: [`%${query}%`],
-	});
-
+async function parseVideos(dbResults: any) {
 	const rows = dbResults.rows || [];
 
 	const ratings = {
@@ -24,7 +19,7 @@ async function getVideosForSearch(query: string) {
 
 	type RatingKey = keyof typeof ratings;
 
-	const results = rows.map((row) => ({
+	const results = rows.map((row: any) => ({
 		id: row[0],
 		name: row[1],
 		description: row[2],
@@ -40,36 +35,22 @@ async function getVideosForSearch(query: string) {
 	return results;
 }
 
+async function getVideosForSearch(query: string) {
+	const dbResults: ResultSet = await getDbConnection(true).execute({
+		sql: "SELECT * FROM videos WHERE name LIKE ?",
+		args: [`%${query}%`],
+	});
+
+	return parseVideos(dbResults);
+}
+
 async function getVideos(category: string) {
 	const dbResults: ResultSet = await getDbConnection(true).execute({
 		sql: "SELECT * FROM videos WHERE category = ?",
 		args: [category],
 	});
 
-	const rows = dbResults.rows || [];
-
-	const ratings = {
-		G: "Suitable for all ages",
-		PG: "Some material may not be suitable for children",
-		CTC: "Check the classification closer to its release date",
-	};
-
-	type RatingKey = keyof typeof ratings;
-
-	const results = rows.map((row) => ({
-		id: row[0],
-		name: row[1],
-		description: row[2],
-		thumbnailURL: row[3],
-		videoURL: row[4],
-		date: row[5],
-		urlName: row[6],
-		rating: row[7],
-		ratingInfo: ratings[row[7] as RatingKey] || "Rating not found",
-		category: row[8],
-	}));
-
-	return results;
+	return parseVideos(dbResults);
 }
 
 async function addVideo(data: any) {

@@ -91,21 +91,15 @@ Response:
 }
 ```
 
-#### api.hexagon.kiwi-micro.com:8080/videoAPI/movies
+#### api.hexagon.kiwi-micro.com:8080/videoAPI/getVideoData
 
-#### api.hexagon.kiwi-micro.com:8080/videoAPI/tvshows
-
-#### api.hexagon.kiwi-micro.com:8080/videoAPI/documentaries
-
-URL: `api.hexagon.kiwi-micro.com:8080/videoAPI/movies`
-URL: `api.hexagon.kiwi-micro.com:8080/videoAPI/tvshows`
-URL: `api.hexagon.kiwi-micro.com:8080/videoAPI/documentaries`
+URL: `api.hexagon.kiwi-micro.com:8080/videoAPI/getVideoData`
 
 Method: `GET`
 
 URL Params:
 
-- None
+- category: The video category (movies|tvshows|documentaries)
 
 Body:
 
