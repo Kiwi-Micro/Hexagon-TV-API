@@ -44,11 +44,10 @@ async function getVideosForSearch(query: string) {
 	return parseVideos(dbResults);
 }
 
-async function getVideos(category: string) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "SELECT * FROM videos WHERE category = ?",
-		args: [category],
-	});
+async function getVideos() {
+	const dbResults: ResultSet = await getDbConnection(true).execute(
+		"SELECT * FROM videos",
+	);
 
 	return parseVideos(dbResults);
 }
@@ -112,4 +111,40 @@ async function auth(sessionId: string, userId: string, username: string) {
 	}
 }
 
-export { getVideos, getVideosForSearch, addVideo, deleteVideo, auth };
+async function adminAuth(sessionId: string, userId: string) {
+	try {
+		const status = "active";
+		const sessions = await clerkClient.sessions.getSessionList({
+			userId,
+			status,
+		});
+		const user = await clerkClient.users.getUser(userId);
+		/* TODO: Change this to scann though the config.json file for that userId */
+		console.log(user.id);
+		console.log("user_2rdeTiDjEc9AHoLTd1vig5rklWI");
+		if (user.id !== "user_2rdeTiDjEc9AHoLTd1vig5rklWI") {
+			return false;
+		}
+		for (const session of sessions.data) {
+			if (session.id === sessionId) {
+				return true;
+			}
+		}
+		return false;
+	} catch (error: any) {
+		if (error.status === 404) {
+			return false;
+		}
+		console.error("Error authenticating:", error);
+		return false;
+	}
+}
+
+export {
+	getVideos,
+	getVideosForSearch,
+	addVideo,
+	deleteVideo,
+	auth,
+	adminAuth,
+};

@@ -7,7 +7,7 @@ const router = Router();
 router.get("/getVideoData", async (req, res) => {
 	printEndpointReached(req, res);
 	try {
-		const results = await getVideos(req.query.category as string);
+		const results = await getVideos();
 		res.json(results);
 	} catch (error) {
 		console.error("Error fetching videos:", error);

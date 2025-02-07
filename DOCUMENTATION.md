@@ -11,25 +11,13 @@
 
 List:
 
-- V1:
-
-  - api.hexagon.kiwi-micro.com:8081/uploadVideo
-  - api.hexagon.kiwi-micro.com:8081/uploadThumbnail
-
-- V2:
-  - api.hexagon.kiwi-micro.com:8080/userAPI/getWatchlist
-  - api.hexagon.kiwi-micro.com:8080/userAPI/addToWatchlist
-  - api.hexagon.kiwi-micro.com:8080/userAPI/removeFromWatchlist
-  - api.hexagon.kiwi-micro.com:8080/videoAPI/movies
-  - api.hexagon.kiwi-micro.com:8080/videoAPI/tvshows
-  - api.hexagon.kiwi-micro.com:8080/videoAPI/documentaries
-  - api.hexagon.kiwi-micro.com:8080/videoAPI/search
-  - api.hexagon.kiwi-micro.com:8080/videoAPI/deleteVideo
-  - api.hexagon.kiwi-micro.com:8080/videoAPI/addVideo
-
-### V1 Endpoints
-
-Comming Soon
+- api.hexagon.kiwi-micro.com:8080/userAPI/getWatchlist
+- api.hexagon.kiwi-micro.com:8080/userAPI/addToWatchlist
+- api.hexagon.kiwi-micro.com:8080/userAPI/removeFromWatchlist
+- api.hexagon.kiwi-micro.com:8080/videoAPI/getVideoData
+- api.hexagon.kiwi-micro.com:8080/videoAPI/search
+- api.hexagon.kiwi-micro.com:8080/videoAPI/deleteVideo
+- api.hexagon.kiwi-micro.com:8080/videoAPI/addVideo
 
 ### V2 Endpoints
 
@@ -99,7 +87,7 @@ Method: `GET`
 
 URL Params:
 
-- category: The video category (movies|tvshows|documentaries)
+- None
 
 Body:
 
