@@ -5,6 +5,7 @@ import config from "../../config.json";
 import { VideoUpdate } from "./types";
 
 import { UTApi } from "uploadthing/server";
+import { use } from "react";
 
 export const utapi = new UTApi({
 	token: config[0]["UPLOADTHING_TOKEN"],
@@ -161,22 +162,21 @@ async function auth(sessionId: string, userId: string, username: string) {
 
 async function adminAuth(sessionId: string, userId: string) {
 	try {
-		const status = "active";
-		const sessions = await clerkClient.sessions.getSessionList({
-			userId,
-			status,
+		const dbGetResults: ResultSet = await getDbConnection(true).execute({
+			sql: "SELECT * FROM userPermissions WHERE isAdmin = 'true' AND userId = ?",
+			args: [userId],
 		});
-		const user = await clerkClient.users.getUser(userId);
-		/* TODO: Change this to scann though the config.json file for that userId */
-		if (user.id !== "user_2rdeTiDjEc9AHoLTd1vig5rklWI") {
+
+		if (dbGetResults.rows.length === 0) {
 			return false;
 		}
-		for (const session of sessions.data) {
-			if (session.id === sessionId) {
-				return true;
-			}
-		}
-		return false;
+
+		const user = await clerkClient.users.getUser(userId);
+		const registeredUsername = user.username || "";
+
+		let isAuthenticated = auth(sessionId, userId, registeredUsername);
+
+		return isAuthenticated;
 	} catch (error: any) {
 		if (error.status === 404) {
 			return false;
