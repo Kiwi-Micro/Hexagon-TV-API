@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { addVideo, adminAuth } from "../../../utils/database";
+import { updateVideo, adminAuth } from "../../../utils/database";
 import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
-router.post("/add", async (req, res) => {
+router.post("/update", async (req, res) => {
 	printEndpointReached(req, res);
 	if (await adminAuth(req.body.sessionId, req.body.userId)) {
 		try {
-			const status = await addVideo(req.body);
+			const status = await updateVideo(req.body);
 			if (status) {
 				res.json({ status: "success" });
 			} else {

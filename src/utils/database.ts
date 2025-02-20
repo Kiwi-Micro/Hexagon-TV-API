@@ -2,6 +2,13 @@ import { ResultSet } from "@libsql/client";
 import { getDbConnection } from "./databaseConnection";
 import { createClerkClient } from "@clerk/backend";
 import config from "../../config.json";
+import { VideoUpdate } from "./types";
+
+import { UTApi } from "uploadthing/server";
+
+export const utapi = new UTApi({
+	token: config[0]["UPLOADTHING_TOKEN"],
+});
 
 const CLERK_SECRET_KEY = config[0]["CLERK_SECRET_KEY"];
 const clerkClient = createClerkClient({
@@ -27,9 +34,11 @@ async function parseVideos(dbResults: any) {
 		videoURL: row[4],
 		date: row[5],
 		urlName: row[6],
-		rating: row[7],
-		ratingInfo: ratings[row[7] as RatingKey] || "Rating not found",
+		ageRating: row[7],
+		ageRatingInfo: ratings[row[7] as RatingKey] || "Age Rating not found",
 		category: row[8],
+		videoUrlKey: row[9],
+		thumbnailUrlKey: row[10],
 	}));
 
 	return results;
@@ -54,8 +63,10 @@ async function getVideos() {
 
 async function addVideo(data: any) {
 	const date = Date().toString().split("T")[0];
+	const videoUrlKey = data.videoURL.split("/f/").pop();
+	const thumbnailUrlKey = data.thumbnailURL.split("/f/").pop();
 	const dbResults: ResultSet = await getDbConnection(false).execute({
-		sql: "INSERT INTO videos (name, description, thumbnailURL, videoURL, date, urlName, rating, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+		sql: "INSERT INTO videos (name, description, thumbnailURL, videoURL, date, urlName, rating, category, videoUrlKey, thumbnailUrlKey) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		args: [
 			data.name,
 			data.description,
@@ -65,6 +76,28 @@ async function addVideo(data: any) {
 			data.urlName,
 			data.ageRating,
 			data.category,
+			data.videoURL.split("/f/").pop(),
+			data.thumbnailURL.split("/f/").pop(),
+		],
+	});
+
+	return dbResults.rowsAffected > 0;
+}
+
+async function updateVideo(data: VideoUpdate) {
+	const date = Date().toString().split("T")[0];
+	const dbResults: ResultSet = await getDbConnection(false).execute({
+		sql: "UPDATE videos SET name = ?, description = ?, thumbnailURL = ?, videoURL = ?, date = ?, urlName = ?, rating = ?, category = ? WHERE urlName = ?;",
+		args: [
+			data.name,
+			data.description,
+			data.thumbnailURL,
+			data.videoURL,
+			date,
+			data.urlName,
+			data.ageRating,
+			data.category,
+			data.currentUrlName,
 		],
 	});
 
@@ -73,12 +106,27 @@ async function addVideo(data: any) {
 
 async function deleteVideo(data: any) {
 	const urlName = data.urlName;
-	const dbResults: ResultSet = await getDbConnection(false).execute({
+
+	const dbGetResults: ResultSet = await getDbConnection(true).execute({
+		sql: "SELECT * FROM videos WHERE urlName = ?",
+		args: [urlName],
+	});
+
+	if (dbGetResults.rows.length === 0) {
+		return false;
+	}
+
+	const videoUrlKey = dbGetResults.rows[0][9] as string;
+	const thumbnailUrlKey = dbGetResults.rows[0][10] as string;
+
+	await utapi.deleteFiles(thumbnailUrlKey);
+	await utapi.deleteFiles(videoUrlKey);
+	const dbDeleteResults: ResultSet = await getDbConnection(false).execute({
 		sql: "DELETE FROM videos WHERE urlName = ?",
 		args: [urlName],
 	});
 
-	return dbResults.rowsAffected > 0;
+	return dbDeleteResults.rowsAffected > 0;
 }
 
 async function auth(sessionId: string, userId: string, username: string) {
@@ -120,8 +168,6 @@ async function adminAuth(sessionId: string, userId: string) {
 		});
 		const user = await clerkClient.users.getUser(userId);
 		/* TODO: Change this to scann though the config.json file for that userId */
-		console.log(user.id);
-		console.log("user_2rdeTiDjEc9AHoLTd1vig5rklWI");
 		if (user.id !== "user_2rdeTiDjEc9AHoLTd1vig5rklWI") {
 			return false;
 		}
@@ -144,6 +190,7 @@ export {
 	getVideos,
 	getVideosForSearch,
 	addVideo,
+	updateVideo,
 	deleteVideo,
 	auth,
 	adminAuth,
