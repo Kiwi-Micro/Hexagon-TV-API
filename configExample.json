@@ -1,0 +1,18 @@
+[
+	{
+		"TURSO_DB_URL": "libsql://project-username.turso.io",
+		"TURSO_DB_AUTH_TOKEN_R": "key",
+		"TURSO_DB_AUTH_TOKEN_RW": "key",
+		"UPLOADTHING_TOKEN": "key",
+		"CLERK_SECRET_KEY": "sk_env_key"
+	},
+	{
+		"PORT": "8070",
+		"CORS_ORIGIN": "*"
+	},
+	{
+		"G": "Suitable for all ages",
+		"PG": "Some material may not be suitable for children",
+		"CTC": "Check the classification closer to its release date"
+	}
+]
