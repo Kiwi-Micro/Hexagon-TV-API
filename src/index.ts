@@ -13,8 +13,11 @@ import { createRouteHandler } from "uploadthing/express";
 import config from "../config.json";
 
 const app: Application = express();
-const port = 8070;
+// Config
+const port = config[2]["PORT"] || 8070;
+const corsOrigin = config[2]["CORS_ORIGIN"] || "*";
 
+// Set CORS options
 const corsOptions = {
 	origin: "*",
 	methods: ["GET", "POST", "DELETE", "PATCH", "PUT", "OPTIONS"],
@@ -26,10 +29,12 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 
+// 404 - Not Found
 app.get("/", (req, res) => {
 	res.send("<pre>Cannot GET /</pre>");
 });
 
+// Logs that the server is running.
 app.listen(port, () => {
 	console.log(`Server is running on http://localhost:${port}`);
 });
