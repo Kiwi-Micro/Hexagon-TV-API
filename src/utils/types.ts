@@ -24,4 +24,12 @@ type VideoUpdate = {
 	currentUrlName: string;
 };
 
-export type { Video, VideoUpdate };
+type Watchlist = {
+	id: number;
+	username: string;
+	name: string;
+	urlName: string;
+	thumbnailURL: string;
+};
+
+export type { Video, VideoUpdate, Watchlist };
