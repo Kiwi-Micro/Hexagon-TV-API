@@ -12,11 +12,11 @@ Please read the [DOCUMENTATION.md](DOCUMENTATION.md).
 
 ## Tech Stack
 
-- **Backend**: Python, Flask, SQLite, TypeScript, Express, Clerk
+- **Backend**: SQLite/Turso, TypeScript, Express, Clerk
 - **Frontend**: React, TypeScript, CSS
 - **Database**: SQL Lite (Via the Typscript - Turso API)
-- **CDN**: Apache
-- **Hosting**: Linode (CDN, API), Vercel (Site), Turso (Database)
+- **CDN**: UploadThing
+- **Hosting**: Linode (API), Vercel (Site), Turso (Database), UploadThing (CDN)
 - **Authentication**: TypeScript, Express, Clerk
 
 ---
