@@ -1,5 +1,5 @@
 import { ResultSet } from "@libsql/client";
-import { getDbConnection } from "./databaseConnection";
+import { getDbConnection } from "./connections";
 
 async function getWatchlist(username: string) {
 	const dbResults: ResultSet = await getDbConnection(true).execute({

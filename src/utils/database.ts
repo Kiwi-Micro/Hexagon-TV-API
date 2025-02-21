@@ -1,20 +1,6 @@
 import { ResultSet } from "@libsql/client";
-import { getDbConnection } from "./databaseConnection";
-import { createClerkClient } from "@clerk/backend";
-import config from "../../config.json";
+import { getDbConnection, clerkClient, utapi } from "./connections";
 import { VideoUpdate } from "./types";
-
-import { UTApi } from "uploadthing/server";
-import { use } from "react";
-
-export const utapi = new UTApi({
-	token: config[0]["UPLOADTHING_TOKEN"],
-});
-
-const CLERK_SECRET_KEY = config[0]["CLERK_SECRET_KEY"];
-const clerkClient = createClerkClient({
-	secretKey: CLERK_SECRET_KEY,
-});
 
 async function parseVideos(dbResults: any) {
 	const rows = dbResults.rows || [];
@@ -28,18 +14,18 @@ async function parseVideos(dbResults: any) {
 	type RatingKey = keyof typeof ratings;
 
 	const results = rows.map((row: any) => ({
-		id: row[0],
-		name: row[1],
-		description: row[2],
-		thumbnailURL: row[3],
-		videoURL: row[4],
-		date: row[5],
-		urlName: row[6],
-		ageRating: row[7],
-		ageRatingInfo: ratings[row[7] as RatingKey] || "Age Rating not found",
-		category: row[8],
-		videoUrlKey: row[9],
-		thumbnailUrlKey: row[10],
+		id: row.id,
+		name: row.name,
+		description: row.description,
+		thumbnailURL: row.thumbnailURL,
+		videoURL: row.videoURL,
+		date: row.date,
+		urlName: row.urlName,
+		ageRating: row.rating,
+		ageRatingInfo: ratings[row.rating as RatingKey] || "Age Rating not found",
+		category: row.category,
+		videoUrlKey: row.videoURLKey,
+		thumbnailUrlKey: row.thumbnailURLKey,
 	}));
 
 	return results;
@@ -64,10 +50,8 @@ async function getVideos() {
 
 async function addVideo(data: any) {
 	const date = Date().toString().split("T")[0];
-	const videoUrlKey = data.videoURL.split("/f/").pop();
-	const thumbnailUrlKey = data.thumbnailURL.split("/f/").pop();
 	const dbResults: ResultSet = await getDbConnection(false).execute({
-		sql: "INSERT INTO videos (name, description, thumbnailURL, videoURL, date, urlName, rating, category, videoUrlKey, thumbnailUrlKey) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		sql: "INSERT INTO videos (name, description, thumbnailURL, videoURL, date, urlName, rating, category, videoURLKey, thumbnailURLKey) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		args: [
 			data.name,
 			data.description,
@@ -87,8 +71,10 @@ async function addVideo(data: any) {
 
 async function updateVideo(data: VideoUpdate) {
 	const date = Date().toString().split("T")[0];
+	const videoUrlKey = data.videoURL.split("/f/").pop() || "";
+	const thumbnailUrlKey = data.thumbnailURL.split("/f/").pop() || "";
 	const dbResults: ResultSet = await getDbConnection(false).execute({
-		sql: "UPDATE videos SET name = ?, description = ?, thumbnailURL = ?, videoURL = ?, date = ?, urlName = ?, rating = ?, category = ? WHERE urlName = ?;",
+		sql: "UPDATE videos SET name = ?, description = ?, thumbnailURL = ?, videoURL = ?, date = ?, urlName = ?, rating = ?, category = ?, videoURLKey = ?, thumbnailURLKey = ? WHERE urlName = ?;",
 		args: [
 			data.name,
 			data.description,
@@ -98,6 +84,8 @@ async function updateVideo(data: VideoUpdate) {
 			data.urlName,
 			data.ageRating,
 			data.category,
+			videoUrlKey,
+			thumbnailUrlKey,
 			data.currentUrlName,
 		],
 	});
@@ -117,8 +105,8 @@ async function deleteVideo(data: any) {
 		return false;
 	}
 
-	const videoUrlKey = dbGetResults.rows[0][9] as string;
-	const thumbnailUrlKey = dbGetResults.rows[0][10] as string;
+	const videoUrlKey = dbGetResults.rows[0].videoURLKey as string;
+	const thumbnailUrlKey = dbGetResults.rows[0].thumbnailURLKey as string;
 
 	await utapi.deleteFiles(thumbnailUrlKey);
 	await utapi.deleteFiles(videoUrlKey);
