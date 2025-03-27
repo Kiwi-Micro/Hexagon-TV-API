@@ -6,7 +6,6 @@ import { printEndpointReached } from "../../../utils/messages";
 const router = Router();
 
 router.delete("/deleteFromWatchlist", async (req, res) => {
-	printEndpointReached(req, res);
 	if (await auth(req.body.sessionId, req.body.userId, req.body.username)) {
 		try {
 			const status = await deleteFromWatchlist(req.body);
@@ -22,6 +21,7 @@ router.delete("/deleteFromWatchlist", async (req, res) => {
 	} else {
 		res.status(403).json({ status: "invalid credentials" });
 	}
+	printEndpointReached(req, res);
 });
 
 export default router;

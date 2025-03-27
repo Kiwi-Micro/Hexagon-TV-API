@@ -5,7 +5,6 @@ import { printEndpointReached } from "../../../utils/messages";
 const router = Router();
 
 router.delete("/delete", async (req, res) => {
-	printEndpointReached(req, res);
 	if (await adminAuth(req.body.sessionId, req.body.userId)) {
 		try {
 			const status = await deleteVideo(req.body);
@@ -21,6 +20,7 @@ router.delete("/delete", async (req, res) => {
 	} else {
 		res.status(403).json({ status: "invalid credentials" });
 	}
+	printEndpointReached(req, res);
 });
 
 export default router;

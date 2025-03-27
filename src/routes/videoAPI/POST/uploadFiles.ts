@@ -17,7 +17,7 @@ const uploadRouter = {
 		},
 	)
 		.middleware(async ({ req, res }) => {
-			printEndpointReached(req, res);
+			printEndpointReached(req);
 			const user = await adminAuth(
 				(req.headers as any).sessionid,
 				(req.headers as any).userid,

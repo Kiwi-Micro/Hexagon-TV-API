@@ -5,7 +5,6 @@ import { printEndpointReached } from "../../../utils/messages";
 const router = Router();
 
 router.get("/getWatchlist", async (req, res) => {
-	printEndpointReached(req, res);
 	try {
 		const results = await getWatchlist(req.query.username as string);
 		res.json(results);
@@ -13,6 +12,7 @@ router.get("/getWatchlist", async (req, res) => {
 		console.error("Error fetching watchlist:", error);
 		res.status(500).json({ status: "server error" });
 	}
+	printEndpointReached(req, res);
 });
 
 export default router;
