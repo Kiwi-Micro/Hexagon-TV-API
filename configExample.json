@@ -9,10 +9,5 @@
 	{
 		"PORT": "8070",
 		"CORS_ORIGIN": "*"
-	},
-	{
-		"G": "Suitable for all ages",
-		"PG": "Some material may not be suitable for children",
-		"CTC": "Check the classification closer to its release date"
 	}
 ]
