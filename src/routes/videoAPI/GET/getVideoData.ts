@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getVideos } from "../../../utils/database";
+import { getVideos } from "../../../utils/video";
 import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();

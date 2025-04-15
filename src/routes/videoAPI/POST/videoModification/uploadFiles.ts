@@ -1,6 +1,6 @@
 import { createUploadthing, type FileRouter, UploadThingError } from "uploadthing/server";
-import { printEndpointReached } from "../../../utils/messages";
-import { adminAuth } from "../../../utils/database";
+import { printEndpointReached } from "../../../../utils/messages";
+import { adminAuth } from "../../../../utils/database";
 
 const f = createUploadthing();
 
