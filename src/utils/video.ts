@@ -36,7 +36,7 @@ async function parseVideos(dbResults: any) {
  */
 
 async function getVideosForSearch(query: string) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
+	const dbResults: ResultSet = await getDbConnection(false).execute({
 		sql: "SELECT * FROM videos WHERE name LIKE ?",
 		args: [`%${query}%`],
 	});
@@ -49,7 +49,7 @@ async function getVideosForSearch(query: string) {
  */
 
 async function getVideos() {
-	const dbResults: ResultSet = await getDbConnection(true).execute(
+	const dbResults: ResultSet = await getDbConnection(false).execute(
 		"SELECT * FROM videos",
 	);
 	return parseVideos(dbResults);
@@ -63,7 +63,7 @@ async function getVideos() {
 
 async function addVideo(data: any) {
 	const date = Date().toString().split("T")[0];
-	const dbResults: ResultSet = await getDbConnection(false).execute({
+	const dbResults: ResultSet = await getDbConnection(true).execute({
 		sql: "INSERT INTO videos (name, description, thumbnailURL, videoURL, date, urlName, rating, category, videoURLKey, thumbnailURLKey) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		args: [
 			data.name,
@@ -90,7 +90,7 @@ async function addVideo(data: any) {
 async function updateVideo(data: VideoUpdate) {
 	const videoUrlKey = data.videoURL.split("/f/").pop() || "";
 	const thumbnailUrlKey = data.thumbnailURL.split("/f/").pop() || "";
-	const dbResults: ResultSet = await getDbConnection(false).execute({
+	const dbResults: ResultSet = await getDbConnection(true).execute({
 		sql: "UPDATE videos SET name = ?, description = ?, thumbnailURL = ?, videoURL = ?, date = ?, urlName = ?, rating = ?, category = ?, videoURLKey = ?, thumbnailURLKey = ? WHERE urlName = ?;",
 		args: [
 			data.name,
@@ -116,7 +116,8 @@ async function updateVideo(data: VideoUpdate) {
  */
 
 async function deleteVideo(data: any) {
-	const dbGetResults: ResultSet = await getDbConnection(true).execute({
+	const connection = getDbConnection(true);
+	const dbGetResults: ResultSet = await connection.execute({
 		sql: "SELECT * FROM videos WHERE urlName = ?",
 		args: [data.urlName],
 	});
@@ -127,7 +128,7 @@ async function deleteVideo(data: any) {
 	const thumbnailUrlKey = dbGetResults.rows[0].thumbnailURLKey as string;
 	await utapi.deleteFiles(thumbnailUrlKey);
 	await utapi.deleteFiles(videoUrlKey);
-	const dbDeleteResults: ResultSet = await getDbConnection(false).execute({
+	const dbDeleteResults: ResultSet = await connection.execute({
 		sql: "DELETE FROM videos WHERE urlName = ?",
 		args: [data.urlName],
 	});
@@ -141,7 +142,7 @@ async function deleteVideo(data: any) {
  */
 
 async function getVideo(urlName: string) {
-	const dbGetResults: ResultSet = await getDbConnection(true).execute({
+	const dbGetResults: ResultSet = await getDbConnection(false).execute({
 		sql: "SELECT * FROM videos WHERE urlName = ?",
 		args: [urlName],
 	});
@@ -157,7 +158,7 @@ async function getVideo(urlName: string) {
  */
 
 async function getAgeRatingInfo(ageRating: string) {
-	const dbGetResults: ResultSet = await getDbConnection(true).execute({
+	const dbGetResults: ResultSet = await getDbConnection(false).execute({
 		sql: "SELECT * FROM ageRatings WHERE ageRating = ?",
 		args: [ageRating],
 	});
@@ -175,7 +176,7 @@ async function getAgeRatingInfo(ageRating: string) {
  */
 
 async function addAgeRating(data: any) {
-	const dbResults: ResultSet = await getDbConnection(false).execute({
+	const dbResults: ResultSet = await getDbConnection(true).execute({
 		sql: "INSERT INTO ageRatings (ageRating, ageRatingInfo) VALUES (?, ?)",
 		args: [data.ageRating, data.ageRatingInfo],
 	});
@@ -189,7 +190,7 @@ async function addAgeRating(data: any) {
  */
 
 async function updateAgeRating(data: any) {
-	const dbResults: ResultSet = await getDbConnection(false).execute({
+	const dbResults: ResultSet = await getDbConnection(true).execute({
 		sql: "UPDATE ageRatings SET ageRating = ?, ageRatingInfo = ? WHERE id = ?",
 		args: [data.ageRating, data.ageRatingInfo, data.id],
 	});
@@ -203,7 +204,7 @@ async function updateAgeRating(data: any) {
  */
 
 async function deleteAgeRating(data: any) {
-	const dbResults: ResultSet = await getDbConnection(false).execute({
+	const dbResults: ResultSet = await getDbConnection(true).execute({
 		sql: "DELETE FROM ageRatings WHERE id = ?",
 		args: [data.id],
 	});

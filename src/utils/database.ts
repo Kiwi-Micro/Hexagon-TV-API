@@ -26,19 +26,21 @@ async function auth(
 		if (sessions.totalCount === 0) {
 			return false;
 		}
+
+		if (!usernameOverride) {
+			const user = await clerkClient.users.getUser(userId);
+			const registeredUsername = user.username;
+			if (registeredUsername !== username) {
+				return false;
+			}
+		}
+
 		for (const session of sessions.data) {
 			if (session.id === sessionId) {
 				return true;
 			}
 		}
 
-		const user = await clerkClient.users.getUser(userId);
-		const registeredUsername = user.username;
-		if (!usernameOverride) {
-			if (registeredUsername !== username) {
-				return false;
-			}
-		}
 		return false;
 	} catch (error: any) {
 		if (error.status === 404) {
@@ -58,10 +60,7 @@ async function auth(
 
 async function adminAuth(sessionId: string, userId: string) {
 	try {
-		const dbGetResults: ResultSet = await getDbConnection(true).execute({
-			sql: "SELECT * FROM userPermissions WHERE isAdmin = 'true' AND userId = ?",
-			args: [userId],
-		});
+		const dbGetResults = await getUserPermission(userId, "isAdmin");
 
 		if (dbGetResults.rows.length === 0) {
 			return false;
@@ -77,4 +76,21 @@ async function adminAuth(sessionId: string, userId: string) {
 	}
 }
 
-export { auth, adminAuth };
+/**
+ * This function gets the user permissions from the database.
+ * @param userId The user ID of the user.
+ * @param permission The permission to get. NOTE: DO NOT EXPOSE TO USERS.
+ * @returns The given user's permissions.
+ */
+
+async function getUserPermission(userId: string, permission: string) {
+	const sql = `SELECT * FROM userPermissions WHERE ${permission} = 'true' AND userId = ?`;
+	const dbGetResults: ResultSet = await getDbConnection(false).execute({
+		sql,
+		args: [userId],
+	});
+
+	return dbGetResults;
+}
+
+export { auth, adminAuth, getUserPermission };

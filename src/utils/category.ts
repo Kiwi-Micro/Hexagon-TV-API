@@ -7,7 +7,7 @@ import { getDbConnection } from "./connections";
  */
 
 async function getCategories() {
-	const dbResults: ResultSet = await getDbConnection(true).execute(
+	const dbResults: ResultSet = await getDbConnection(false).execute(
 		"SELECT * FROM categories",
 	);
 	const results = dbResults.rows.map((row: any) => ({
@@ -26,7 +26,7 @@ async function getCategories() {
  */
 
 async function addCategory(data: any) {
-	const dbResults: ResultSet = await getDbConnection(false).execute({
+	const dbResults: ResultSet = await getDbConnection(true).execute({
 		sql: "INSERT INTO categories (categoryName, categoryId, isSeries) VALUES (?, ?, ?)",
 		args: [data.categoryName, data.categoryId, data.isSeries],
 	});
@@ -34,7 +34,7 @@ async function addCategory(data: any) {
 }
 
 async function updateCategory(data: any) {
-	const dbResults: ResultSet = await getDbConnection(false).execute({
+	const dbResults: ResultSet = await getDbConnection(true).execute({
 		sql: "UPDATE categories SET categoryName = ?, categoryId = ?, isSeries = ? WHERE id = ?",
 		args: [data.categoryName, data.categoryId, data.isSeries, data.id],
 	});
@@ -48,9 +48,9 @@ async function updateCategory(data: any) {
  */
 
 async function deleteCategory(data: any) {
-	const dbDeleteResults: ResultSet = await getDbConnection(false).execute({
-		sql: "DELETE FROM categories WHERE categoryId = ?",
-		args: [data.categoryId],
+	const dbDeleteResults: ResultSet = await getDbConnection(true).execute({
+		sql: "DELETE FROM categories WHERE id = ?",
+		args: [data.id],
 	});
 	return dbDeleteResults.rowsAffected > 0;
 }

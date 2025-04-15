@@ -12,7 +12,7 @@ router.post("/addCategory", async (req, res) => {
 			if (status) {
 				res.json({ status: "success" });
 			} else {
-				res.status(409).json({ status: "server error" });
+				res.status(409).json({ status: "unable to add category" });
 			}
 		} catch (error) {
 			console.error("Error adding category:", error);

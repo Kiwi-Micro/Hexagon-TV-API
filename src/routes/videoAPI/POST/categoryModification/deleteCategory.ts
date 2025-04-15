@@ -12,7 +12,7 @@ router.delete("/deleteCategory", async (req, res) => {
 			if (status) {
 				res.json({ status: "success" });
 			} else {
-				res.status(500).json({ status: "server error" });
+				res.status(409).json({ status: "category not found" });
 			}
 		} catch (error) {
 			console.error("Error deleting category:", error);

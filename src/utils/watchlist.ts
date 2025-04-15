@@ -10,7 +10,7 @@ import { Watchlist } from "./types";
 
 async function getWatchlist(username: string) {
 	// Get the watchlist for the given username.
-	const dbResults: ResultSet = await getDbConnection(true).execute({
+	const dbResults: ResultSet = await getDbConnection(false).execute({
 		sql: "SELECT * FROM watchlist WHERE username = ?",
 		args: [username],
 	});
@@ -37,7 +37,7 @@ async function getWatchlist(username: string) {
 async function addToWatchlist(video: Watchlist) {
 	try {
 		// Add the video to the watchlist.
-		const dbResults: ResultSet = await getDbConnection(false).execute({
+		const dbResults: ResultSet = await getDbConnection(true).execute({
 			sql: "INSERT INTO watchlist (username, name, urlName, thumbnailURL) VALUES (?, ?, ?, ?)",
 			args: [video.username, video.name, video.urlName, video.thumbnailURL],
 		});
@@ -59,7 +59,7 @@ async function addToWatchlist(video: Watchlist) {
 async function deleteFromWatchlist(video: any) {
 	try {
 		// Delete the video from the watchlist.
-		const dbResults: ResultSet = await getDbConnection(false).execute({
+		const dbResults: ResultSet = await getDbConnection(true).execute({
 			sql: "DELETE FROM watchlist WHERE urlName = ? AND username = ?",
 			args: [video.urlName, video.username],
 		});
