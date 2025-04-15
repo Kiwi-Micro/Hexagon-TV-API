@@ -1,7 +1,6 @@
 import { ResultSet } from "@libsql/client";
 import { getDbConnection, utapi } from "./connections";
 import { VideoUpdate } from "./types";
-import { get } from "http";
 
 /**
  * Formats the videos from the database.
