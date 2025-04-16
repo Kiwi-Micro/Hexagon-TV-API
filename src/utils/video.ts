@@ -141,14 +141,14 @@ async function deleteVideo(data: any) {
 
 /**
  * This function gets a video from the database.
- * @param urlName The urlName of the video.
+ * @param id The id of the video.
  * @returns The video or null if it doesn't exist.
  */
 
-async function getVideo(urlName: string) {
+async function getVideo(id: string) {
 	const dbGetResults: ResultSet = await getDbConnection(false).execute({
-		sql: "SELECT * FROM videos WHERE urlName = ?",
-		args: [urlName],
+		sql: "SELECT * FROM videos WHERE id = ?",
+		args: [id],
 	});
 	if (dbGetResults.rows.length === 0) {
 		return null;
