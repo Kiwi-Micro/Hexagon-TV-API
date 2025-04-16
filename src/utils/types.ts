@@ -15,10 +15,15 @@ type Video = {
 
 type Watchlist = {
 	id: number;
-	username: string;
-	name: string;
-	urlName: string;
-	thumbnailURL: string;
+	userId: string;
+	videoId: string;
 };
 
-export type { Video, Watchlist };
+type WatchlistWithVideoData = {
+	id: number;
+	userId: string;
+	videoId: string;
+	video: Video;
+};
+
+export type { Video, Watchlist, WatchlistWithVideoData };

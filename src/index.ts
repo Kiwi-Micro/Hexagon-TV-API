@@ -2,7 +2,7 @@ import express, { Application } from "express";
 import cors from "cors";
 import getWatchlistEndpoint from "./routes/userAPI/GET/watchlist";
 import addToWatchlistEndpoint from "./routes/userAPI/POST/addToWatchlist";
-import removeFromWatchlistEndpoint from "./routes/userAPI/POST/removeToWatchlist";
+import deleteFromWatchlistEndpoint from "./routes/userAPI/POST/deleteFromWatchlist";
 import getCategoriesEndpoint from "./routes/videoAPI/GET/getCategories";
 import categoryAddEndpoint from "./routes/videoAPI/POST/categoryModification/addCategory";
 import categoryUpdateEndpoint from "./routes/videoAPI/POST/categoryModification/updateCategory";
@@ -69,4 +69,4 @@ app.use("/videoAPI", categoryDeleteEndpoint);
 // User API - Watchlist
 app.use("/userAPI", getWatchlistEndpoint);
 app.use("/userAPI", addToWatchlistEndpoint);
-app.use("/userAPI", removeFromWatchlistEndpoint);
+app.use("/userAPI", deleteFromWatchlistEndpoint);

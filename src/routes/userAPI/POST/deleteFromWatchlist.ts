@@ -12,7 +12,7 @@ router.delete("/deleteFromWatchlist", async (req, res) => {
 			if (status) {
 				res.json({ status: "success" });
 			} else {
-				res.status(409).json({ status: "server error" });
+				res.status(409).json({ status: "watchlist item not found" });
 			}
 		} catch (error) {
 			console.error("Error removing from watchlist:", error);
