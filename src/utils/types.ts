@@ -9,6 +9,8 @@ type Video = {
 	ageRating: string;
 	ageRatingInfo: string;
 	urlName: string;
+	isPartOfTVShow: string;
+	tvShowId: string;
 };
 
 type VideoUpdate = {
@@ -21,7 +23,8 @@ type VideoUpdate = {
 	date: string;
 	ageRating: string;
 	urlName: string;
-	currentUrlName: string;
+	isPartOfTVShow: string;
+	tvShowId: string;
 };
 
 type Watchlist = {

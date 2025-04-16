@@ -60,9 +60,10 @@ async function auth(
 
 async function adminAuth(sessionId: string, userId: string) {
 	try {
-		const dbGetResults = await getUserPermission(userId, "isAdmin");
-
-		if (dbGetResults.rows.length === 0) {
+		const dbGetResults: string = String(
+			(await getUserPermissions(userId, "isAdmin"))?.isAdmin,
+		);
+		if (dbGetResults !== "true") {
 			return false;
 		}
 
@@ -83,14 +84,13 @@ async function adminAuth(sessionId: string, userId: string) {
  * @returns The given user's permissions.
  */
 
-async function getUserPermission(userId: string, permission: string) {
-	const sql = `SELECT * FROM userPermissions WHERE ${permission} = 'true' AND userId = ?`;
+async function getUserPermissions(userId: string, permission: string) {
+	const sql = `SELECT * FROM userPermissions WHERE userId = ?`;
 	const dbGetResults: ResultSet = await getDbConnection(false).execute({
 		sql,
 		args: [userId],
 	});
-
-	return dbGetResults;
+	return dbGetResults.rows[0];
 }
 
-export { auth, adminAuth, getUserPermission };
+export { auth, adminAuth, getUserPermissions };

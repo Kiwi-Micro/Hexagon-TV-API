@@ -1,6 +1,6 @@
 import { createUploadthing, type FileRouter, UploadThingError } from "uploadthing/server";
 import { printEndpointReached } from "../../../../utils/messages";
-import { adminAuth } from "../../../../utils/database";
+import { adminAuth, getUserPermissions } from "../../../../utils/database";
 
 const f = createUploadthing();
 
@@ -23,7 +23,12 @@ const uploadRouter = {
 				(req.headers as any).userid,
 			);
 
+			const hasPermission = (
+				await getUserPermissions((req.headers as any).userid, "canAddVideos")
+			).canAddVideos;
+
 			if (!user) throw new UploadThingError("Unauthorized");
+			if (hasPermission) throw new UploadThingError("Unauthorized");
 
 			return {};
 		})
@@ -42,13 +47,18 @@ const uploadRouter = {
 		},
 	)
 		.middleware(async ({ req, res }) => {
-			printEndpointReached(req, res);
+			printEndpointReached(req);
 			const user = await adminAuth(
 				(req.headers as any).sessionid,
 				(req.headers as any).userid,
 			);
 
+			const hasPermission = (
+				await getUserPermissions((req.headers as any).userid, "canAddVideos")
+			).canAddVideos;
+
 			if (!user) throw new UploadThingError("Unauthorized");
+			if (hasPermission) throw new UploadThingError("Unauthorized");
 
 			return {};
 		})

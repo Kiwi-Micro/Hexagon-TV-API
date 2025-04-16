@@ -1,6 +1,6 @@
 import { ResultSet } from "@libsql/client";
 import { getDbConnection, utapi } from "./connections";
-import { VideoUpdate } from "./types";
+import { Video, VideoUpdate } from "./types";
 
 /**
  * Formats the videos from the database.
@@ -61,21 +61,23 @@ async function getVideos() {
  * @returns True if the video was added, false otherwise.
  */
 
-async function addVideo(data: any) {
-	const date = Date().toString().split("T")[0];
+async function addVideo(data: Video) {
 	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "INSERT INTO videos (name, description, thumbnailURL, videoURL, date, urlName, rating, category, videoURLKey, thumbnailURLKey) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		sql: "INSERT INTO videos (name, description, thumbnailURL, videoURL, dateReleased, urlName, ageRating, category, videoURLKey, thumbnailURLKey, isPartOfTVShow, tvShowId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		args: [
 			data.name,
 			data.description,
 			data.thumbnailURL,
 			data.videoURL,
-			date,
+			data.date,
 			data.urlName,
 			data.ageRating,
 			data.category,
-			data.videoURL.split("/f/").pop(),
-			data.thumbnailURL.split("/f/").pop(),
+			data.videoURL.split("/f/").pop() || "",
+			data.thumbnailURL.split("/f/").pop() || "",
+			// TODO: Add TV show ID
+			data.isPartOfTVShow || "false",
+			data.tvShowId || "0",
 		],
 	});
 	return dbResults.rowsAffected > 0;
@@ -91,7 +93,7 @@ async function updateVideo(data: VideoUpdate) {
 	const videoUrlKey = data.videoURL.split("/f/").pop() || "";
 	const thumbnailUrlKey = data.thumbnailURL.split("/f/").pop() || "";
 	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "UPDATE videos SET name = ?, description = ?, thumbnailURL = ?, videoURL = ?, date = ?, urlName = ?, rating = ?, category = ?, videoURLKey = ?, thumbnailURLKey = ? WHERE urlName = ?;",
+		sql: "UPDATE videos SET name = ?, description = ?, thumbnailURL = ?, videoURL = ?, dateReleased = ?, urlName = ?, ageRating = ?, category = ?, videoURLKey = ?, thumbnailURLKey = ?, isPartOfTVShow = ?, tvShowId = ? WHERE id = ?;",
 		args: [
 			data.name,
 			data.description,
@@ -103,7 +105,9 @@ async function updateVideo(data: VideoUpdate) {
 			data.category,
 			videoUrlKey,
 			thumbnailUrlKey,
-			data.currentUrlName,
+			data.isPartOfTVShow || "false",
+			data.tvShowId || "0",
+			data.id,
 		],
 	});
 	return dbResults.rowsAffected > 0;
@@ -118,8 +122,8 @@ async function updateVideo(data: VideoUpdate) {
 async function deleteVideo(data: any) {
 	const connection = getDbConnection(true);
 	const dbGetResults: ResultSet = await connection.execute({
-		sql: "SELECT * FROM videos WHERE urlName = ?",
-		args: [data.urlName],
+		sql: "SELECT * FROM videos WHERE id = ?",
+		args: [data.id],
 	});
 	if (dbGetResults.rows.length === 0) {
 		return false;
@@ -129,8 +133,8 @@ async function deleteVideo(data: any) {
 	await utapi.deleteFiles(thumbnailUrlKey);
 	await utapi.deleteFiles(videoUrlKey);
 	const dbDeleteResults: ResultSet = await connection.execute({
-		sql: "DELETE FROM videos WHERE urlName = ?",
-		args: [data.urlName],
+		sql: "DELETE FROM videos WHERE id = ?",
+		args: [data.id],
 	});
 	return dbDeleteResults.rowsAffected > 0;
 }

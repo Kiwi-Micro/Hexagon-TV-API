@@ -1,5 +1,7 @@
 # Hexagon TV API Documentation
 
+# NOTE: THESE DOCUMENTATION ARE OUT OF DATE! THESE DOCS ARE FOR V1, BUT THIS IS THE V2 BRANCH!
+
 ## Contents
 
 - [Endpoints](#endpoints)
