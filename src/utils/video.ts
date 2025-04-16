@@ -1,6 +1,6 @@
 import { ResultSet } from "@libsql/client";
 import { getDbConnection, utapi } from "./connections";
-import { Video, VideoUpdate } from "./types";
+import { Video } from "./types";
 
 /**
  * Formats the videos from the database.
@@ -89,7 +89,7 @@ async function addVideo(data: Video) {
  * @returns True if the video was updated, false otherwise.
  */
 
-async function updateVideo(data: VideoUpdate) {
+async function updateVideo(data: Video) {
 	const videoUrlKey = data.videoURL.split("/f/").pop() || "";
 	const thumbnailUrlKey = data.thumbnailURL.split("/f/").pop() || "";
 	const dbResults: ResultSet = await getDbConnection(true).execute({

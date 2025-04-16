@@ -13,20 +13,6 @@ type Video = {
 	tvShowId: string;
 };
 
-type VideoUpdate = {
-	id: number;
-	name: string;
-	description: string;
-	category: string;
-	thumbnailURL: string;
-	videoURL: string;
-	date: string;
-	ageRating: string;
-	urlName: string;
-	isPartOfTVShow: string;
-	tvShowId: string;
-};
-
 type Watchlist = {
 	id: number;
 	username: string;
@@ -35,4 +21,4 @@ type Watchlist = {
 	thumbnailURL: string;
 };
 
-export type { Video, VideoUpdate, Watchlist };
+export type { Video, Watchlist };
