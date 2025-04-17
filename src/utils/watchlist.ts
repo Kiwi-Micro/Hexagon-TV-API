@@ -1,6 +1,6 @@
 import { ResultSet } from "@libsql/client";
 import { getDbConnection } from "./connections";
-import { Watchlist } from "./types";
+import type { Watchlist } from "./types";
 
 /**
  * Gets the watchlist for a given user.
