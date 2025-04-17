@@ -7,7 +7,7 @@ import getCategoriesEndpoint from "./routes/videoAPI/GET/getCategories";
 import categoryAddEndpoint from "./routes/videoAPI/POST/categoryModification/addCategory";
 import categoryUpdateEndpoint from "./routes/videoAPI/POST/categoryModification/updateCategory";
 import categoryDeleteEndpoint from "./routes/videoAPI/POST/categoryModification/deleteCategory";
-import getVideoDataEndpoint from "./routes/videoAPI/GET/getVideoData";
+import getVideosEndpoint from "./routes/videoAPI/GET/getVideos";
 import searchEndpoint from "./routes/videoAPI/GET/search";
 import videoDeleteEndpoint from "./routes/videoAPI/POST/videoModification/deleteVideo";
 import videoAddEndpoint from "./routes/videoAPI/POST/videoModification/addVideo";
@@ -45,7 +45,7 @@ app.listen(port, () => {
 
 // Video API - GET
 app.use("/videoAPI", getCategoriesEndpoint);
-app.use("/videoAPI", getVideoDataEndpoint);
+app.use("/videoAPI", getVideosEndpoint);
 app.use("/videoAPI", searchEndpoint);
 
 // Video API - POST

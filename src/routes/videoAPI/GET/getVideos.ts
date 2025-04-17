@@ -4,7 +4,7 @@ import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
-router.get("/getVideoData", async (req, res) => {
+router.get("/getVideos", async (req, res) => {
 	try {
 		const results = await getVideos();
 		res.json(results);
