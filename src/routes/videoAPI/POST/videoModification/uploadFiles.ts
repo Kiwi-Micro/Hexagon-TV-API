@@ -1,6 +1,6 @@
 import { createUploadthing, type FileRouter, UploadThingError } from "uploadthing/server";
 import { printEndpointReached } from "../../../../utils/messages";
-import { checkPermissions } from "../../../../utils/database";
+import { checkPermissionsAndAuthenticate } from "../../../../utils/database";
 import { getUserPermissions } from "../../../../utils/permissions";
 
 const f = createUploadthing();
@@ -21,7 +21,7 @@ const uploadRouter = {
 			printEndpointReached(req);
 
 			if (
-				await checkPermissions(
+				await checkPermissionsAndAuthenticate(
 					(req.headers as any).userId,
 					(req.headers as any).sessionId,
 					true,
@@ -53,7 +53,7 @@ const uploadRouter = {
 			printEndpointReached(req);
 
 			if (
-				await checkPermissions(
+				await checkPermissionsAndAuthenticate(
 					(req.headers as any).userId,
 					(req.headers as any).sessionId,
 					true,

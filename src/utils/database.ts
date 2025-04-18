@@ -39,7 +39,16 @@ async function auth(sessionId: string, userId: string) {
 	}
 }
 
-async function checkPermissions(
+/**
+ * This function checks if the user is authenticated and has the correct permissions.
+ * @param userId The user ID of the user.
+ * @param sessionId The session ID of the user.
+ * @param shouldCheckExtraPermissions Whether to check for extra permissions.
+ * @param extraPermissions Extra permissions to check for.
+ * @returns True if the user is authenticated and has the correct permissions, false otherwise.
+ */
+
+async function checkPermissionsAndAuthenticate(
 	userId: string,
 	sessionId: string,
 	shouldCheckExtraPermissions: boolean,
@@ -56,4 +65,4 @@ async function checkPermissions(
 	}
 }
 
-export { auth, checkPermissions };
+export { auth, checkPermissionsAndAuthenticate };

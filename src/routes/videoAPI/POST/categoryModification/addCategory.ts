@@ -2,13 +2,13 @@ import { Router } from "express";
 import { addCategory } from "../../../../utils/category";
 import { printEndpointReached } from "../../../../utils/messages";
 import { getUserPermissions } from "../../../../utils/permissions";
-import { checkPermissions } from "../../../../utils/database";
+import { checkPermissionsAndAuthenticate } from "../../../../utils/database";
 
 const router = Router();
 
 router.post("/addCategory", async (req, res) => {
 	if (
-		await checkPermissions(
+		await checkPermissionsAndAuthenticate(
 			req.body.userId,
 			req.body.sessionId,
 			true,

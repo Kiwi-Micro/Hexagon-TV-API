@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { checkPermissions } from "../../../../utils/database";
+import { checkPermissionsAndAuthenticate } from "../../../../utils/database";
 import { getUserPermissions } from "../../../../utils/permissions";
 import { updateUserPermissions } from "../../../../utils/permissions";
 import { printEndpointReached } from "../../../../utils/messages";
@@ -8,7 +8,7 @@ const router = Router();
 
 router.post("/updateUserPermissions", async (req, res) => {
 	if (
-		await checkPermissions(
+		await checkPermissionsAndAuthenticate(
 			req.body.userId,
 			req.body.sessionId,
 			true,

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { checkPermissions } from "../../../../utils/database";
+import { checkPermissionsAndAuthenticate } from "../../../../utils/database";
 import { deleteCategory } from "../../../../utils/category";
 import { printEndpointReached } from "../../../../utils/messages";
 import { getUserPermissions } from "../../../../utils/permissions";
@@ -8,7 +8,7 @@ const router = Router();
 
 router.delete("/deleteCategory", async (req, res) => {
 	if (
-		await checkPermissions(
+		await checkPermissionsAndAuthenticate(
 			req.body.userId,
 			req.body.sessionId,
 			true,
