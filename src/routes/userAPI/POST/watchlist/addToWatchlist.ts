@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { addToWatchlist } from "../../../utils/watchlist";
-import { auth } from "../../../utils/database";
-import { printEndpointReached } from "../../../utils/messages";
+import { addToWatchlist } from "../../../../utils/watchlist";
+import { auth } from "../../../../utils/database";
+import { printEndpointReached } from "../../../../utils/messages";
 
 const router = Router();
 
 router.post("/addToWatchlist", async (req, res) => {
-	if (await auth(req.body.sessionId, req.body.userId, req.body.username)) {
+	if (await auth(req.body.sessionId, req.body.userId)) {
 		try {
 			const status = await addToWatchlist(req.body);
 			if (status) {

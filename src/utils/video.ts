@@ -161,6 +161,23 @@ async function getVideo(id: string) {
  * @returns All the age ratings.
  */
 
+async function getAgeRatings() {
+	const dbResults: ResultSet = await getDbConnection(false).execute(
+		"SELECT * FROM ageRatings",
+	);
+	if (dbResults.rows.length === 0) {
+		console.log("No age ratings found");
+		return null;
+	}
+	return dbResults.rows;
+}
+
+/**
+ * This function gets the specified age rating from the database.
+ * @param ageRating The age rating to get.
+ * @returns All the age ratings.
+ */
+
 async function getAgeRatingInfo(ageRating: string) {
 	const dbGetResults: ResultSet = await getDbConnection(false).execute({
 		sql: "SELECT * FROM ageRatings WHERE ageRating = ?",
@@ -222,6 +239,7 @@ export {
 	updateVideo,
 	deleteVideo,
 	getVideo,
+	getAgeRatings,
 	getAgeRatingInfo,
 	addAgeRating,
 	updateAgeRating,

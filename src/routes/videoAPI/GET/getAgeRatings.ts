@@ -1,0 +1,18 @@
+import { Router } from "express";
+import { printEndpointReached } from "../../../utils/messages";
+import { getAgeRatings } from "../../../utils/video";
+
+const router = Router();
+
+router.get("/getAgeRatings", async (req, res) => {
+	try {
+		const results = await getAgeRatings();
+		res.json(results);
+	} catch (error) {
+		console.error("Error fetching age ratings:", error);
+		res.status(500).json({ status: "server error" });
+	}
+	printEndpointReached(req, res);
+});
+
+export default router;

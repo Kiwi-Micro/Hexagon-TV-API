@@ -17,13 +17,18 @@ type Watchlist = {
 	id: number;
 	userId: string;
 	videoId: string;
+	video?: Video;
 };
 
-type WatchlistWithVideoData = {
+type Permission = {
 	id: number;
 	userId: string;
-	videoId: string;
-	video: Video;
+	isAdmin: boolean;
+	canModifyPermissions: boolean;
+	canModifyVideos: boolean;
+	canModifyCategorys: boolean;
+	canModifyTVShows: boolean;
+	canModifyAgeRating: boolean;
 };
 
-export type { Video, Watchlist, WatchlistWithVideoData };
+export type { Video, Watchlist, Permission };

@@ -1,6 +1,7 @@
 import { createUploadthing, type FileRouter, UploadThingError } from "uploadthing/server";
 import { printEndpointReached } from "../../../../utils/messages";
-import { adminAuth, getUserPermissions } from "../../../../utils/database";
+import { checkPermissions } from "../../../../utils/database";
+import { getUserPermissions } from "../../../../utils/permissions";
 
 const f = createUploadthing();
 
@@ -16,21 +17,23 @@ const uploadRouter = {
 			awaitServerData: true,
 		},
 	)
-		.middleware(async ({ req, res }) => {
+		.middleware(async ({ req }) => {
 			printEndpointReached(req);
-			const user = await adminAuth(
-				(req.headers as any).sessionid,
-				(req.headers as any).userid,
-			);
 
-			const hasPermission = (
-				await getUserPermissions((req.headers as any).userid, "canAddVideos")
-			).canAddVideos;
-
-			if (!user) throw new UploadThingError("Unauthorized");
-			if (hasPermission) throw new UploadThingError("Unauthorized");
-
-			return {};
+			if (
+				await checkPermissions(
+					(req.headers as any).userId,
+					(req.headers as any).sessionId,
+					true,
+					(
+						await getUserPermissions((req.headers as any).userId)
+					).canModifyVideos,
+				)
+			) {
+				return {};
+			} else {
+				throw new UploadThingError("Unauthorized");
+			}
 		})
 		.onUploadComplete(async () => {
 			return { status: "success" };
@@ -46,21 +49,23 @@ const uploadRouter = {
 			awaitServerData: true,
 		},
 	)
-		.middleware(async ({ req, res }) => {
+		.middleware(async ({ req }) => {
 			printEndpointReached(req);
-			const user = await adminAuth(
-				(req.headers as any).sessionid,
-				(req.headers as any).userid,
-			);
 
-			const hasPermission = (
-				await getUserPermissions((req.headers as any).userid, "canAddVideos")
-			).canAddVideos;
-
-			if (!user) throw new UploadThingError("Unauthorized");
-			if (hasPermission) throw new UploadThingError("Unauthorized");
-
-			return {};
+			if (
+				await checkPermissions(
+					(req.headers as any).userId,
+					(req.headers as any).sessionId,
+					true,
+					(
+						await getUserPermissions((req.headers as any).userId)
+					).canModifyVideos,
+				)
+			) {
+				return {};
+			} else {
+				throw new UploadThingError("Unauthorized");
+			}
 		})
 		.onUploadComplete(async () => {
 			return { status: "success" };

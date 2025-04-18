@@ -1,12 +1,22 @@
 import { Router } from "express";
-import { adminAuth } from "../../../../utils/database";
+import { checkPermissions } from "../../../../utils/database";
 import { deleteCategory } from "../../../../utils/category";
 import { printEndpointReached } from "../../../../utils/messages";
+import { getUserPermissions } from "../../../../utils/permissions";
 
 const router = Router();
 
 router.delete("/deleteCategory", async (req, res) => {
-	if (await adminAuth(req.body.sessionId, req.body.userId)) {
+	if (
+		await checkPermissions(
+			req.body.userId,
+			req.body.sessionId,
+			true,
+			(
+				await getUserPermissions(req.body.userId)
+			).canModifyCategories,
+		)
+	) {
 		try {
 			const status = await deleteCategory(req.body);
 			if (status) {
