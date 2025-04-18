@@ -22,11 +22,11 @@ const uploadRouter = {
 
 			if (
 				await checkPermissionsAndAuthenticate(
-					(req.headers as any).userId,
-					(req.headers as any).sessionId,
+					(req.headers as any).userid,
+					(req.headers as any).sessionid,
 					true,
 					(
-						await getUserPermissions((req.headers as any).userId)
+						await getUserPermissions((req.headers as any).userid)
 					).canModifyVideos,
 				)
 			) {
