@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { printEndpointReached } from "../../../utils/messages";
-import { getAgeRatings } from "../../../utils/video";
+import { getAgeRatings } from "../../../utils/ageRating";
 
 const router = Router();
 

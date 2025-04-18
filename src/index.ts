@@ -16,6 +16,9 @@ import videoAddEndpoint from "./routes/videoAPI/POST/videoModification/addVideo"
 import videoUpdateEndpoint from "./routes/videoAPI/POST/videoModification/updateVideo";
 import uploadFilesEndpoint from "./routes/videoAPI/POST/videoModification/uploadFiles";
 import updateUserPermissionsEndpoint from "./routes/userAPI/POST/permissionModification/updateUserPermissions";
+import ageRatingAddEndpoint from "./routes/videoAPI/POST/ageRatingModification/addAgeRating";
+import ageRatingUpdateEndpoint from "./routes/videoAPI/POST/ageRatingModification/updateAgeRating";
+import ageRatingDeleteEndpoint from "./routes/videoAPI/POST/ageRatingModification/deleteAgeRating";
 import { createRouteHandler } from "uploadthing/express";
 import config from "../config.json";
 
@@ -69,6 +72,9 @@ app.use("/videoAPI", videoUpdateEndpoint);
 app.use("/videoAPI", categoryAddEndpoint);
 app.use("/videoAPI", categoryUpdateEndpoint);
 app.use("/videoAPI", categoryDeleteEndpoint);
+app.use("/videoAPI", ageRatingAddEndpoint);
+app.use("/videoAPI", ageRatingUpdateEndpoint);
+app.use("/videoAPI", ageRatingDeleteEndpoint);
 
 // User API - GET
 app.use("/userAPI", getUserPermissionsEndpoint);

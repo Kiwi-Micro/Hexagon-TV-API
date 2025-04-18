@@ -13,6 +13,12 @@ type Video = {
 	tvShowId: string;
 };
 
+type ageRating = {
+	id: number;
+	ageRating: string;
+	ageRatingInfo: string;
+};
+
 type Watchlist = {
 	id: number;
 	userId: string;
@@ -28,7 +34,7 @@ type Permission = {
 	canModifyVideos: boolean;
 	canModifyCategorys: boolean;
 	canModifyTVShows: boolean;
-	canModifyAgeRating: boolean;
+	canModifyAgeRatings: boolean;
 };
 
 export type { Video, Watchlist, Permission };

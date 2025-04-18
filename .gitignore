@@ -14,4 +14,4 @@ dist
 *.sw?
 config.json
 deploy.sh
-devcommands.sh
+devCommands.sh
