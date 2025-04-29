@@ -10,7 +10,7 @@ import type { Permission } from "./types";
 
 async function addUserRow(userId: string) {
 	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategorys, canModifyTVShows, canModifyAgeRatings) VALUES (?, 'false', 'false', 'false', 'false', 'false', 'false') ON CONFLICT (userId) DO NOTHING;",
+		sql: "INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategorys, canModifyTVShows, canModifyAgeRatings, canModifyTiers) VALUES (?, 'false', 'false', 'false', 'false', 'false', 'false', 'false') ON CONFLICT (userId) DO NOTHING;",
 		args: [userId],
 	});
 	return dbResults.rowsAffected > 0;
@@ -33,6 +33,7 @@ async function updateUserPermissions(data: Permission) {
 		"canModifyCategorys",
 		"canModifyTVShows",
 		"canModifyAgeRatings",
+		"canModifyTiers",
 	] as const;
 
 	const inputs = Object.fromEntries(
@@ -40,7 +41,7 @@ async function updateUserPermissions(data: Permission) {
 	);
 
 	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "UPDATE userPermissions SET userId = ?, isAdmin = ?, canModifyPermissions = ?, canModifyVideos = ?, canModifyCategorys = ?, canModifyTVShows = ?, canModifyAgeRatings = ? WHERE id = ?;",
+		sql: "UPDATE userPermissions SET userId = ?, isAdmin = ?, canModifyPermissions = ?, canModifyVideos = ?, canModifyCategorys = ?, canModifyTVShows = ?, canModifyAgeRatings = ?, canModifyTiers = ? WHERE id = ?;",
 		args: [
 			data.userId,
 			inputs.isAdmin,
@@ -49,6 +50,7 @@ async function updateUserPermissions(data: Permission) {
 			inputs.canModifyCategorys,
 			inputs.canModifyTVShows,
 			inputs.canModifyAgeRatings,
+			inputs.canModifyTiers,
 			data.id,
 		],
 	});

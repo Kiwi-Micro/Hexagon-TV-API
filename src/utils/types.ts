@@ -35,6 +35,7 @@ type Permission = {
 	canModifyCategorys: boolean;
 	canModifyTVShows: boolean;
 	canModifyAgeRatings: boolean;
+	canModifyTiers: boolean;
 };
 
 export type { Video, Watchlist, Permission };
