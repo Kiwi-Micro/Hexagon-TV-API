@@ -8,7 +8,7 @@ router.get("/getCategories", async (req, res) => {
 	try {
 		const results = await getCategories();
 		res.json(results);
-	} catch (error) {
+	} catch (error: any) {
 		console.error("Error fetching categories:", error);
 		res.status(500).json({ status: "server error" });
 	}

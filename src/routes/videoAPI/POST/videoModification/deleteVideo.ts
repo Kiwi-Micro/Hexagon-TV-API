@@ -24,7 +24,7 @@ router.delete("/deleteVideo", async (req, res) => {
 			} else {
 				res.status(409).json({ status: "video not found" });
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error deleting video:", error);
 			res.status(500).json({ status: "server srror" });
 		}

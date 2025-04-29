@@ -8,7 +8,7 @@ router.get("/getAgeRatings", async (req, res) => {
 	try {
 		const results = await getAgeRatings();
 		res.json(results);
-	} catch (error) {
+	} catch (error: any) {
 		console.error("Error fetching age ratings:", error);
 		res.status(500).json({ status: "server error" });
 	}

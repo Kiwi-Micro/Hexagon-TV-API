@@ -24,7 +24,7 @@ router.delete("/deleteAgeRating", async (req, res) => {
 			} else {
 				res.status(409).json({ status: "age rating not found" });
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error deleting age rating:", error);
 			res.status(500).json({ status: "server srror" });
 		}

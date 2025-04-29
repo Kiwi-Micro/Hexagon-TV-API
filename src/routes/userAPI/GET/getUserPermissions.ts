@@ -8,7 +8,7 @@ router.get("/getUserPermissions", async (req, res) => {
 	try {
 		const results = await getUserPermissions(req.query.userId as string);
 		res.json(results);
-	} catch (error) {
+	} catch (error: any) {
 		console.error("Error fetching permissions:", error);
 		res.status(500).json({ status: "server error" });
 	}

@@ -8,7 +8,7 @@ router.get("/search", async (req, res) => {
 	try {
 		const results = await getVideosForSearch(req.query.query as string);
 		res.json(results);
-	} catch (error) {
+	} catch (error: any) {
 		console.error("Error fetching videos:", error);
 		res.status(500).json({ status: "server error" });
 	}

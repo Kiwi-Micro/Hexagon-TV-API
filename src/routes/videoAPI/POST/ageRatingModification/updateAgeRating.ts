@@ -24,7 +24,7 @@ router.post("/updateAgeRating", async (req, res) => {
 			} else {
 				res.status(409).json({ status: "age rating not found" });
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error adding age rating:", error);
 			res.status(500).json({ status: "server srror" });
 		}

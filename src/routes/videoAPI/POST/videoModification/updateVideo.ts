@@ -24,7 +24,7 @@ router.post("/updateVideo", async (req, res) => {
 			} else {
 				res.status(409).json({ status: "video not found" });
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error adding video:", error);
 			res.status(500).json({ status: "server srror" });
 		}

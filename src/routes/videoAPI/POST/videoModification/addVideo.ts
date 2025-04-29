@@ -24,7 +24,7 @@ router.post("/addVideo", async (req, res) => {
 			} else {
 				res.status(409).json({ status: "unable to add video" });
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error adding video:", error);
 			res.status(500).json({ status: "server srror" });
 		}

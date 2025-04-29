@@ -51,7 +51,7 @@ async function addToWatchlist(video: Watchlist) {
 		});
 		// Return true if the video was added to the watchlist.
 		return dbResults.rowsAffected > 0;
-	} catch (error) {
+	} catch (error: any) {
 		// Log the error.
 		console.error("Error adding to watchlist:", error);
 		return false;
@@ -73,7 +73,7 @@ async function deleteFromWatchlist(video: Watchlist) {
 		});
 		// Return true if the video was deleted from the watchlist.
 		return dbResults.rowsAffected > 0;
-	} catch (error) {
+	} catch (error: any) {
 		// Log the error.
 		console.error("Error removing from watchlist:", error);
 		return false;
