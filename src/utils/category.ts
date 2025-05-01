@@ -33,6 +33,12 @@ async function addCategory(data: any) {
 	return dbResults.rowsAffected > 0;
 }
 
+/**
+ * This function updates a category in the database.
+ * @param data The data to update the category.
+ * @returns True if the category was updated, false otherwise.
+ */
+
 async function updateCategory(data: any) {
 	const dbResults: ResultSet = await getDbConnection(true).execute({
 		sql: "UPDATE categories SET categoryName = ?, categoryId = ?, isSeries = ? WHERE id = ?",
