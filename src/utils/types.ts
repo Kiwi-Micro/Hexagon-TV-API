@@ -38,4 +38,4 @@ type Permission = {
 	canModifyTiers: boolean;
 };
 
-export type { Video, Watchlist, Permission };
+export type { Video, Watchlist, Permission, ageRating };
