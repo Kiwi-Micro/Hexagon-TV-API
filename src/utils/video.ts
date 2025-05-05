@@ -1,7 +1,8 @@
 import { ResultSet } from "@libsql/client";
-import { getDbConnection, utapi } from "./connections";
+import { utapi } from "./connections";
 import type { Video } from "./types";
 import { getAgeRatingInfo } from "./ageRating";
+import { runSQL } from "./database";
 
 /**
  * Formats the videos from the database.
@@ -37,10 +38,12 @@ async function parseVideos(dbResults: any) {
  */
 
 async function getVideosForSearch(query: string) {
-	const dbResults: ResultSet = await getDbConnection(false).execute({
-		sql: "SELECT * FROM videos WHERE name LIKE ?",
-		args: [`%${query}%`],
-	});
+	const dbResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM videos WHERE name LIKE ?",
+		true,
+		[`%${query}%`],
+	);
 	return parseVideos(dbResults);
 }
 
@@ -50,9 +53,7 @@ async function getVideosForSearch(query: string) {
  */
 
 async function getVideos() {
-	const dbResults: ResultSet = await getDbConnection(false).execute(
-		"SELECT * FROM videos",
-	);
+	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM videos", false);
 	return parseVideos(dbResults);
 }
 
@@ -63,9 +64,11 @@ async function getVideos() {
  */
 
 async function addVideo(data: Video) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "INSERT INTO videos (name, description, thumbnailURL, videoURL, dateReleased, urlName, ageRating, category, videoURLKey, thumbnailURLKey, isPartOfTVShow, tvShowId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-		args: [
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"INSERT INTO videos (name, description, thumbnailURL, videoURL, dateReleased, urlName, ageRating, category, videoURLKey, thumbnailURLKey, isPartOfTVShow, tvShowId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		true,
+		[
 			data.name,
 			data.description,
 			data.thumbnailURL,
@@ -76,11 +79,10 @@ async function addVideo(data: Video) {
 			data.category,
 			data.videoURL.split("/f/").pop() || "",
 			data.thumbnailURL.split("/f/").pop() || "",
-			// TODO: Add TV show ID
 			data.isPartOfTVShow || "false",
 			data.tvShowId || "0",
 		],
-	});
+	);
 	return dbResults.rowsAffected > 0;
 }
 
@@ -93,9 +95,11 @@ async function addVideo(data: Video) {
 async function updateVideo(data: Video) {
 	const videoUrlKey = data.videoURL.split("/f/").pop() || "";
 	const thumbnailUrlKey = data.thumbnailURL.split("/f/").pop() || "";
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "UPDATE videos SET name = ?, description = ?, thumbnailURL = ?, videoURL = ?, dateReleased = ?, urlName = ?, ageRating = ?, category = ?, videoURLKey = ?, thumbnailURLKey = ?, isPartOfTVShow = ?, tvShowId = ? WHERE id = ?;",
-		args: [
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"UPDATE videos SET name = ?, description = ?, thumbnailURL = ?, videoURL = ?, dateReleased = ?, urlName = ?, ageRating = ?, category = ?, videoURLKey = ?, thumbnailURLKey = ?, isPartOfTVShow = ?, tvShowId = ? WHERE id = ?;",
+		true,
+		[
 			data.name,
 			data.description,
 			data.thumbnailURL,
@@ -110,7 +114,7 @@ async function updateVideo(data: Video) {
 			data.tvShowId || "0",
 			data.id,
 		],
-	});
+	);
 	return dbResults.rowsAffected > 0;
 }
 
@@ -121,11 +125,12 @@ async function updateVideo(data: Video) {
  */
 
 async function deleteVideo(data: any) {
-	const connection = getDbConnection(true);
-	const dbGetResults: ResultSet = await connection.execute({
-		sql: "SELECT * FROM videos WHERE id = ?",
-		args: [data.id],
-	});
+	const dbGetResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM videos WHERE id = ?",
+		true,
+		[data.id],
+	);
 	if (dbGetResults.rows.length === 0) {
 		return false;
 	}
@@ -133,10 +138,12 @@ async function deleteVideo(data: any) {
 	const thumbnailUrlKey = dbGetResults.rows[0].thumbnailURLKey as string;
 	await utapi.deleteFiles(thumbnailUrlKey);
 	await utapi.deleteFiles(videoUrlKey);
-	const dbDeleteResults: ResultSet = await connection.execute({
-		sql: "DELETE FROM videos WHERE id = ?",
-		args: [data.id],
-	});
+	const dbDeleteResults: ResultSet = await runSQL(
+		true,
+		"DELETE FROM videos WHERE id = ?",
+		true,
+		[data.id],
+	);
 	return dbDeleteResults.rowsAffected > 0;
 }
 
@@ -147,10 +154,12 @@ async function deleteVideo(data: any) {
  */
 
 async function getVideo(id: string) {
-	const dbGetResults: ResultSet = await getDbConnection(false).execute({
-		sql: "SELECT * FROM videos WHERE id = ?",
-		args: [id],
-	});
+	const dbGetResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM videos WHERE id = ?",
+		true,
+		[id],
+	);
 	if (dbGetResults.rows.length === 0) {
 		return null;
 	}

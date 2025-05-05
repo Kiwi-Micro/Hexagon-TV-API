@@ -1,5 +1,5 @@
 import { ResultSet } from "@libsql/client";
-import { getDbConnection } from "./connections";
+import { runSQL } from "./database";
 
 /**
  * Gets all categorys from the database.
@@ -7,9 +7,7 @@ import { getDbConnection } from "./connections";
  */
 
 async function getCategories() {
-	const dbResults: ResultSet = await getDbConnection(false).execute(
-		"SELECT * FROM categories",
-	);
+	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM categories", false);
 	const results = dbResults.rows.map((row: any) => ({
 		id: row.id,
 		categoryName: row.categoryName,
@@ -26,10 +24,12 @@ async function getCategories() {
  */
 
 async function addCategory(data: any) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "INSERT INTO categories (categoryName, categoryId, isSeries) VALUES (?, ?, ?)",
-		args: [data.categoryName, data.categoryId, data.isSeries],
-	});
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"INSERT INTO categories (categoryName, categoryId, isSeries) VALUES (?, ?, ?)",
+		true,
+		[data.categoryName, data.categoryId, data.isSeries],
+	);
 	return dbResults.rowsAffected > 0;
 }
 
@@ -40,10 +40,12 @@ async function addCategory(data: any) {
  */
 
 async function updateCategory(data: any) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "UPDATE categories SET categoryName = ?, categoryId = ?, isSeries = ? WHERE id = ?",
-		args: [data.categoryName, data.categoryId, data.isSeries, data.id],
-	});
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"UPDATE categories SET categoryName = ?, categoryId = ?, isSeries = ? WHERE id = ?",
+		true,
+		[data.categoryName, data.categoryId, data.isSeries, data.id],
+	);
 	return dbResults.rowsAffected > 0;
 }
 
@@ -54,11 +56,13 @@ async function updateCategory(data: any) {
  */
 
 async function deleteCategory(data: any) {
-	const dbDeleteResults: ResultSet = await getDbConnection(true).execute({
-		sql: "DELETE FROM categories WHERE id = ?",
-		args: [data.id],
-	});
-	return dbDeleteResults.rowsAffected > 0;
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"DELETE FROM categories WHERE id = ?",
+		true,
+		[data.id],
+	);
+	return dbResults.rowsAffected > 0;
 }
 
 export { getCategories, addCategory, updateCategory, deleteCategory };

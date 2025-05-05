@@ -22,10 +22,10 @@ router.post("/updateUserPermissions", async (req, res) => {
 			if (status) {
 				res.json({ status: "success" });
 			} else {
-				res.status(409).json({ status: "video not found" });
+				res.status(409).json({ status: "user not found" });
 			}
 		} catch (error: any) {
-			console.error("Error adding video:", error);
+			console.error("Error updating user permissions:", error);
 			res.status(500).json({ status: "server srror" });
 		}
 	} else {

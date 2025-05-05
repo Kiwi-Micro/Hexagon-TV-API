@@ -1,6 +1,6 @@
 import { ResultSet } from "@libsql/client";
-import { getDbConnection } from "./connections";
 import type { Permission } from "./types";
+import { runSQL } from "./database";
 
 /**
  * This function adds a user row to the database.
@@ -9,10 +9,12 @@ import type { Permission } from "./types";
  */
 
 async function addUserRow(userId: string) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategorys, canModifyTVShows, canModifyAgeRatings, canModifyTiers) VALUES (?, 'false', 'false', 'false', 'false', 'false', 'false', 'false') ON CONFLICT (userId) DO NOTHING;",
-		args: [userId],
-	});
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategorys, canModifyTVShows, canModifyAgeRatings, canModifyTiers) VALUES (?, 'false', 'false', 'false', 'false', 'false', 'false', 'false') ON CONFLICT (userId) DO NOTHING;",
+		true,
+		[userId],
+	);
 	return dbResults.rowsAffected > 0;
 }
 
@@ -39,11 +41,11 @@ async function updateUserPermissions(data: Permission) {
 	const inputs = Object.fromEntries(
 		fields.map((field) => [field, data[field] ?? dbGetResults[field]]),
 	);
-
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "UPDATE userPermissions SET userId = ?, isAdmin = ?, canModifyPermissions = ?, canModifyVideos = ?, canModifyCategorys = ?, canModifyTVShows = ?, canModifyAgeRatings = ?, canModifyTiers = ? WHERE id = ?;",
-		args: [
-			data.userId,
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"UPDATE userPermissions SET isAdmin = ?, canModifyPermissions = ?, canModifyVideos = ?, canModifyCategorys = ?, canModifyTVShows = ?, canModifyAgeRatings = ?, canModifyTiers = ? WHERE userId = ?;",
+		true,
+		[
 			inputs.isAdmin,
 			inputs.canModifyPermissions,
 			inputs.canModifyVideos,
@@ -51,9 +53,10 @@ async function updateUserPermissions(data: Permission) {
 			inputs.canModifyTVShows,
 			inputs.canModifyAgeRatings,
 			inputs.canModifyTiers,
-			data.id,
+			data.userId,
 		],
-	});
+	);
+	console.log(dbResults);
 	return dbResults.rowsAffected > 0;
 }
 
@@ -64,11 +67,13 @@ async function updateUserPermissions(data: Permission) {
  */
 
 async function getUserPermissions(userId: string) {
-	const dbGetResults: ResultSet = await getDbConnection(false).execute({
-		sql: "SELECT * FROM userPermissions WHERE userId = ?",
-		args: [userId],
-	});
-	return dbGetResults.rows[0];
+	const dbResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM userPermissions WHERE userId = ?",
+		true,
+		[userId],
+	);
+	return dbResults.rows[0];
 }
 
 export { addUserRow, updateUserPermissions, getUserPermissions };

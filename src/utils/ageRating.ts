@@ -1,5 +1,5 @@
 import { ResultSet } from "@libsql/client";
-import { getDbConnection } from "./connections";
+import { runSQL } from "./database";
 
 /**
  * This function gets all age ratings from the database.
@@ -7,9 +7,7 @@ import { getDbConnection } from "./connections";
  */
 
 async function getAgeRatings() {
-	const dbResults: ResultSet = await getDbConnection(false).execute(
-		"SELECT * FROM ageRatings",
-	);
+	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM ageRatings", false);
 	if (dbResults.rows.length === 0) {
 		console.log("No age ratings found");
 		return null;
@@ -24,10 +22,12 @@ async function getAgeRatings() {
  */
 
 async function getAgeRatingInfo(ageRating: string) {
-	const dbGetResults: ResultSet = await getDbConnection(false).execute({
-		sql: "SELECT * FROM ageRatings WHERE ageRating = ?",
-		args: [ageRating],
-	});
+	const dbGetResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM ageRatings WHERE ageRating = ?",
+		true,
+		[ageRating],
+	);
 	if (dbGetResults.rows.length === 0) {
 		console.log("No age rating found");
 		return null;
@@ -42,10 +42,12 @@ async function getAgeRatingInfo(ageRating: string) {
  */
 
 async function addAgeRating(data: any) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "INSERT INTO ageRatings (ageRating, ageRatingInfo) VALUES (?, ?)",
-		args: [data.ageRating, data.ageRatingInfo],
-	});
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"INSERT INTO ageRatings (ageRating, ageRatingInfo) VALUES (?, ?)",
+		true,
+		[data.ageRating, data.ageRatingInfo],
+	);
 	return dbResults.rowsAffected > 0;
 }
 
@@ -56,10 +58,12 @@ async function addAgeRating(data: any) {
  */
 
 async function updateAgeRating(data: any) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "UPDATE ageRatings SET ageRating = ?, ageRatingInfo = ? WHERE id = ?",
-		args: [data.ageRating, data.ageRatingInfo, data.id],
-	});
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"UPDATE ageRatings SET ageRating = ?, ageRatingInfo = ? WHERE id = ?",
+		true,
+		[data.ageRating, data.ageRatingInfo, data.id],
+	);
 	return dbResults.rowsAffected > 0;
 }
 
@@ -70,10 +74,12 @@ async function updateAgeRating(data: any) {
  */
 
 async function deleteAgeRating(data: any) {
-	const dbResults: ResultSet = await getDbConnection(true).execute({
-		sql: "DELETE FROM ageRatings WHERE id = ?",
-		args: [data.id],
-	});
+	const dbResults: ResultSet = await runSQL(
+		true,
+		"DELETE FROM ageRatings WHERE id = ?",
+		true,
+		[data.id],
+	);
 	return dbResults.rowsAffected > 0;
 }
 

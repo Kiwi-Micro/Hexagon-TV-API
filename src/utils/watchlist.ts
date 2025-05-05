@@ -1,6 +1,6 @@
 import { ResultSet } from "@libsql/client";
-import { getDbConnection } from "./connections";
 import type { Watchlist } from "./types";
+import { runSQL } from "./database";
 
 /**
  * Gets the watchlist for a given user.
@@ -9,20 +9,21 @@ import type { Watchlist } from "./types";
  */
 
 async function getWatchlist(userId: string) {
-	// Get the watchlist for the given username.
-	const dbResults: ResultSet = await getDbConnection(false).execute({
-		sql: "SELECT * FROM watchlist WHERE userId = ?",
-		args: [userId],
-	});
+	const dbResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM watchlist WHERE userId = ?",
+		true,
+		[userId],
+	);
 
 	const rows = dbResults.rows || [];
-	// Get the videos for the watchlist.
-	const videoResults: ResultSet = await getDbConnection(false).execute({
-		sql: "SELECT * FROM videos WHERE id IN (SELECT videoId FROM watchlist WHERE userId = ?)",
-		args: [userId],
-	});
+	const videoResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM videos WHERE id IN (SELECT videoId FROM watchlist WHERE userId = ?)",
+		true,
+		[userId],
+	);
 	const videoRows = videoResults.rows || [];
-	// Format the watchlist videos and add the videos to the watchlist.
 	const results = rows.map((row) => {
 		const video = videoRows.find((videoRow) => videoRow.id === row.videoId);
 		return {
@@ -32,7 +33,6 @@ async function getWatchlist(userId: string) {
 			video: video,
 		};
 	});
-	// Return the watchlist videos.
 	return results;
 }
 
@@ -44,15 +44,14 @@ async function getWatchlist(userId: string) {
 
 async function addToWatchlist(video: Watchlist) {
 	try {
-		// Add the video to the watchlist.
-		const dbResults: ResultSet = await getDbConnection(true).execute({
-			sql: "INSERT INTO watchlist (userId, videoId) VALUES (?, ?)",
-			args: [video.userId, video.videoId],
-		});
-		// Return true if the video was added to the watchlist.
+		const dbResults: ResultSet = await runSQL(
+			true,
+			"INSERT INTO watchlist (userId, videoId) VALUES (?, ?)",
+			true,
+			[video.userId, video.videoId],
+		);
 		return dbResults.rowsAffected > 0;
 	} catch (error: any) {
-		// Log the error.
 		console.error("Error adding to watchlist:", error);
 		return false;
 	}
@@ -66,15 +65,14 @@ async function addToWatchlist(video: Watchlist) {
 
 async function deleteFromWatchlist(video: Watchlist) {
 	try {
-		// Delete the video from the watchlist.
-		const dbResults: ResultSet = await getDbConnection(true).execute({
-			sql: "DELETE FROM watchlist WHERE id = ? AND userId = ?",
-			args: [video.id, video.userId],
-		});
-		// Return true if the video was deleted from the watchlist.
+		const dbResults: ResultSet = await runSQL(
+			true,
+			"DELETE FROM watchlist WHERE id = ? AND userId = ?",
+			true,
+			[video.id, video.userId],
+		);
 		return dbResults.rowsAffected > 0;
 	} catch (error: any) {
-		// Log the error.
 		console.error("Error removing from watchlist:", error);
 		return false;
 	}

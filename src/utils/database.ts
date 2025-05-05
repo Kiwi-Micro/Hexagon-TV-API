@@ -1,5 +1,29 @@
-import { clerkClient } from "./connections";
+import { ResultSet } from "@libsql/client/.";
+import { clerkClient, getDbConnection } from "./connections";
 import { getUserPermissions } from "./permissions";
+
+/**
+ * This function runs a SQL query.
+ * NOTE: If you are changing SQL Providers change it here! This is the only place you need to change.
+ * @param needsRW If the query needs Read Write access.
+ * @param sql The SQL query to run.
+ * @param hasArgs Whether the query has arguments.
+ * @param args The arguments to pass to the SQL query.
+ * @returns The results of the SQL query.
+ */
+
+async function runSQL(needsRW: boolean, sql: string, hasArgs: boolean, args?: any) {
+	if (hasArgs) {
+		const dbResults: ResultSet = await getDbConnection(needsRW).execute({
+			sql,
+			args,
+		});
+		return dbResults;
+	} else {
+		const dbResults: ResultSet = await getDbConnection(needsRW).execute(sql);
+		return dbResults;
+	}
+}
 
 /**
  * This function checks if the user is authenticated.
@@ -65,4 +89,4 @@ async function checkPermissionsAndAuthenticate(
 	}
 }
 
-export { auth, checkPermissionsAndAuthenticate };
+export { auth, checkPermissionsAndAuthenticate, runSQL };
