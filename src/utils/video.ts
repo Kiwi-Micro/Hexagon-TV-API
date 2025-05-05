@@ -3,6 +3,7 @@ import { utapi } from "./connections";
 import type { Video } from "./types";
 import { getAgeRatingInfo } from "./ageRating";
 import { runSQL } from "./database";
+import { getWatchlist } from "./watchlist";
 
 /**
  * Formats the videos from the database.
@@ -10,10 +11,11 @@ import { runSQL } from "./database";
  * @returns The formatted videos.
  */
 
-async function parseVideos(dbResults: any) {
+async function parseVideos(dbResults: any, userId: any) {
+	const watchlist = await getWatchlist(userId);
 	const rows = dbResults.rows || [];
 	const results = rows.map(async (row: any) => ({
-		id: row.id,
+		id: row.id as number,
 		name: row.name,
 		description: row.description,
 		thumbnailURL: row.thumbnailURL,
@@ -27,8 +29,32 @@ async function parseVideos(dbResults: any) {
 		thumbnailUrlKey: row.thumbnailURLKey,
 		isPartOfTVShow: row.isPartOfTVShow,
 		tvShowId: row.tvShowId,
+		isInWatchlist: watchlist.find((watchlistVideo) => watchlistVideo.videoId === row.id)
+			? true
+			: false,
+		progressThroughVideo: 0,
+		isVideoCompleted: false,
 	}));
-	return await Promise.all(results);
+	const dbUserResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM continueWatching WHERE userId = ?",
+		true,
+		[userId],
+	);
+	const userProgressResults = dbUserResults.rows || [];
+	const resolvedResults = await Promise.all(results);
+	for (const userProgressResult of userProgressResults) {
+		console.log(userProgressResult.videoId);
+		const video = resolvedResults.find(
+			(result: any) => result.id === userProgressResult.videoId,
+		);
+		if (video) {
+			video.progressThroughVideo = userProgressResult.progressThroughVideo;
+			console.log(userProgressResult);
+			video.isVideoCompleted = userProgressResult.isVideoCompleted;
+		}
+	}
+	return resolvedResults;
 }
 
 /**
@@ -37,24 +63,26 @@ async function parseVideos(dbResults: any) {
  * @returns An array of videos.
  */
 
-async function getVideosForSearch(query: string) {
-	const dbResults: ResultSet = await runSQL(
+async function getVideosForSearch(query: string, userId: string) {
+	const dbVideoResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM videos WHERE name LIKE ?",
 		true,
 		[`%${query}%`],
 	);
-	return parseVideos(dbResults);
+	return parseVideos(dbVideoResults, userId);
 }
 
 /**
- * Gets all videos from the database.
+ * Gets all videos from the database with user specific data.
+ * @param userId The userId of the user to get the videos for.
  * @returns An array of videos.
  */
 
-async function getVideos() {
-	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM videos", false);
-	return parseVideos(dbResults);
+async function getVideos(userId: string) {
+	// Get videos from videos table and user progress and is watched from continueWatching table
+	const dbVideoResults: ResultSet = await runSQL(false, "SELECT * FROM videos", false);
+	return parseVideos(dbVideoResults, userId);
 }
 
 /**

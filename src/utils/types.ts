@@ -11,6 +11,9 @@ type Video = {
 	urlName: string;
 	isPartOfTVShow: string;
 	tvShowId: string;
+	isInWatchlist: boolean;
+	progressThroughVideo: number;
+	isVideoCompleted: boolean;
 };
 
 type ageRating = {
