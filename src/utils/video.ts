@@ -44,13 +44,11 @@ async function parseVideos(dbResults: any, userId: any) {
 	const userProgressResults = dbUserResults.rows || [];
 	const resolvedResults = await Promise.all(results);
 	for (const userProgressResult of userProgressResults) {
-		console.log(userProgressResult.videoId);
 		const video = resolvedResults.find(
 			(result: any) => result.id === userProgressResult.videoId,
 		);
 		if (video) {
 			video.progressThroughVideo = userProgressResult.progressThroughVideo;
-			console.log(userProgressResult);
 			video.isVideoCompleted = userProgressResult.isVideoCompleted;
 		}
 	}
