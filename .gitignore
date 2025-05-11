@@ -15,3 +15,4 @@ dist
 config.json
 deploy.sh
 devCommands.md
+notes.md
