@@ -1,5 +1,5 @@
 import { ResultSet } from "@libsql/client";
-import type { Watchlist } from "./types";
+import { parseWatchlist, type Watchlist } from "./types";
 import { runSQL } from "./database";
 
 /**
@@ -8,7 +8,7 @@ import { runSQL } from "./database";
  * @returns The watchlist for the user.
  */
 
-async function getWatchlist(userId: string) {
+async function getWatchlist(userId: string): Promise<Watchlist[]> {
 	const dbResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM watchlist WHERE userId = ?",
@@ -16,23 +16,13 @@ async function getWatchlist(userId: string) {
 		[userId],
 	);
 
-	const rows = dbResults.rows || [];
 	const videoResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM videos WHERE id IN (SELECT videoId FROM watchlist WHERE userId = ?)",
 		true,
 		[userId],
 	);
-	const videoRows = videoResults.rows || [];
-	const results = rows.map((row) => {
-		const video = videoRows.find((videoRow) => videoRow.id === row.videoId);
-		return {
-			id: row.id,
-			userId: row.userId,
-			videoId: row.videoId,
-			video: video,
-		};
-	});
+	const results = parseWatchlist(dbResults, videoResults);
 	return results;
 }
 
@@ -42,7 +32,7 @@ async function getWatchlist(userId: string) {
  * @returns True if the video was added to the watchlist, false otherwise.
  */
 
-async function addToWatchlist(video: Watchlist) {
+async function addToWatchlist(video: Watchlist): Promise<boolean> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			true,
@@ -63,7 +53,7 @@ async function addToWatchlist(video: Watchlist) {
  * @returns Returns true if the video was deleted from the watchlist, false otherwise.
  */
 
-async function deleteFromWatchlist(video: Watchlist) {
+async function deleteFromWatchlist(video: Watchlist): Promise<boolean> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			true,

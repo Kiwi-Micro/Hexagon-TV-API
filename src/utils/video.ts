@@ -1,59 +1,7 @@
 import { ResultSet } from "@libsql/client";
 import { utapi } from "./connections";
-import type { Video } from "./types";
-import { getAgeRatingInfo } from "./ageRating";
+import { parseVideos, type Video } from "./types";
 import { runSQL } from "./database";
-import { getWatchlist } from "./watchlist";
-
-/**
- * Formats the videos from the database.
- * @param dbResults The videos from the database results.
- * @returns The formatted videos.
- */
-
-async function parseVideos(dbResults: any, userId: any) {
-	const watchlist = await getWatchlist(userId);
-	const rows = dbResults.rows || [];
-	const results = rows.map(async (row: any) => ({
-		id: row.id as number,
-		name: row.name,
-		description: row.description,
-		thumbnailURL: row.thumbnailURL,
-		videoURL: row.videoURL,
-		dateReleased: row.dateReleased,
-		urlName: row.urlName,
-		ageRating: row.ageRating,
-		ageRatingInfo: (await getAgeRatingInfo(row.ageRating)) || "Age Rating not found",
-		category: row.category,
-		videoUrlKey: row.videoURLKey,
-		thumbnailUrlKey: row.thumbnailURLKey,
-		isPartOfTVShow: row.isPartOfTVShow,
-		tvShowId: row.tvShowId,
-		isInWatchlist: watchlist.find((watchlistVideo) => watchlistVideo.videoId === row.id)
-			? true
-			: false,
-		progressThroughVideo: 0,
-		isVideoCompleted: false,
-	}));
-	const dbUserResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM continueWatching WHERE userId = ?",
-		true,
-		[userId],
-	);
-	const userProgressResults = dbUserResults.rows || [];
-	const resolvedResults = await Promise.all(results);
-	for (const userProgressResult of userProgressResults) {
-		const video = resolvedResults.find(
-			(result: any) => result.id === userProgressResult.videoId,
-		);
-		if (video) {
-			video.progressThroughVideo = userProgressResult.progressThroughVideo;
-			video.isVideoCompleted = userProgressResult.isVideoCompleted;
-		}
-	}
-	return resolvedResults;
-}
 
 /**
  * Gets all videos from the database that match the query.
@@ -61,14 +9,14 @@ async function parseVideos(dbResults: any, userId: any) {
  * @returns An array of videos.
  */
 
-async function getVideosForSearch(query: string, userId: string) {
-	const dbVideoResults: ResultSet = await runSQL(
+async function getVideosForSearch(query: string, userId: string): Promise<Video[]> {
+	const dbResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM videos WHERE name LIKE ?",
 		true,
 		[`%${query}%`],
 	);
-	return parseVideos(dbVideoResults, userId);
+	return parseVideos(dbResults, userId);
 }
 
 /**
@@ -77,10 +25,28 @@ async function getVideosForSearch(query: string, userId: string) {
  * @returns An array of videos.
  */
 
-async function getVideos(userId: string) {
-	// Get videos from videos table and user progress and is watched from continueWatching table
-	const dbVideoResults: ResultSet = await runSQL(false, "SELECT * FROM videos", false);
-	return parseVideos(dbVideoResults, userId);
+async function getVideos(userId: string): Promise<Video[]> {
+	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM videos", false);
+	return parseVideos(dbResults, userId);
+}
+
+/**
+ * This function gets a video from the database.
+ * @param id The id of the video.
+ * @returns The video or null if it doesn't exist.
+ */
+
+async function getVideo(id: string, userId: string): Promise<Video | null> {
+	const dbResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM videos WHERE id = ?",
+		true,
+		[id],
+	);
+	if (dbResults.rows.length === 0) {
+		return null;
+	}
+	return (await parseVideos(dbResults, userId))[0];
 }
 
 /**
@@ -89,7 +55,7 @@ async function getVideos(userId: string) {
  * @returns True if the video was added, false otherwise.
  */
 
-async function addVideo(data: Video) {
+async function addVideo(data: Video): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"INSERT INTO videos (name, description, thumbnailURL, videoURL, dateReleased, urlName, ageRating, category, videoURLKey, thumbnailURLKey, isPartOfTVShow, tvShowId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -118,7 +84,7 @@ async function addVideo(data: Video) {
  * @returns True if the video was updated, false otherwise.
  */
 
-async function updateVideo(data: Video) {
+async function updateVideo(data: Video): Promise<boolean> {
 	const videoUrlKey = data.videoURL.split("/f/").pop() || "";
 	const thumbnailUrlKey = data.thumbnailURL.split("/f/").pop() || "";
 	const dbResults: ResultSet = await runSQL(
@@ -150,7 +116,7 @@ async function updateVideo(data: Video) {
  * @returns True if the video was deleted, false otherwise.
  */
 
-async function deleteVideo(data: any) {
+async function deleteVideo(data: any): Promise<boolean> {
 	const dbGetResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM videos WHERE id = ?",
@@ -173,23 +139,4 @@ async function deleteVideo(data: any) {
 	return dbDeleteResults.rowsAffected > 0;
 }
 
-/**
- * This function gets a video from the database.
- * @param id The id of the video.
- * @returns The video or null if it doesn't exist.
- */
-
-async function getVideo(id: string) {
-	const dbGetResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM videos WHERE id = ?",
-		true,
-		[id],
-	);
-	if (dbGetResults.rows.length === 0) {
-		return null;
-	}
-	return dbGetResults.rows[0];
-}
-
-export { getVideos, getVideosForSearch, addVideo, updateVideo, deleteVideo, getVideo };
+export { getVideosForSearch, getVideos, getVideo, addVideo, updateVideo, deleteVideo };

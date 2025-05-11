@@ -1,4 +1,4 @@
-import { createClient } from "@libsql/client";
+import { Client, createClient } from "@libsql/client";
 import config from "../../config.json";
 import { createClerkClient } from "@clerk/backend";
 import { UTApi } from "uploadthing/server";
@@ -36,7 +36,7 @@ const TURSO_DB_CONNECTION_RW = createClient({
  * @returns The database connection.
  */
 
-function getDbConnection(readWrite: boolean) {
+function getDbConnection(readWrite: boolean): Client {
 	if (readWrite) {
 		return TURSO_DB_CONNECTION_RW;
 	} else {

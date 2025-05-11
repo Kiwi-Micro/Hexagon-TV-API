@@ -1,4 +1,5 @@
 import { ResultSet } from "@libsql/client";
+import { parseAgeRatings, type ageRating } from "./types";
 import { runSQL } from "./database";
 
 /**
@@ -6,13 +7,13 @@ import { runSQL } from "./database";
  * @returns All the age ratings.
  */
 
-async function getAgeRatings() {
+async function getAgeRatings(): Promise<ageRating[] | null> {
 	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM ageRatings", false);
 	if (dbResults.rows.length === 0) {
 		console.log("No age ratings found");
 		return null;
 	}
-	return dbResults.rows;
+	return parseAgeRatings(dbResults);
 }
 
 /**
@@ -21,18 +22,18 @@ async function getAgeRatings() {
  * @returns All the age ratings.
  */
 
-async function getAgeRatingInfo(ageRating: string) {
-	const dbGetResults: ResultSet = await runSQL(
+async function getAgeRatingInfo(ageRating: string): Promise<string | null> {
+	const dbResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM ageRatings WHERE ageRating = ?",
 		true,
 		[ageRating],
 	);
-	if (dbGetResults.rows.length === 0) {
+	if (dbResults.rows.length === 0) {
 		console.log("No age rating found");
 		return null;
 	}
-	return dbGetResults.rows[0].ageRatingInfo;
+	return dbResults.rows[0].ageRatingInfo as string;
 }
 
 /**
@@ -41,7 +42,7 @@ async function getAgeRatingInfo(ageRating: string) {
  * @returns True if the age rating was added, false otherwise.
  */
 
-async function addAgeRating(data: any) {
+async function addAgeRating(data: any): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"INSERT INTO ageRatings (ageRating, ageRatingInfo) VALUES (?, ?)",
@@ -57,7 +58,7 @@ async function addAgeRating(data: any) {
  * @returns True if the age rating was updated, false otherwise.
  */
 
-async function updateAgeRating(data: any) {
+async function updateAgeRating(data: any): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"UPDATE ageRatings SET ageRating = ?, ageRatingInfo = ? WHERE id = ?",
@@ -73,7 +74,7 @@ async function updateAgeRating(data: any) {
  * @returns True if the age rating was deleted, false otherwise.
  */
 
-async function deleteAgeRating(data: any) {
+async function deleteAgeRating(data: any): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"DELETE FROM ageRatings WHERE id = ?",

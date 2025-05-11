@@ -1,20 +1,15 @@
 import { ResultSet } from "@libsql/client";
 import { runSQL } from "./database";
+import { parseCategories, type Category } from "./types";
 
 /**
  * Gets all categorys from the database.
  * @returns An array of categorys.
  */
 
-async function getCategories() {
+async function getCategories(): Promise<Category[] | null> {
 	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM categories", false);
-	const results = dbResults.rows.map((row: any) => ({
-		id: row.id,
-		categoryName: row.categoryName,
-		categoryId: row.categoryId,
-		isSeries: row.isSeries,
-	}));
-	return results;
+	return parseCategories(dbResults);
 }
 
 /**
@@ -23,12 +18,12 @@ async function getCategories() {
  * @returns True if the video was added, false otherwise.
  */
 
-async function addCategory(data: any) {
+async function addCategory(data: any): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
-		"INSERT INTO categories (categoryName, categoryId, isSeries) VALUES (?, ?, ?)",
+		"INSERT INTO categories (categoryName, urlName, isSeries) VALUES (?, ?, ?)",
 		true,
-		[data.categoryName, data.categoryId, data.isSeries],
+		[data.categoryName, data.urlName, data.isSeries],
 	);
 	return dbResults.rowsAffected > 0;
 }
@@ -39,12 +34,12 @@ async function addCategory(data: any) {
  * @returns True if the category was updated, false otherwise.
  */
 
-async function updateCategory(data: any) {
+async function updateCategory(data: any): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
-		"UPDATE categories SET categoryName = ?, categoryId = ?, isSeries = ? WHERE id = ?",
+		"UPDATE categories SET categoryName = ?, urlName = ?, isSeries = ? WHERE id = ?",
 		true,
-		[data.categoryName, data.categoryId, data.isSeries, data.id],
+		[data.categoryName, data.urlName, data.isSeries, data.id],
 	);
 	return dbResults.rowsAffected > 0;
 }
@@ -55,7 +50,7 @@ async function updateCategory(data: any) {
  * @returns True if the category was deleted, false otherwise.
  */
 
-async function deleteCategory(data: any) {
+async function deleteCategory(data: any): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"DELETE FROM categories WHERE id = ?",

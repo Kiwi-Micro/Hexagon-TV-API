@@ -12,7 +12,12 @@ import { getUserPermissions } from "./permissions";
  * @returns The results of the SQL query.
  */
 
-async function runSQL(needsRW: boolean, sql: string, hasArgs: boolean, args?: any) {
+async function runSQL(
+	needsRW: boolean,
+	sql: string,
+	hasArgs: boolean,
+	args?: any,
+): Promise<ResultSet> {
 	if (hasArgs) {
 		const dbResults: ResultSet = await getDbConnection(needsRW).execute({
 			sql,
@@ -34,7 +39,7 @@ async function runSQL(needsRW: boolean, sql: string, hasArgs: boolean, args?: an
  * @returns True if the user is authenticated, false otherwise.
  */
 
-async function auth(sessionId: string, userId: string) {
+async function auth(sessionId: string, userId: string): Promise<boolean> {
 	try {
 		const status = "active";
 		const sessions = await clerkClient.sessions.getSessionList({
@@ -77,7 +82,7 @@ async function checkPermissionsAndAuthenticate(
 	sessionId: string,
 	shouldCheckExtraPermissions: boolean,
 	extraPermissions?: any,
-) {
+): Promise<boolean> {
 	if (
 		((extraPermissions == "true" && shouldCheckExtraPermissions) ||
 			(await getUserPermissions(userId)).isAdmin == "true") &&

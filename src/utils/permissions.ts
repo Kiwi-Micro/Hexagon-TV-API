@@ -1,5 +1,5 @@
 import { ResultSet } from "@libsql/client";
-import type { Permission } from "./types";
+import { parsePermissions, type Permission } from "./types";
 import { runSQL } from "./database";
 
 /**
@@ -8,7 +8,7 @@ import { runSQL } from "./database";
  * @returns True if the user row was added, false otherwise.
  */
 
-async function addUserRow(userId: string) {
+async function addUserRow(userId: string): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategorys, canModifyTVShows, canModifyAgeRatings, canModifyTiers) VALUES (?, 'false', 'false', 'false', 'false', 'false', 'false', 'false') ON CONFLICT (userId) DO NOTHING;",
@@ -24,7 +24,7 @@ async function addUserRow(userId: string) {
  * @returns True if the user's permissions were updated, false otherwise.
  */
 
-async function updateUserPermissions(data: Permission) {
+async function updateUserPermissions(data: Permission): Promise<boolean> {
 	await addUserRow(data.userId);
 	const dbGetResults = await getUserPermissions(data.userId);
 
@@ -56,12 +56,12 @@ async function updateUserPermissions(data: Permission) {
 			data.userId,
 		],
 	);
-	console.log(dbResults);
 	return dbResults.rowsAffected > 0;
 }
 
 /**
  * This function gets the user permissions from the database.
+ * NOTE: This function is not typed, We will type it soon! Until then, **use with caution**.
  * @param userId The user ID of the user.
  * @returns The given user's permissions.
  */
@@ -76,4 +76,20 @@ async function getUserPermissions(userId: string) {
 	return dbResults.rows[0];
 }
 
-export { addUserRow, updateUserPermissions, getUserPermissions };
+/**
+ * This function gets the user permissions from the database.
+ * @param userId The user ID of the user.
+ * @returns The given user's permissions.
+ */
+
+async function getUserPermissions1(userId: string): Promise<Permission> {
+	const dbResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM userPermissions WHERE userId = ?",
+		true,
+		[userId],
+	);
+	return (await parsePermissions(dbResults))[0];
+}
+
+export { addUserRow, updateUserPermissions, getUserPermissions, getUserPermissions1 };
