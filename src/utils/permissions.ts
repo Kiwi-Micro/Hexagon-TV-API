@@ -61,35 +61,18 @@ async function updateUserPermissions(data: Permission): Promise<boolean> {
 
 /**
  * This function gets the user permissions from the database.
- * NOTE: This function is not typed, We will type it soon! Until then, **use with caution**.
  * @param userId The user ID of the user.
  * @returns The given user's permissions.
  */
 
-async function getUserPermissions(userId: string) {
+async function getUserPermissions(userId: string): Promise<Permission> {
 	const dbResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM userPermissions WHERE userId = ?",
 		true,
 		[userId],
 	);
-	return dbResults.rows[0];
+	return parsePermissions(dbResults)[0];
 }
 
-/**
- * This function gets the user permissions from the database.
- * @param userId The user ID of the user.
- * @returns The given user's permissions.
- */
-
-async function getUserPermissions1(userId: string): Promise<Permission> {
-	const dbResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM userPermissions WHERE userId = ?",
-		true,
-		[userId],
-	);
-	return (await parsePermissions(dbResults))[0];
-}
-
-export { addUserRow, updateUserPermissions, getUserPermissions, getUserPermissions1 };
+export { addUserRow, updateUserPermissions, getUserPermissions };
