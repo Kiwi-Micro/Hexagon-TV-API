@@ -22,6 +22,8 @@ import getTierEndpoint from "../routes/userAPI/GET/getTier";
 import addTierEndpoint from "../routes/userAPI/POST/tierModification/addTier";
 import updateTierEndpoint from "../routes/userAPI/POST/tierModification/updateTier";
 import deleteTierEndpoint from "../routes/userAPI/POST/tierModification/deleteTier";
+import updateUserVideoProgressEndpoint from "../routes/userAPI/POST/videoProgressModification/updateUserVideoProgress";
+import getUserVideoProgressEndpoint from "../routes/userAPI/GET/getUserVideoProgress";
 import { createRouteHandler } from "uploadthing/express";
 import config from "../../config.json";
 
@@ -128,6 +130,14 @@ function createEndpoints(app: any) {
 		{
 			path: "/userAPI/watchlist",
 			handler: deleteFromWatchlistEndpoint,
+		},
+		{
+			path: "/userAPI/videoProgress",
+			handler: getUserVideoProgressEndpoint,
+		},
+		{
+			path: "/userAPI/videoProgress",
+			handler: updateUserVideoProgressEndpoint,
 		},
 	];
 
