@@ -29,7 +29,9 @@ type Video = {
 	category: string;
 	thumbnailURL: string;
 	videoURL: string;
-	date: string;
+	thumbnailURLKey?: string;
+	videoURLKey?: string;
+	dateReleased: string;
 	ageRating: string;
 	ageRatingInfo: string;
 	urlName: string;

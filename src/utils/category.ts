@@ -13,12 +13,27 @@ async function getCategories(): Promise<Category[] | null> {
 }
 
 /**
+ * Gets all categories from the database.
+ * @returns An array of categories.
+ */
+
+async function getCategory(id: number): Promise<Category | null> {
+	const dbResults: ResultSet = await runSQL(
+		false,
+		"SELECT * FROM categories WHERE id = ?",
+		true,
+		[id],
+	);
+	return parseCategories(dbResults)[0];
+}
+
+/**
  * This function adds a video to the database.
  * @param data The data to add the video.
  * @returns True if the video was added, false otherwise.
  */
 
-async function addCategory(data: any): Promise<boolean> {
+async function addCategory(data: Category): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"INSERT INTO categories (categoryName, urlName, isSeries) VALUES (?, ?, ?)",
@@ -34,12 +49,21 @@ async function addCategory(data: any): Promise<boolean> {
  * @returns True if the category was updated, false otherwise.
  */
 
-async function updateCategory(data: any): Promise<boolean> {
+async function updateCategory(data: Category): Promise<boolean> {
+	const categoryData = await getCategory(data.id);
+	if (categoryData == null) {
+		return false;
+	}
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"UPDATE categories SET categoryName = ?, urlName = ?, isSeries = ? WHERE id = ?",
 		true,
-		[data.categoryName, data.urlName, data.isSeries, data.id],
+		[
+			data.categoryName || categoryData.categoryName,
+			data.urlName || categoryData.urlName,
+			data.isSeries || categoryData.isSeries,
+			data.id,
+		],
 	);
 	return dbResults.rowsAffected > 0;
 }

@@ -36,11 +36,21 @@ async function addTier(data: any): Promise<boolean> {
 }
 
 async function updateTier(data: any): Promise<boolean> {
+	const tierData = await getTier(data.id);
+	if (tierData == null) {
+		return false;
+	}
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"UPDATE tiers SET tierName = ?, tierPriceUSD = ?, tierImage = ?, tierURLName = ? WHERE id = ?",
 		true,
-		[data.tierName, data.tierPriceUSD, data.tierImage, data.tierURLName, data.id],
+		[
+			data.tierName || tierData.tierName,
+			data.tierPriceUSD || tierData.tierPriceUSD,
+			data.tierImage || tierData.tierImage,
+			data.tierURLName || tierData.tierURLName,
+			data.id,
+		],
 	);
 	return dbResults.rowsAffected > 0;
 }

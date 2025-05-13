@@ -65,7 +65,7 @@ async function addVideo(data: Video): Promise<boolean> {
 			data.description,
 			data.thumbnailURL,
 			data.videoURL,
-			data.date,
+			data.dateReleased,
 			data.urlName,
 			data.ageRating,
 			data.category,
@@ -85,25 +85,36 @@ async function addVideo(data: Video): Promise<boolean> {
  */
 
 async function updateVideo(data: Video): Promise<boolean> {
-	const videoUrlKey = data.videoURL.split("/f/").pop() || "";
-	const thumbnailUrlKey = data.thumbnailURL.split("/f/").pop() || "";
+	const videoData = await getVideo(data.id, "");
+	if (videoData == null) {
+		return false;
+	}
+
+	const videoUrlKey = data.videoURL
+		? data.videoURL.split("/f/").pop() || ""
+		: videoData.videoURLKey || "";
+
+	const thumbnailUrlKey = data.thumbnailURL
+		? data.thumbnailURL.split("/f/").pop() || ""
+		: videoData.thumbnailURLKey || "";
+
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"UPDATE videos SET name = ?, description = ?, thumbnailURL = ?, videoURL = ?, dateReleased = ?, urlName = ?, ageRating = ?, category = ?, videoURLKey = ?, thumbnailURLKey = ?, isPartOfTVShow = ?, tvShowId = ? WHERE id = ?;",
 		true,
 		[
-			data.name,
-			data.description,
-			data.thumbnailURL,
-			data.videoURL,
-			data.date,
-			data.urlName,
-			data.ageRating,
-			data.category,
+			data.name || videoData.name,
+			data.description || videoData.description,
+			data.thumbnailURL || videoData.thumbnailURL,
+			data.videoURL || videoData.videoURL,
+			data.dateReleased || videoData.dateReleased,
+			data.urlName || videoData.urlName,
+			data.ageRating || videoData.ageRating,
+			data.category || videoData.category,
 			videoUrlKey,
 			thumbnailUrlKey,
-			data.isPartOfTVShow || 0,
-			data.tvShowId || 0,
+			data.isPartOfTVShow || videoData.isPartOfTVShow || 0,
+			data.tvShowId || videoData.tvShowId || 0,
 			data.id,
 		],
 	);
