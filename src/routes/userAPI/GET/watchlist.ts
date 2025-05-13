@@ -6,9 +6,8 @@ const router = Router();
 
 router.get("/getWatchlist", async (req, res) => {
 	try {
-		const results = await getWatchlist(req.query.username as string);
-		res.json(results);
-	} catch (error) {
+		res.json(await getWatchlist(req.query.userId as string));
+	} catch (error: any) {
 		console.error("Error fetching watchlist:", error);
 		res.status(500).json({ status: "server error" });
 	}

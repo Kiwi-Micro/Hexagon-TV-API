@@ -1,16 +1,14 @@
 import { Router } from "express";
-import { getVideosForSearch } from "../../../utils/video";
+import { getCategories } from "../../../utils/category";
 import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
-router.get("/search", async (req, res) => {
+router.get("/getCategories", async (req, res) => {
 	try {
-		res.json(
-			await getVideosForSearch(req.query.query as string, req.query.userId as string),
-		);
+		res.json(await getCategories());
 	} catch (error: any) {
-		console.error("Error fetching videos:", error);
+		console.error("Error fetching categories:", error);
 		res.status(500).json({ status: "server error" });
 	}
 	printEndpointReached(req, res);

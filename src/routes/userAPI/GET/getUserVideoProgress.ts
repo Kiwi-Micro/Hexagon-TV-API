@@ -1,16 +1,16 @@
 import { Router } from "express";
-import { getVideosForSearch } from "../../../utils/video";
 import { printEndpointReached } from "../../../utils/messages";
+import { getUserVideoProgress } from "../../../utils/videoProgress";
 
 const router = Router();
 
-router.get("/search", async (req, res) => {
+router.get("/getUserVideoProgress", async (req, res) => {
 	try {
 		res.json(
-			await getVideosForSearch(req.query.query as string, req.query.userId as string),
+			await getUserVideoProgress(req.query.userId as string, req.query.videoId as string),
 		);
 	} catch (error: any) {
-		console.error("Error fetching videos:", error);
+		console.error("Error fetching permissions:", error);
 		res.status(500).json({ status: "server error" });
 	}
 	printEndpointReached(req, res);

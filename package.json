@@ -8,10 +8,10 @@
 		"lint": "npx eslint .",
 		"lint:fix": "npx eslint . --fix"
 	},
-	"keywords": [],
 	"author": "Malcolm Hauser (Mooshay105)",
-	"license": "",
-	"description": "The Main Hexagon TV API",
+	"license": "MPL-2.0",
+	"description": "The API For Hexagon TV",
+	"homepage": "https://hexagon.kiwi-micro.com",
 	"dependencies": {
 		"@clerk/backend": "^1.26.0",
 		"@libsql/client": "^0.14.0",

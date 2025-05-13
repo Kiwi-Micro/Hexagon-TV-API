@@ -19,7 +19,6 @@ export default [
 			"**/.vscode/**",
 			"**/.git/**",
 			"**/.github/**",
-			"**/V1/**",
 		],
 	},
 	{

@@ -1,20 +1,20 @@
 import { Router } from "express";
-import { addToWatchlist } from "../../../utils/watchlist";
-import { auth } from "../../../utils/database";
-import { printEndpointReached } from "../../../utils/messages";
+import { addToWatchlist } from "../../../../utils/watchlist";
+import { auth } from "../../../../utils/database";
+import { printEndpointReached } from "../../../../utils/messages";
 
 const router = Router();
 
 router.post("/addToWatchlist", async (req, res) => {
-	if (await auth(req.body.sessionId, req.body.userId, req.body.username)) {
+	if (await auth(req.body.sessionId, req.body.userId)) {
 		try {
 			const status = await addToWatchlist(req.body);
 			if (status) {
 				res.json({ status: "success" });
 			} else {
-				res.status(409).json({ status: "server error" });
+				res.status(409).json({ status: "watchlist item not found" });
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error adding to watchlist:", error);
 			res.status(500).json({ status: "server srror" });
 		}
