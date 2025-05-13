@@ -58,11 +58,11 @@ async function parseVideos(dbResults: any, userId: string): Promise<Video[]> {
 		dateReleased: row.dateReleased,
 		urlName: row.urlName,
 		ageRating: row.ageRating,
-		ageRatingInfo: (await getAgeRatingInfo(row.ageRating)) || "Age Rating not found",
+		ageRatingInfo: getAgeRatingInfo(row.ageRating) || "Age Rating not found",
 		category: row.category,
 		videoUrlKey: row.videoURLKey,
 		thumbnailUrlKey: row.thumbnailURLKey,
-		isPartOfTVShow: row.isPartOfTVShow,
+		isPartOfTVShow: row.isPartOfTVShow == 1 ? true : false,
 		tvShowId: row.tvShowId,
 		isInWatchlist: watchlist.find((watchlistVideo) => watchlistVideo.videoId === row.id)
 			? true
@@ -76,15 +76,16 @@ async function parseVideos(dbResults: any, userId: string): Promise<Video[]> {
 		true,
 		[userId],
 	);
-	const userProgressResults = dbUserResults.rows || [];
+	const userVideoProgressResults = dbUserResults.rows || [];
 	const resolvedResults = await Promise.all(results);
-	for (const userProgressResult of userProgressResults) {
+	for (const userVideoProgressResult of userVideoProgressResults) {
 		const video = resolvedResults.find(
-			(result: any) => result.id === userProgressResult.videoId,
+			(result: any) => result.id === userVideoProgressResult.videoId,
 		);
 		if (video) {
-			video.progressThroughVideo = userProgressResult.progressThroughVideo;
-			video.isVideoCompleted = userProgressResult.isVideoCompleted;
+			video.progressThroughVideo = userVideoProgressResult.progressThroughVideo;
+			video.isVideoCompleted =
+				userVideoProgressResult.isVideoCompleted == 1 ? true : false;
 		}
 	}
 	return resolvedResults;
@@ -177,7 +178,7 @@ type Permission = {
 	isAdmin: boolean;
 	canModifyPermissions: boolean;
 	canModifyVideos: boolean;
-	canModifyCategorys: boolean;
+	canModifyCategories: boolean;
 	canModifyTVShows: boolean;
 	canModifyAgeRatings: boolean;
 	canModifyTiers: boolean;
@@ -195,13 +196,13 @@ function parsePermissions(dbResults: any): Permission[] {
 	const results = rows.map((row: any) => ({
 		id: row.id,
 		userId: row.userId,
-		isAdmin: row.isAdmin,
-		canModifyPermissions: row.canModifyPermissions,
-		canModifyVideos: row.canModifyVideos,
-		canModifyCategorys: row.canModifyCategorys,
-		canModifyTVShows: row.canModifyTVShows,
-		canModifyAgeRatings: row.canModifyAgeRatings,
-		canModifyTiers: row.canModifyTiers,
+		isAdmin: row.isAdmin == 1 ? true : false,
+		canModifyPermissions: row.canModifyPermissions == 1 ? true : false,
+		canModifyVideos: row.canModifyVideos == 1 ? true : false,
+		canModifyCategories: row.canModifyCategories == 1 ? true : false,
+		canModifyTVShows: row.canModifyTVShows == 1 ? true : false,
+		canModifyAgeRatings: row.canModifyAgeRatings == 1 ? true : false,
+		canModifyTiers: row.canModifyTiers == 1 ? true : false,
 	}));
 	return results;
 }
@@ -267,12 +268,44 @@ function parseCategories(dbResults: any): Category[] {
 		id: row.id,
 		categoryName: row.categoryName,
 		urlName: row.urlName,
-		isSeries: row.isSeries,
+		isSeries: row.isSeries == 1 ? true : false,
 	}));
 	return results;
 }
 
-export type { Video, Watchlist, Permission, ageRating, Tier, Category };
+/**
+ * The type for all the video progress Data.
+ * @property userId: The userId of the user.
+ * @property videoId: The id of the video.
+ * @property progress: The progress of the video.
+ * @property isVideoCompleted: Whether the video is completed.
+ */
+
+type VideoProgress = {
+	userId: string;
+	videoId: string;
+	progressThroughVideo: number;
+	isVideoCompleted: boolean;
+};
+
+/**
+ * This function parses the video progress from the database.
+ * @param dbResults The video progress results from the database.
+ * @returns The parsed video progress.
+ */
+
+function parseVideoProgress(dbResults: any): VideoProgress[] {
+	const rows = dbResults.rows || [];
+	const results = rows.map((row: any) => ({
+		userId: row.userId,
+		videoId: row.videoId,
+		progressThroughVideo: row.progressThroughVideo,
+		isVideoCompleted: row.isVideoCompleted == 1 ? true : false,
+	}));
+	return results;
+}
+
+export type { Video, Watchlist, Permission, ageRating, Tier, Category, VideoProgress };
 export {
 	parseAgeRatings,
 	parseCategories,
@@ -280,4 +313,5 @@ export {
 	parseTiers,
 	parseVideos,
 	parseWatchlist,
+	parseVideoProgress,
 };

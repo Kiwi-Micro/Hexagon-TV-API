@@ -3,8 +3,8 @@ import { runSQL } from "./database";
 import { parseCategories, type Category } from "./types";
 
 /**
- * Gets all categorys from the database.
- * @returns An array of categorys.
+ * Gets all categories from the database.
+ * @returns An array of categories.
  */
 
 async function getCategories(): Promise<Category[] | null> {

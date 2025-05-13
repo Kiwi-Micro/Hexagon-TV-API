@@ -36,7 +36,7 @@ async function getVideos(userId: string): Promise<Video[]> {
  * @returns The video or null if it doesn't exist.
  */
 
-async function getVideo(id: string, userId: string): Promise<Video | null> {
+async function getVideo(id: number, userId: string): Promise<Video | null> {
 	const dbResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM videos WHERE id = ?",
@@ -71,8 +71,8 @@ async function addVideo(data: Video): Promise<boolean> {
 			data.category,
 			data.videoURL.split("/f/").pop() || "",
 			data.thumbnailURL.split("/f/").pop() || "",
-			data.isPartOfTVShow || "false",
-			data.tvShowId || "0",
+			data.isPartOfTVShow || 0,
+			data.tvShowId || 0,
 		],
 	);
 	return dbResults.rowsAffected > 0;
@@ -102,8 +102,8 @@ async function updateVideo(data: Video): Promise<boolean> {
 			data.category,
 			videoUrlKey,
 			thumbnailUrlKey,
-			data.isPartOfTVShow || "false",
-			data.tvShowId || "0",
+			data.isPartOfTVShow || 0,
+			data.tvShowId || 0,
 			data.id,
 		],
 	);

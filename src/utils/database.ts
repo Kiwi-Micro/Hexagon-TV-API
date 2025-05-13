@@ -84,8 +84,8 @@ async function checkPermissionsAndAuthenticate(
 	extraPermissions?: any,
 ): Promise<boolean> {
 	if (
-		((extraPermissions == "true" && shouldCheckExtraPermissions) ||
-			(await getUserPermissions(userId)).isAdmin == "true") &&
+		((extraPermissions == true && shouldCheckExtraPermissions) ||
+			(await getUserPermissions(userId)).isAdmin == true) &&
 		(await auth(sessionId, userId))
 	) {
 		return true;

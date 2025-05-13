@@ -22,7 +22,7 @@ async function getTier(tierId: string): Promise<Tier | null> {
 		console.log("No tier found");
 		return null;
 	}
-	return (await parseTiers(dbResults))[0];
+	return parseTiers(dbResults)[0];
 }
 
 async function addTier(data: any): Promise<boolean> {
