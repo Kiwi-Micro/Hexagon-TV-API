@@ -14,9 +14,6 @@ import videoAddEndpoint from "../routes/videoAPI/POST/videoModification/addVideo
 import videoUpdateEndpoint from "../routes/videoAPI/POST/videoModification/updateVideo";
 import uploadFilesEndpoint from "../routes/videoAPI/POST/videoModification/uploadFiles";
 import updateUserPermissionsEndpoint from "../routes/userAPI/POST/permissionModification/updateUserPermissions";
-import ageRatingAddEndpoint from "../routes/videoAPI/POST/ageRatingModification/addAgeRating";
-import ageRatingUpdateEndpoint from "../routes/videoAPI/POST/ageRatingModification/updateAgeRating";
-import ageRatingDeleteEndpoint from "../routes/videoAPI/POST/ageRatingModification/deleteAgeRating";
 import getTiersEndpoint from "../routes/userAPI/GET/getTiers";
 import getTierEndpoint from "../routes/userAPI/GET/getTier";
 import addTierEndpoint from "../routes/userAPI/POST/tierModification/addTier";
@@ -78,18 +75,6 @@ function createEndpoints(app: any) {
 		{
 			path: "/videoAPI/categories",
 			handler: categoryDeleteEndpoint,
-		},
-		{
-			path: "/videoAPI/ageRatings",
-			handler: ageRatingAddEndpoint,
-		},
-		{
-			path: "/videoAPI/ageRatings",
-			handler: ageRatingUpdateEndpoint,
-		},
-		{
-			path: "/videoAPI/ageRatings",
-			handler: ageRatingDeleteEndpoint,
 		},
 		{
 			path: "/userAPI/tiers",
