@@ -18,7 +18,7 @@ async function runSQL(
 	hasArgs: boolean,
 	args?: any,
 ): Promise<ResultSet> {
-	if (hasArgs) {
+	if (hasArgs && args) {
 		const dbResults: ResultSet = await getDbConnection(needsRW).execute({
 			sql,
 			args,
