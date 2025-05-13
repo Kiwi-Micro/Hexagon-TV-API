@@ -6,8 +6,7 @@ const router = Router();
 
 router.get("/getVideos", async (req, res) => {
 	try {
-		const results = await getVideos(req.query.userId as string);
-		res.json(results);
+		res.json(await getVideos(req.query.userId as string));
 	} catch (error: any) {
 		console.error("Error fetching videos:", error);
 		res.status(500).json({ status: "server error" });

@@ -6,8 +6,7 @@ const router = Router();
 
 router.get("/getTier", async (req, res) => {
 	try {
-		const results = await getTier(req.query.id as string);
-		res.json(results);
+		res.json(await getTier(req.query.id as string));
 	} catch (error: any) {
 		console.error((("Error fetching tier:" + req.query.id) as string) + ":" + error);
 		res.status(500).json({ status: "server error" });

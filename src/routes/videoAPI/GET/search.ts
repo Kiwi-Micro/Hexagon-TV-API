@@ -6,11 +6,9 @@ const router = Router();
 
 router.get("/search", async (req, res) => {
 	try {
-		const results = await getVideosForSearch(
-			req.query.query as string,
-			req.query.userId as string,
+		res.json(
+			await getVideosForSearch(req.query.query as string, req.query.userId as string),
 		);
-		res.json(results);
 	} catch (error: any) {
 		console.error("Error fetching videos:", error);
 		res.status(500).json({ status: "server error" });

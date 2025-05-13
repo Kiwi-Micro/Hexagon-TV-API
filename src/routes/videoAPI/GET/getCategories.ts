@@ -6,8 +6,7 @@ const router = Router();
 
 router.get("/getCategories", async (req, res) => {
 	try {
-		const results = await getCategories();
-		res.json(results);
+		res.json(await getCategories());
 	} catch (error: any) {
 		console.error("Error fetching categories:", error);
 		res.status(500).json({ status: "server error" });
