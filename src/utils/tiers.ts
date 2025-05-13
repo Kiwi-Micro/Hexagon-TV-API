@@ -28,7 +28,7 @@ async function getTier(tierId: string): Promise<Tier | null> {
 async function addTier(data: any): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
-		"INSERT INTO tiers (tierName, tierPriceUSD, tierImage, tierURLName) VALUES (?, ?, ?, ?, ?)",
+		"INSERT INTO tiers (tierName, tierPriceUSD, tierImage, tierURLName) VALUES (?, ?, ?, ?)",
 		true,
 		[data.tierName, data.tierPriceUSD, data.tierImage, data.tierURLName],
 	);
