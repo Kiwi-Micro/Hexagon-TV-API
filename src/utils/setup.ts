@@ -14,11 +14,6 @@ import videoAddEndpoint from "../routes/videoAPI/POST/videoModification/addVideo
 import videoUpdateEndpoint from "../routes/videoAPI/POST/videoModification/updateVideo";
 import uploadFilesEndpoint from "../routes/videoAPI/POST/videoModification/uploadFiles";
 import updateUserPermissionsEndpoint from "../routes/userAPI/POST/permissionModification/updateUserPermissions";
-import getTiersEndpoint from "../routes/userAPI/GET/getTiers";
-import getTierEndpoint from "../routes/userAPI/GET/getTier";
-import addTierEndpoint from "../routes/userAPI/POST/tierModification/addTier";
-import updateTierEndpoint from "../routes/userAPI/POST/tierModification/updateTier";
-import deleteTierEndpoint from "../routes/userAPI/POST/tierModification/deleteTier";
 import updateUserVideoProgressEndpoint from "../routes/userAPI/POST/videoProgressModification/updateUserVideoProgress";
 import getUserVideoProgressEndpoint from "../routes/userAPI/GET/getUserVideoProgress";
 import { createRouteHandler } from "uploadthing/express";
@@ -77,32 +72,12 @@ function createEndpoints(app: any) {
 			handler: categoryDeleteEndpoint,
 		},
 		{
-			path: "/userAPI/tiers",
-			handler: getTiersEndpoint,
-		},
-		{
-			path: "/userAPI/tiers",
-			handler: getTierEndpoint,
-		},
-		{
 			path: "/userAPI/permissions",
 			handler: getUserPermissionsEndpoint,
 		},
 		{
 			path: "/userAPI/watchlist",
 			handler: getWatchlistEndpoint,
-		},
-		{
-			path: "/userAPI/tiers",
-			handler: addTierEndpoint,
-		},
-		{
-			path: "/userAPI/tiers",
-			handler: updateTierEndpoint,
-		},
-		{
-			path: "/userAPI/tiers",
-			handler: deleteTierEndpoint,
 		},
 		{
 			path: "/userAPI/permissions",

@@ -11,7 +11,7 @@ import { runSQL } from "./database";
 async function addUserRow(userId: string): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
-		"INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategories, canModifyTVShows, canModifyAgeRatings, canModifyTiers) VALUES (?, 0, 0, 0, 0, 0, 0, 0) ON CONFLICT (userId) DO NOTHING;",
+		"INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategories, canModifyTVShows, canModifyAgeRatings) VALUES (?, 0, 0, 0, 0, 0, 0) ON CONFLICT (userId) DO NOTHING;",
 		true,
 		[userId],
 	);
@@ -35,7 +35,6 @@ async function updateUserPermissions(data: Permission): Promise<boolean> {
 		"canModifyCategories",
 		"canModifyTVShows",
 		"canModifyAgeRatings",
-		"canModifyTiers",
 	] as const;
 
 	const inputs = Object.fromEntries(
@@ -43,7 +42,7 @@ async function updateUserPermissions(data: Permission): Promise<boolean> {
 	);
 	const dbResults: ResultSet = await runSQL(
 		true,
-		"UPDATE userPermissions SET isAdmin = ?, canModifyPermissions = ?, canModifyVideos = ?, canModifyCategories = ?, canModifyTVShows = ?, canModifyAgeRatings = ?, canModifyTiers = ? WHERE userId = ?;",
+		"UPDATE userPermissions SET isAdmin = ?, canModifyPermissions = ?, canModifyVideos = ?, canModifyCategories = ?, canModifyTVShows = ?, canModifyAgeRatings = ? WHERE userId = ?;",
 		true,
 		[
 			inputs.isAdmin,
@@ -52,7 +51,6 @@ async function updateUserPermissions(data: Permission): Promise<boolean> {
 			inputs.canModifyCategories,
 			inputs.canModifyTVShows,
 			inputs.canModifyAgeRatings,
-			inputs.canModifyTiers,
 			data.userId,
 		],
 	);

@@ -170,8 +170,6 @@ function parseWatchlist(dbResults: any, videoResults: any): Watchlist[] {
  * @property canModifyCategorys: Whether the user can modify categories.
  * @property canModifyTVShows: Whether the user can modify TV shows.
  * @property canModifyAgeRatings: Whether the user can modify age ratings.
- * @property canModifyTiers: Whether the user can modify tiers.
- * @property (COMMING SOON, NOT AVAILABLE) canModifyUserTier: Whether the user can modify their what tier a user is on.
  */
 
 type Permission = {
@@ -183,8 +181,6 @@ type Permission = {
 	canModifyCategories: boolean;
 	canModifyTVShows: boolean;
 	canModifyAgeRatings: boolean;
-	canModifyTiers: boolean;
-	/*canModifyUserTier: boolean;*/
 };
 
 /**
@@ -204,42 +200,6 @@ function parsePermissions(dbResults: any): Permission[] {
 		canModifyCategories: row.canModifyCategories == 1 ? true : false,
 		canModifyTVShows: row.canModifyTVShows == 1 ? true : false,
 		canModifyAgeRatings: row.canModifyAgeRatings == 1 ? true : false,
-		canModifyTiers: row.canModifyTiers == 1 ? true : false,
-	}));
-	return results;
-}
-
-/**
- * The type for all the tier Data.
- * @property id: The id of the tier.
- * @property tierName: The name of the tier.
- * @property tierPriceUSD: The price of the tier in USD.
- * @property tierImage: The image for the tier banner.
- * @property tierURLName: The name to use for the URL of the tier.
- */
-
-type Tier = {
-	id: number;
-	tierName: string;
-	tierPriceUSD: string;
-	tierImage: string;
-	tierURLName: string;
-};
-
-/**
- * This function parses the tiers from the database.
- * @param dbResults The tiers results from the database.
- * @returns The parsed tiers.
- */
-
-function parseTiers(dbResults: any): Tier[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
-		id: row.id,
-		tierName: row.tierName,
-		tierPriceUSD: row.tierPriceUSD,
-		tierImage: row.tierImage,
-		tierURLName: row.tierURLName,
 	}));
 	return results;
 }
@@ -307,12 +267,11 @@ function parseVideoProgress(dbResults: any): VideoProgress[] {
 	return results;
 }
 
-export type { Video, Watchlist, Permission, ageRating, Tier, Category, VideoProgress };
+export type { Video, Watchlist, Permission, ageRating, Category, VideoProgress };
 export {
 	parseAgeRatings,
 	parseCategories,
 	parsePermissions,
-	parseTiers,
 	parseVideos,
 	parseWatchlist,
 	parseVideoProgress,
