@@ -17,6 +17,7 @@
 		"@libsql/client": "^0.14.0",
 		"cors": "^2.8.5",
 		"express": "^5.1.0",
+		"posthog-node": "^4.17.1",
 		"uploadthing": "7.4.4"
 	},
 	"devDependencies": {

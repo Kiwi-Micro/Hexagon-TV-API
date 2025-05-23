@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { checkPermissionsAndAuthenticate } from "../../../../utils/database";
+import {
+	checkPermissionsAndAuthenticate,
+	sendAnalyticsEvent,
+} from "../../../../utils/database";
 import { getUserPermissions } from "../../../../utils/permissions";
 import { updateVideo } from "../../../../utils/video";
 import { printEndpointReached } from "../../../../utils/messages";
@@ -20,15 +23,31 @@ router.post("/updateVideo", async (req, res) => {
 		try {
 			const status = await updateVideo(req.body);
 			if (status) {
+				sendAnalyticsEvent(req.body.userId as string, "api.update.updateVideo", req.body);
 				res.json({ status: "success" });
 			} else {
+				sendAnalyticsEvent(
+					req.body.userId as string,
+					"api.update.updateVideo.failed",
+					req.body,
+				);
 				res.status(409).json({ status: "video not found" });
 			}
 		} catch (error: any) {
+			sendAnalyticsEvent(
+				req.body.userId as string,
+				"api.update.updateVideo.failed",
+				req.body,
+			);
 			console.error("Error adding video:", error);
 			res.status(500).json({ status: "server srror" });
 		}
 	} else {
+		sendAnalyticsEvent(
+			req.body.userId as string,
+			"api.update.updateVideo.invalidCredentials",
+			req.body,
+		);
 		res.status(403).json({ status: "invalid credentials" });
 	}
 	printEndpointReached(req, res);

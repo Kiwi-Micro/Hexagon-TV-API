@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { checkPermissionsAndAuthenticate } from "../../../../utils/database";
+import {
+	checkPermissionsAndAuthenticate,
+	sendAnalyticsEvent,
+} from "../../../../utils/database";
 import { deleteCategory } from "../../../../utils/category";
 import { printEndpointReached } from "../../../../utils/messages";
 import { getUserPermissions } from "../../../../utils/permissions";
@@ -20,15 +23,35 @@ router.delete("/deleteCategory", async (req, res) => {
 		try {
 			const status = await deleteCategory(req.body);
 			if (status) {
+				sendAnalyticsEvent(
+					req.body.userId as string,
+					"api.delete.deleteCategory",
+					req.body,
+				);
 				res.json({ status: "success" });
 			} else {
+				sendAnalyticsEvent(
+					req.body.userId as string,
+					"api.delete.deleteCategory.failed",
+					req.body,
+				);
 				res.status(409).json({ status: "category not found" });
 			}
 		} catch (error: any) {
+			sendAnalyticsEvent(
+				req.body.userId as string,
+				"api.delete.deleteCategory.failed",
+				req.body,
+			);
 			console.error("Error deleting category:", error);
 			res.status(500).json({ status: "server srror" });
 		}
 	} else {
+		sendAnalyticsEvent(
+			req.body.userId as string,
+			"api.delete.deleteCategory.invalidCredentials",
+			req.body,
+		);
 		res.status(403).json({ status: "invalid credentials" });
 	}
 	printEndpointReached(req, res);
