@@ -1,4 +1,4 @@
-import { ResultSet, Row } from "@libsql/client";
+import { Row } from "@libsql/client";
 import { getAgeRatingInfo } from "./ageRating";
 import { runSQL } from "./database";
 import { getWatchlist } from "./watchlist";
@@ -49,10 +49,15 @@ type Video = {
  */
 
 async function parseVideos(dbResults: any, userId: string): Promise<Video[]> {
-	const watchlist = await getWatchlist(userId);
-	const rows = dbResults.rows || [];
-	const results = rows.map(async (row: any) => ({
-		id: row.id as number,
+	const dbUserProgressResults: Row[] =
+		(
+			await runSQL(false, "SELECT * FROM continueWatching WHERE userId = ?", true, [
+				userId,
+			])
+		).rows || [];
+
+	const results = (dbResults.rows || []).map(async (row: Video) => ({
+		id: row.id,
 		name: row.name,
 		description: row.description,
 		thumbnailURL: row.thumbnailURL,
@@ -60,37 +65,29 @@ async function parseVideos(dbResults: any, userId: string): Promise<Video[]> {
 		dateReleased: row.dateReleased,
 		urlName: row.urlName,
 		ageRating: row.ageRating,
-		ageRatingInfo: getAgeRatingInfo(row.ageRating) || "Age Rating not found",
+		ageRatingInfo: (await getAgeRatingInfo(row.ageRating)) || "Age Rating not found",
 		category: row.category,
 		videoUrlKey: row.videoURLKey,
 		thumbnailUrlKey: row.thumbnailURLKey,
 		isPartOfTVShow: row.isPartOfTVShow == 1 ? true : false,
 		tvShowId: row.tvShowId,
-		isInWatchlist: watchlist.find((watchlistVideo) => watchlistVideo.videoId === row.id)
+		isInWatchlist: (await getWatchlist(userId)).find(
+			(watchlistVideo) => watchlistVideo.videoId === row.id,
+		)
 			? true
 			: false,
-		progressThroughVideo: 0,
-		isVideoCompleted: false,
+		progressThroughVideo:
+			dbUserProgressResults.find(
+				(userVideoProgressResult) => userVideoProgressResult.videoId === row.id,
+			)?.progressThroughVideo || 0,
+		isVideoCompleted:
+			dbUserProgressResults.find(
+				(userVideoProgressResult) => userVideoProgressResult.videoId === row.id,
+			)?.isVideoCompleted == 1
+				? true
+				: false,
 	}));
-	const dbUserResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM continueWatching WHERE userId = ?",
-		true,
-		[userId],
-	);
-	const userVideoProgressResults = dbUserResults.rows || [];
-	const resolvedResults = await Promise.all(results);
-	for (const userVideoProgressResult of userVideoProgressResults) {
-		const video = resolvedResults.find(
-			(result: any) => result.id === userVideoProgressResult.videoId,
-		);
-		if (video) {
-			video.progressThroughVideo = userVideoProgressResult.progressThroughVideo;
-			video.isVideoCompleted =
-				userVideoProgressResult.isVideoCompleted == 1 ? true : false;
-		}
-	}
-	return resolvedResults;
+	return await Promise.all(results);
 }
 
 /**
