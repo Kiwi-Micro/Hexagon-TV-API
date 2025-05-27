@@ -1,4 +1,4 @@
-import { ResultSet } from "@libsql/client";
+import { ResultSet, Row } from "@libsql/client";
 import { getAgeRatingInfo } from "./ageRating";
 import { runSQL } from "./database";
 import { getWatchlist } from "./watchlist";
@@ -35,8 +35,8 @@ type Video = {
 	ageRating: string;
 	ageRatingInfo: string;
 	urlName: string;
-	isPartOfTVShow: string;
-	tvShowId: string;
+	isPartOfTVShow: number;
+	tvShowId: number;
 	isInWatchlist: boolean;
 	progressThroughVideo: number;
 	isVideoCompleted: boolean;
@@ -113,12 +113,12 @@ type ageRating = {
  */
 
 function parseAgeRatings(dbResults: any): ageRating[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
+	const results = (dbResults.rows || []).map((row: any) => ({
 		id: row.id,
 		ageRating: row.ageRating,
 		ageRatingInfo: row.ageRatingInfo,
 	}));
+
 	return results;
 }
 
@@ -133,7 +133,7 @@ function parseAgeRatings(dbResults: any): ageRating[] {
 type Watchlist = {
 	id: number;
 	userId: string;
-	videoId: string;
+	videoId: number;
 	video?: Video;
 };
 
@@ -145,10 +145,10 @@ type Watchlist = {
  */
 
 function parseWatchlist(dbResults: any, videoResults: any): Watchlist[] {
-	const videoRows = videoResults.rows || [];
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => {
-		const video = videoRows.find((videoRow: any) => videoRow.id === row.videoId);
+	const results = (dbResults.rows || []).map((row: any) => {
+		const video = (videoResults.rows || []).find(
+			(videoRow: any) => videoRow.id === row.videoId,
+		);
 		return {
 			id: row.id,
 			userId: row.userId,
@@ -190,8 +190,7 @@ type Permission = {
  */
 
 function parsePermissions(dbResults: any): Permission[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
+	const results = (dbResults.rows || []).map((row: any) => ({
 		id: row.id,
 		userId: row.userId,
 		isAdmin: row.isAdmin == 1 ? true : false,
@@ -201,6 +200,7 @@ function parsePermissions(dbResults: any): Permission[] {
 		canModifyTVShows: row.canModifyTVShows == 1 ? true : false,
 		canModifyAgeRatings: row.canModifyAgeRatings == 1 ? true : false,
 	}));
+
 	return results;
 }
 
@@ -225,13 +225,13 @@ type Category = {
  */
 
 function parseCategories(dbResults: any): Category[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
+	const results = (dbResults.rows || []).map((row: any) => ({
 		id: row.id,
 		categoryName: row.categoryName,
 		urlName: row.urlName,
 		isSeries: row.isSeries == 1 ? true : false,
 	}));
+
 	return results;
 }
 
@@ -257,13 +257,13 @@ type VideoProgress = {
  */
 
 function parseVideoProgress(dbResults: any): VideoProgress[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
+	const results = (dbResults.rows || []).map((row: any) => ({
 		userId: row.userId,
 		videoId: row.videoId,
 		progressThroughVideo: row.progressThroughVideo,
 		isVideoCompleted: row.isVideoCompleted == 1 ? true : false,
 	}));
+
 	return results;
 }
 
