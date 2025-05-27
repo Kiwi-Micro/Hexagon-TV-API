@@ -12,7 +12,7 @@ import searchEndpoint from "../routes/videoAPI/GET/search";
 import videoDeleteEndpoint from "../routes/videoAPI/POST/videoModification/deleteVideo";
 import videoAddEndpoint from "../routes/videoAPI/POST/videoModification/addVideo";
 import videoUpdateEndpoint from "../routes/videoAPI/POST/videoModification/updateVideo";
-import uploadFilesEndpoint from "../routes/videoAPI/POST/videoModification/uploadFiles";
+import uploadFilesEndpoint from "../routes/videoAPI/POST/uploadFiles";
 import updateUserPermissionsEndpoint from "../routes/userAPI/POST/permissionModification/updateUserPermissions";
 import updateUserVideoProgressEndpoint from "../routes/userAPI/POST/videoProgressModification/updateUserVideoProgress";
 import getUserVideoProgressEndpoint from "../routes/userAPI/GET/getUserVideoProgress";

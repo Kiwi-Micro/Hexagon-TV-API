@@ -1,10 +1,10 @@
 import { createUploadthing, type FileRouter, UploadThingError } from "uploadthing/server";
-import { printEndpointReached } from "../../../../utils/messages";
+import { printEndpointReached } from "../../../utils/messages";
 import {
 	checkPermissionsAndAuthenticate,
 	sendAnalyticsEvent,
-} from "../../../../utils/database";
-import { getUserPermissions } from "../../../../utils/permissions";
+} from "../../../utils/database";
+import { getUserPermissions } from "../../../utils/permissions";
 
 const f = createUploadthing();
 
