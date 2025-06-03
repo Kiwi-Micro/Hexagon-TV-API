@@ -2,14 +2,14 @@ import { Router } from "express";
 import {
 	checkPermissionsAndAuthenticate,
 	sendAnalyticsEvent,
-} from "../../../../utils/database";
-import { deleteCategory } from "../../../../utils/category";
-import { printEndpointReached } from "../../../../utils/messages";
-import { getUserPermissions } from "../../../../utils/permissions";
+} from "../../../utils/database";
+import { getUserPermissions } from "../../../utils/permissions";
+import { updateUserPermissions } from "../../../utils/permissions";
+import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
-router.delete("/deleteCategory", async (req, res) => {
+router.post("/updateUserPermissions", async (req, res) => {
 	if (
 		await checkPermissionsAndAuthenticate(
 			req.body.userId,
@@ -17,40 +17,36 @@ router.delete("/deleteCategory", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).canModifyCategories,
+			).canModifyPermissions,
 		)
 	) {
 		try {
-			const status = await deleteCategory(req.body);
+			const status = await updateUserPermissions(req.body);
 			if (status) {
 				sendAnalyticsEvent(
 					req.body.userId as string,
-					"api.delete.deleteCategory",
-					req.body,
+					"api.permissions.updateUserPermissions",
 				);
 				res.json({ status: "success" });
 			} else {
 				sendAnalyticsEvent(
 					req.body.userId as string,
-					"api.delete.deleteCategory.failed",
-					req.body,
+					"api.permissions.updateUserPermissions.failed",
 				);
-				res.status(409).json({ status: "category not found" });
+				res.status(409).json({ status: "user not found" });
 			}
 		} catch (error: any) {
 			sendAnalyticsEvent(
 				req.body.userId as string,
-				"api.delete.deleteCategory.failed",
-				req.body,
+				"api.permissions.updateUserPermissions.failed",
 			);
-			console.error("Error deleting category:", error);
-			res.status(500).json({ status: "server srror" });
+			console.error("Error updating user permissions:", error);
+			res.status(500).json({ status: "server error" });
 		}
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,
-			"api.delete.deleteCategory.invalidCredentials",
-			req.body,
+			"api.permissions.updateUserPermissions.failed",
 		);
 		res.status(403).json({ status: "invalid credentials" });
 	}

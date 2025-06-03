@@ -9,6 +9,11 @@ import { parseCategories, type Category } from "./types";
 
 async function getCategories(): Promise<Category[] | null> {
 	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM categories", false);
+
+	if (dbResults.rows.length === 0) {
+		throw new Error("Error getting categories (0 Rows Returned)");
+	}
+
 	return parseCategories(dbResults);
 }
 
@@ -24,13 +29,18 @@ async function getCategory(id: number): Promise<Category | null> {
 		true,
 		[id],
 	);
+
+	if (dbResults.rows.length === 0) {
+		throw new Error("Error getting category (0 Rows Returned)");
+	}
+
 	return parseCategories(dbResults)[0];
 }
 
 /**
  * This function adds a video to the database.
  * @param data The data to add the video.
- * @returns True if the video was added, false otherwise.
+ * @returns True if the video was added, throws error otherwise.
  */
 
 async function addCategory(data: Category): Promise<boolean> {
@@ -40,13 +50,18 @@ async function addCategory(data: Category): Promise<boolean> {
 		true,
 		[data.categoryName, data.urlName, data.isSeries],
 	);
-	return dbResults.rowsAffected > 0;
+
+	if (dbResults.rowsAffected === 0) {
+		throw new Error("Error adding category (0 Rows Affected)");
+	}
+
+	return true;
 }
 
 /**
  * This function updates a category in the database.
  * @param data The data to update the category.
- * @returns True if the category was updated, false otherwise.
+ * @returns True if the category was updated, throws error otherwise.
  */
 
 async function updateCategory(data: Category): Promise<boolean> {
@@ -65,13 +80,18 @@ async function updateCategory(data: Category): Promise<boolean> {
 			data.id,
 		],
 	);
-	return dbResults.rowsAffected > 0;
+
+	if (dbResults.rowsAffected === 0) {
+		throw new Error("Error updating category (0 Rows Affected)");
+	}
+
+	return true;
 }
 
 /**
  * This function deletes a category from the database.
  * @param data The data to delete the category.
- * @returns True if the category was deleted, false otherwise.
+ * @returns True if the category was deleted, throws error otherwise.
  */
 
 async function deleteCategory(data: any): Promise<boolean> {
@@ -81,7 +101,12 @@ async function deleteCategory(data: any): Promise<boolean> {
 		true,
 		[data.id],
 	);
-	return dbResults.rowsAffected > 0;
+
+	if (dbResults.rowsAffected === 0) {
+		throw new Error("Error deleting category (0 Rows Affected)");
+	}
+
+	return true;
 }
 
 export { getCategories, addCategory, updateCategory, deleteCategory };

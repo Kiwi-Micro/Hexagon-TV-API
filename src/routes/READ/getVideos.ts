@@ -1,16 +1,16 @@
 import { Router } from "express";
-import { getVideos } from "../../../utils/video";
-import { printEndpointReached } from "../../../utils/messages";
-import { sendAnalyticsEvent } from "../../../utils/database";
+import { getVideos } from "../../utils/video";
+import { printEndpointReached } from "../../utils/messages";
+import { sendAnalyticsEvent } from "../../utils/database";
 
 const router = Router();
 
 router.get("/getVideos", async (req, res) => {
 	try {
-		sendAnalyticsEvent(req.query.userId as string, "api.get.video.getVideos");
 		res.json(await getVideos(req.query.userId as string));
+		sendAnalyticsEvent(req.query.userId as string, "api.videos.getVideos");
 	} catch (error: any) {
-		sendAnalyticsEvent(req.query.userId as string, "api.get.video.getVideos.failed");
+		sendAnalyticsEvent(req.query.userId as string, "api.videos.getVideos.failed");
 		console.error("Error fetching videos:", error);
 		res.status(500).json({ status: "server error" });
 	}

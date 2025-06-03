@@ -4,22 +4,6 @@ import { parseVideos, type Video } from "./types";
 import { runSQL } from "./database";
 
 /**
- * Gets all videos from the database that match the query.
- * @param query The query to search for.
- * @returns An array of videos.
- */
-
-async function getVideosForSearch(query: string, userId: string): Promise<Video[]> {
-	const dbResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM videos WHERE name LIKE ?",
-		true,
-		[`%${query}%`],
-	);
-	return parseVideos(dbResults, userId);
-}
-
-/**
  * Gets all videos from the database with user specific data.
  * @param userId The userId of the user to get the videos for.
  * @returns An array of videos.
@@ -150,4 +134,4 @@ async function deleteVideo(data: any): Promise<boolean> {
 	return dbDeleteResults.rowsAffected > 0;
 }
 
-export { getVideosForSearch, getVideos, getVideo, addVideo, updateVideo, deleteVideo };
+export { getVideos, getVideo, addVideo, updateVideo, deleteVideo };

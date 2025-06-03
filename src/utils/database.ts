@@ -116,8 +116,9 @@ const client = new PostHog(posthogKey, {
  */
 
 function sendAnalyticsEvent(userId: string, event: string, properties?: any): void {
+	console.log("userId");
 	client.capture({
-		distinctId: userId,
+		distinctId: userId || "user_noId",
 		event: event,
 		properties: properties,
 	});

@@ -45,6 +45,7 @@ type Video = {
 /**
  * This function parses the videos from the database.
  * @param dbResults The videos from the database.
+ * @returns The formatted videos and TV Shows.
  * @returns The formatted videos.
  */
 
@@ -264,7 +265,72 @@ function parseVideoProgress(dbResults: any): VideoProgress[] {
 	return results;
 }
 
-export type { Video, Watchlist, Permission, ageRating, Category, VideoProgress };
+/**
+ * The type for all the TV Show Data.
+ * @property id: The id of the TV Show.
+ * @property name: The name of the TV Show.
+ * @property description: The description of the TV Show.
+ * @property urlName: The name to use for the URL.
+ * @property thumbnailURL: The URL to get the thumbnail from.
+ * @property thumbnailURLKey: The key to use for the thumbnail.
+ * @property dateReleased: The date the TV Show was released.
+ * @property ageRating: The age rating of the TV Show.
+ * @property ageRatingInfo: The age rating information of the TV Show.
+ * @property category: The category of the TV Show.
+ * @property isInWatchlist: Whether the TV Show is in the user's watchlist.
+ * @property nextEpisodeId: The id of the next episode.
+ * @property episodeStatus: The episode status of the TV Show.
+ */
+
+type TVShow = {
+	id: number;
+	name: string;
+	description: string;
+	urlName: string;
+	thumbnailURL: string;
+	thumbnailURLKey?: string;
+	dateReleased: string;
+	ageRating: string;
+	ageRatingInfo?: string;
+	category: string;
+	isInWatchlist?: boolean;
+	nextEpisodeId?: number;
+	episodeStatus?: [id: number, isWatched: boolean];
+	isTVShowCompleted?: boolean;
+};
+
+/**
+ * This function parses the TV Shows from the database.
+ * @param dbResults The TV Shows results from the database.
+ * @param userId The userId of the user to get the TV Shows for.
+ * @returns The parsed TV Shows.
+ */
+
+async function parseTVShows(dbResults: any, userId: string): Promise<TVShow[]> {
+	const results = (dbResults.rows || []).map(async (row: TVShow) => ({
+		id: row.id,
+		name: row.name,
+		description: row.description,
+		urlName: row.urlName,
+		thumbnailURL: row.thumbnailURL,
+		thumbnailUrlKey: row.thumbnailURLKey,
+		dateReleased: row.dateReleased,
+		ageRating: row.ageRating,
+		ageRatingInfo: (await getAgeRatingInfo(row.ageRating)) || "Age Rating not found",
+		category: row.category,
+		isInWatchlist: (await getWatchlist(userId)).find(
+			(watchlistVideo) => watchlistVideo.videoId === row.id,
+		)
+			? true
+			: false,
+		nextEpisodeId: 0,
+		episodeStatus: [],
+		isTVShowCompleted: false,
+	}));
+	return await Promise.all(results);
+}
+
+export type { Video, Watchlist, Permission, ageRating, Category, VideoProgress, TVShow };
 export {
 	parseAgeRatings,
 	parseCategories,
@@ -272,4 +338,5 @@ export {
 	parseVideos,
 	parseWatchlist,
 	parseVideoProgress,
+	parseTVShows,
 };
