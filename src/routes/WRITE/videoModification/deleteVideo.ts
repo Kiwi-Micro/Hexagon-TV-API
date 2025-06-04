@@ -20,20 +20,10 @@ router.delete("/deleteVideo", async (req, res) => {
 			).canModifyVideos,
 		)
 	) {
-		try {
-			const status = await deleteVideo(req.body);
-			if (status) {
-				sendAnalyticsEvent(req.body.userId as string, "api.videos.deleteVideo");
-				res.json({ status: "success" });
-			} else {
-				sendAnalyticsEvent(req.body.userId as string, "api.videos.deleteVideo.failed");
-				res.status(409).json({ status: "video not found" });
-			}
-		} catch (error: any) {
-			sendAnalyticsEvent(req.body.userId as string, "api.videos.deleteVideo.failed");
-			console.error("Error deleting video:", error);
-			res.status(500).json({ status: "server error" });
-		}
+		const result = await deleteVideo(req.body);
+
+		sendAnalyticsEvent(req.body.userId as string, result.analyticsEventType);
+		res.status(result.httpStatus).json({ status: result.status });
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,

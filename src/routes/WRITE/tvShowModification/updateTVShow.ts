@@ -4,12 +4,12 @@ import {
 	sendAnalyticsEvent,
 } from "../../../utils/database";
 import { getUserPermissions } from "../../../utils/permissions";
-import { updateVideo } from "../../../utils/video";
+import { updateTVShow } from "../../../utils/tvShow";
 import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
-router.post("/updateVideo", async (req, res) => {
+router.post("/updateTVShow", async (req, res) => {
 	if (
 		await checkPermissionsAndAuthenticate(
 			req.body.userId,
@@ -17,27 +17,17 @@ router.post("/updateVideo", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).canModifyVideos,
+			).canModifyTVShows,
 		)
 	) {
-		try {
-			const status = await updateVideo(req.body);
-			if (status) {
-				sendAnalyticsEvent(req.body.userId as string, "api.tvShows.updateVideo");
-				res.json({ status: "success" });
-			} else {
-				sendAnalyticsEvent(req.body.userId as string, "api.tvShows.updateVideo.failed");
-				res.status(409).json({ status: "video not found" });
-			}
-		} catch (error: any) {
-			sendAnalyticsEvent(req.body.userId as string, "api.tvShows.updateVideo.failed");
-			console.error("Error adding video:", error);
-			res.status(500).json({ status: "server error" });
-		}
+		const result = await updateTVShow(req.body);
+
+		sendAnalyticsEvent(req.body.userId as string, result.analyticsEventType);
+		res.status(result.httpStatus).json({ status: result.status });
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,
-			"api.tvShows.updateVideo.invalidCredentials",
+			"api.tvShows.updateTVShow.invalidCredentials",
 		);
 		res.status(403).json({ status: "invalid credentials" });
 	}

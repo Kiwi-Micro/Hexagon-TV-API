@@ -7,33 +7,14 @@ const router = Router();
 
 router.post("/updateUserVideoProgress", async (req, res) => {
 	if (await auth(req.body.sessionId, req.body.userId)) {
-		try {
-			const status = await updateUserVideoProgress(req.body);
-			if (status) {
-				sendAnalyticsEvent(
-					req.body.userId as string,
-					"api.videoProgress.updateUserVideoProgress",
-				);
-				res.json({ status: "success" });
-			} else {
-				sendAnalyticsEvent(
-					req.body.userId as string,
-					"api.videoProgress.updateUserVideoProgress.failed",
-				);
-				res.status(409).json({ status: "user not found" });
-			}
-		} catch (error: any) {
-			sendAnalyticsEvent(
-				req.body.userId as string,
-				"api.videoProgress.updateUserVideoProgress.failed",
-			);
-			console.error("Error updating user progress:", error);
-			res.status(500).json({ status: "server error" });
-		}
+		const result = await updateUserVideoProgress(req.body);
+
+		sendAnalyticsEvent(req.body.userId as string, result.analyticsEventType);
+		res.status(result.httpStatus).json({ status: result.status });
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,
-			"api.videoProgress.updateUserVideoProgress.failed",
+			"api.videoProgress.updateUserVideoProgress.invalidCredentials",
 		);
 		res.status(403).json({ status: "invalid credentials" });
 	}

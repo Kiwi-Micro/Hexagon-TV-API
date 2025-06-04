@@ -4,12 +4,10 @@
  * @param res The response object
  */
 
-function printEndpointReached(req: any, res?: any) {
+export function printEndpointReached(req: any, res?: any) {
 	console.log(
 		`${req.socket.remoteAddress}: ${new Date().toString().slice(4, 24)} GMT+0000: ${
 			req.method
 		} ${req.url} ${res ? res.statusCode : ""}`,
 	);
 }
-
-export { printEndpointReached };

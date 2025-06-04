@@ -14,7 +14,7 @@ import config from "../../config.json";
  * @returns The results of the SQL query.
  */
 
-async function runSQL(
+export async function runSQL(
 	needsRW: boolean,
 	sql: string,
 	hasArgs: boolean,
@@ -42,7 +42,7 @@ async function runSQL(
  * @returns True if the user is authenticated, false otherwise.
  */
 
-async function auth(sessionId: string, userId: string): Promise<boolean> {
+export async function auth(sessionId: string, userId: string): Promise<boolean> {
 	try {
 		const status = "active";
 		const sessions = await clerkClient.sessions.getSessionList({
@@ -81,7 +81,7 @@ async function auth(sessionId: string, userId: string): Promise<boolean> {
  * @returns True if the user is authenticated and has the correct permissions, false otherwise.
  */
 
-async function checkPermissionsAndAuthenticate(
+export async function checkPermissionsAndAuthenticate(
 	userId: string,
 	sessionId: string,
 	shouldCheckExtraPermissions: boolean,
@@ -98,13 +98,11 @@ async function checkPermissionsAndAuthenticate(
 	}
 }
 
-const posthogKey = config[0]["POSTHOG_KEY"] || "";
-
 /**
  * The PostHog client.
  */
 
-const client = new PostHog(posthogKey, {
+const client = new PostHog(config[0]["POSTHOG_KEY"] || "", {
 	host: "https://us.i.posthog.com",
 });
 
@@ -115,7 +113,11 @@ const client = new PostHog(posthogKey, {
  * @param properties
  */
 
-function sendAnalyticsEvent(userId: string, event: string, properties?: any): void {
+export function sendAnalyticsEvent(
+	userId: string,
+	event: string,
+	properties?: any,
+): void {
 	client.capture({
 		distinctId: userId || "user_noId",
 		event: event,
@@ -124,5 +126,3 @@ function sendAnalyticsEvent(userId: string, event: string, properties?: any): vo
 
 	client.flush();
 }
-
-export { auth, checkPermissionsAndAuthenticate, runSQL, sendAnalyticsEvent };

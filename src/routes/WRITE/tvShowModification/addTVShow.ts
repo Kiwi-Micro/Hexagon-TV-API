@@ -20,20 +20,10 @@ router.post("/addTVShow", async (req, res) => {
 			).canModifyTVShows,
 		)
 	) {
-		try {
-			const status = await addTVShow(req.body);
-			if (status) {
-				sendAnalyticsEvent(req.body.userId as string, "api.tvShows.addTVShow");
-				res.json({ status: "success" });
-			} else {
-				sendAnalyticsEvent(req.body.userId as string, "api.tvShows.addTVShow.failed");
-				res.status(409).json({ status: "unable to add tv show" });
-			}
-		} catch (error: any) {
-			sendAnalyticsEvent(req.body.userId as string, "api.tvShows.addTVShow.failed");
-			console.error("Error adding TV Show:", error);
-			res.status(500).json({ status: "server error" });
-		}
+		const result = await addTVShow(req.body);
+
+		sendAnalyticsEvent(req.body.userId as string, result.analyticsEventType);
+		res.status(result.httpStatus).json({ status: result.status });
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,

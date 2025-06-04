@@ -1,5 +1,5 @@
 import { ResultSet } from "@libsql/client";
-import { parsePermissions, type Permission } from "./types";
+import { parsePermissions, ReturnData, type Permission } from "./types";
 import { runSQL } from "./database";
 
 /**
@@ -8,7 +8,7 @@ import { runSQL } from "./database";
  * @returns True if the user row was added, false otherwise.
  */
 
-async function addUserRow(userId: string): Promise<boolean> {
+export async function addUserRow(userId: string): Promise<boolean> {
 	const dbResults: ResultSet = await runSQL(
 		true,
 		"INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategories, canModifyTVShows, canModifyAgeRatings) VALUES (?, 0, 0, 0, 0, 0, 0) ON CONFLICT (userId) DO NOTHING;",
@@ -24,37 +24,59 @@ async function addUserRow(userId: string): Promise<boolean> {
  * @returns True if the user's permissions were updated, false otherwise.
  */
 
-async function updateUserPermissions(data: Permission): Promise<boolean> {
-	await addUserRow(data.userId);
-	const dbGetResults = await getUserPermissions(data.userId);
+export async function updateUserPermissions(data: Permission): Promise<ReturnData> {
+	try {
+		await addUserRow(data.userId);
+		const dbGetResults = await getUserPermissions(data.userId);
 
-	const fields = [
-		"isAdmin",
-		"canModifyPermissions",
-		"canModifyVideos",
-		"canModifyCategories",
-		"canModifyTVShows",
-		"canModifyAgeRatings",
-	] as const;
+		const fields = [
+			"isAdmin",
+			"canModifyPermissions",
+			"canModifyVideos",
+			"canModifyCategories",
+			"canModifyTVShows",
+			"canModifyAgeRatings",
+		] as const;
 
-	const inputs = Object.fromEntries(
-		fields.map((field) => [field, data[field] ?? dbGetResults[field]]),
-	);
-	const dbResults: ResultSet = await runSQL(
-		true,
-		"UPDATE userPermissions SET isAdmin = ?, canModifyPermissions = ?, canModifyVideos = ?, canModifyCategories = ?, canModifyTVShows = ?, canModifyAgeRatings = ? WHERE userId = ?;",
-		true,
-		[
-			inputs.isAdmin,
-			inputs.canModifyPermissions,
-			inputs.canModifyVideos,
-			inputs.canModifyCategories,
-			inputs.canModifyTVShows,
-			inputs.canModifyAgeRatings,
-			data.userId,
-		],
-	);
-	return dbResults.rowsAffected > 0;
+		const inputs = Object.fromEntries(
+			fields.map((field) => [field, data[field] ?? dbGetResults[field]]),
+		);
+		const dbResults: ResultSet = await runSQL(
+			true,
+			"UPDATE userPermissions SET isAdmin = ?, canModifyPermissions = ?, canModifyVideos = ?, canModifyCategories = ?, canModifyTVShows = ?, canModifyAgeRatings = ? WHERE userId = ?;",
+			true,
+			[
+				inputs.isAdmin,
+				inputs.canModifyPermissions,
+				inputs.canModifyVideos,
+				inputs.canModifyCategories,
+				inputs.canModifyTVShows,
+				inputs.canModifyAgeRatings,
+				data.userId,
+			],
+		);
+		return dbResults.rowsAffected > 0
+			? {
+					status: "success",
+					httpStatus: 200,
+					analyticsEventType: "api.permissions.updateUserPermissions",
+					data: null,
+			  }
+			: {
+					status: "server error",
+					httpStatus: 500,
+					analyticsEventType: "api.permissions.updateUserPermissions.failed",
+					data: null,
+			  };
+	} catch (error: any) {
+		console.error("Error updating user permissions:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.permissions.updateUserPermissions.failed",
+			data: null,
+		};
+	}
 }
 
 /**
@@ -63,7 +85,7 @@ async function updateUserPermissions(data: Permission): Promise<boolean> {
  * @returns The given user's permissions.
  */
 
-async function getUserPermissions(userId: string): Promise<Permission> {
+export async function getUserPermissions(userId: string): Promise<Permission> {
 	const dbResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM userPermissions WHERE userId = ?",
@@ -72,5 +94,3 @@ async function getUserPermissions(userId: string): Promise<Permission> {
 	);
 	return parsePermissions(dbResults)[0];
 }
-
-export { addUserRow, updateUserPermissions, getUserPermissions };

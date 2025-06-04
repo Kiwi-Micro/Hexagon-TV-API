@@ -20,15 +20,10 @@ router.post("/addCategory", async (req, res) => {
 			).canModifyCategories,
 		)
 	) {
-		try {
-			await addCategory(req.body);
-			sendAnalyticsEvent(req.body.userId as string, "api.categories.addCategory");
-			res.json({ status: "success" });
-		} catch (error: any) {
-			sendAnalyticsEvent(req.body.userId as string, "api.categories.addCategory.failed");
-			console.error("Error adding category:", error);
-			res.status(500).json({ status: "server error" });
-		}
+		const result = await addCategory(req.body);
+
+		sendAnalyticsEvent(req.body.userId as string, result.analyticsEventType);
+		res.status(result.httpStatus).json({ status: result.status });
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,

@@ -20,20 +20,10 @@ router.post("/updateVideo", async (req, res) => {
 			).canModifyVideos,
 		)
 	) {
-		try {
-			const status = await updateVideo(req.body);
-			if (status) {
-				sendAnalyticsEvent(req.body.userId as string, "api.videos.updateVideo");
-				res.json({ status: "success" });
-			} else {
-				sendAnalyticsEvent(req.body.userId as string, "api.videos.updateVideo.failed");
-				res.status(409).json({ status: "video not found" });
-			}
-		} catch (error: any) {
-			sendAnalyticsEvent(req.body.userId as string, "api.videos.updateVideo.failed");
-			console.error("Error adding video:", error);
-			res.status(500).json({ status: "server error" });
-		}
+		const result = await updateVideo(req.body);
+
+		sendAnalyticsEvent(req.body.userId as string, result.analyticsEventType);
+		res.status(result.httpStatus).json({ status: result.status });
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,

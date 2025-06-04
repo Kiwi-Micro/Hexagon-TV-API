@@ -1,6 +1,6 @@
 import { ResultSet } from "@libsql/client";
 import { utapi } from "./connections";
-import { parseTVShows, type TVShow } from "./types";
+import { parseTVShows, ReturnData, type TVShow } from "./types";
 import { runSQL } from "./database";
 
 /**
@@ -9,7 +9,7 @@ import { runSQL } from "./database";
  * @returns An array of TV Shows.
  */
 
-async function getTVShows(userId: string): Promise<TVShow[]> {
+export async function getTVShows(userId: string): Promise<TVShow[]> {
 	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM tvShows", false);
 	return parseTVShows(dbResults, userId);
 }
@@ -21,7 +21,7 @@ async function getTVShows(userId: string): Promise<TVShow[]> {
  * @returns The TV Show or null if it doesn't exist.
  */
 
-async function getTVShow(id: number, userId: string): Promise<TVShow | null> {
+export async function getTVShow(id: number, userId: string): Promise<TVShow | null> {
 	const dbResults: ResultSet = await runSQL(
 		false,
 		"SELECT * FROM tvShows WHERE id = ?",
@@ -40,23 +40,45 @@ async function getTVShow(id: number, userId: string): Promise<TVShow | null> {
  * @returns True if the TV Show was added, false otherwise.
  */
 
-async function addTVShow(data: TVShow): Promise<boolean> {
-	const dbResults: ResultSet = await runSQL(
-		true,
-		"INSERT INTO tvShows (name, description, urlName, thumbnailURL, thumbnailURLKey, dateReleased, ageRating, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-		true,
-		[
-			data.name,
-			data.description,
-			data.urlName,
-			data.thumbnailURL,
-			data.thumbnailURL.split("/f/").pop() || "",
-			data.dateReleased,
-			data.ageRating,
-			data.category,
-		],
-	);
-	return dbResults.rowsAffected > 0;
+export async function addTVShow(data: TVShow): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(
+			true,
+			"INSERT INTO tvShows (name, description, urlName, thumbnailURL, thumbnailURLKey, dateReleased, ageRating, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+			true,
+			[
+				data.name,
+				data.description,
+				data.urlName,
+				data.thumbnailURL,
+				data.thumbnailURL.split("/f/").pop() || "",
+				data.dateReleased,
+				data.ageRating,
+				data.category,
+			],
+		);
+		return dbResults.rowsAffected > 0
+			? {
+					status: "success",
+					httpStatus: 200,
+					analyticsEventType: "api.tvShows.addTVShow",
+					data: null,
+			  }
+			: {
+					status: "server error",
+					httpStatus: 500,
+					analyticsEventType: "api.tvShows.addTVShow.failed",
+					data: null,
+			  };
+	} catch (error: any) {
+		console.error("Error adding TV Show:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.tvShows.addTVShow.failed",
+			data: null,
+		};
+	}
 }
 
 /**
@@ -65,34 +87,61 @@ async function addTVShow(data: TVShow): Promise<boolean> {
  * @returns True if the TV Show was updated, false otherwise.
  */
 
-async function updateTVShow(data: TVShow): Promise<boolean> {
-	const tvShowData = await getTVShow(data.id, "");
-	if (tvShowData == null) {
-		return false;
+export async function updateTVShow(data: TVShow): Promise<ReturnData> {
+	try {
+		const tvShowData = await getTVShow(data.id, "");
+		if (tvShowData == null) {
+			return {
+				status: "tv show not found",
+				httpStatus: 404,
+				analyticsEventType: "api.tvShows.updateTVShow.failed",
+				data: null,
+			};
+		}
+
+		const thumbnailUrlKey = data.thumbnailURL
+			? data.thumbnailURL.split("/f/").pop() || ""
+			: tvShowData.thumbnailURLKey || "";
+
+		const dbResults: ResultSet = await runSQL(
+			true,
+			"UPDATE tvShows SET name = ?, description = ?, urlName = ?, thumbnailURL = ?, thumbnailURLKey = ?, dateReleased = ?, ageRating = ?, category = ? WHERE id = ?;",
+			true,
+			[
+				data.name || tvShowData.name,
+				data.description || tvShowData.description,
+				data.urlName || tvShowData.urlName,
+				data.thumbnailURL || tvShowData.thumbnailURL,
+				thumbnailUrlKey,
+				data.dateReleased || tvShowData.dateReleased,
+				data.ageRating || tvShowData.ageRating,
+				data.category || tvShowData.category,
+				data.id,
+			],
+		);
+
+		return dbResults.rowsAffected > 0
+			? {
+					status: "success",
+					httpStatus: 200,
+					analyticsEventType: "api.tvShows.updateTVShow",
+					data: null,
+			  }
+			: {
+					status: "server error",
+					httpStatus: 500,
+					analyticsEventType: "api.tvShows.updateTVShow.failed",
+					data: null,
+			  };
+	} catch (error: any) {
+		console.error("Error updating TV Show:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.tvShows.updateTVShow.failed",
+			data: null,
+		};
 	}
-
-	const thumbnailUrlKey = data.thumbnailURL
-		? data.thumbnailURL.split("/f/").pop() || ""
-		: tvShowData.thumbnailURLKey || "";
-
-	const dbResults: ResultSet = await runSQL(
-		true,
-		"UPDATE tvShows SET name = ?, description = ?, urlName = ?, thumbnailURL = ?, thumbnailURLKey = ?, dateReleased = ?, ageRating = ?, category = ? WHERE id = ?;",
-		true,
-		[
-			data.name || tvShowData.name,
-			data.description || tvShowData.description,
-			data.urlName || tvShowData.urlName,
-			data.thumbnailURL || tvShowData.thumbnailURL,
-			thumbnailUrlKey,
-			data.dateReleased || tvShowData.dateReleased,
-			data.ageRating || tvShowData.ageRating,
-			data.category || tvShowData.category,
-			data.id,
-		],
-	);
-
-	return dbResults.rowsAffected > 0;
 }
 
 /**
@@ -101,25 +150,50 @@ async function updateTVShow(data: TVShow): Promise<boolean> {
  * @returns True if the TV Show was deleted, false otherwise.
  */
 
-async function deleteTVShow(data: any): Promise<boolean> {
-	const dbGetResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM tvShows WHERE id = ?",
-		true,
-		[data.id],
-	);
-	if (dbGetResults.rows.length === 0) {
-		return false;
+export async function deleteTVShow(data: any): Promise<ReturnData> {
+	try {
+		const dbGetResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM tvShows WHERE id = ?",
+			true,
+			[data.id],
+		);
+		if (dbGetResults.rows.length === 0) {
+			return {
+				status: "tv show not found",
+				httpStatus: 404,
+				analyticsEventType: "api.tvShows.deleteTVShow.failed",
+				data: null,
+			};
+		}
+		const thumbnailUrlKey = dbGetResults.rows[0].thumbnailURLKey as string;
+		await utapi.deleteFiles(thumbnailUrlKey);
+		const dbDeleteResults: ResultSet = await runSQL(
+			true,
+			"DELETE FROM tVShows WHERE id = ?",
+			true,
+			[data.id],
+		);
+		return dbDeleteResults.rowsAffected > 0
+			? {
+					status: "success",
+					httpStatus: 200,
+					analyticsEventType: "api.tvShows.deleteTVShow",
+					data: null,
+			  }
+			: {
+					status: "server error",
+					httpStatus: 500,
+					analyticsEventType: "api.tvShows.deleteTVShow.failed",
+					data: null,
+			  };
+	} catch (error: any) {
+		console.error("Error deleting TV Show:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.tvShows.deleteTVShow.failed",
+			data: null,
+		};
 	}
-	const thumbnailUrlKey = dbGetResults.rows[0].thumbnailURLKey as string;
-	await utapi.deleteFiles(thumbnailUrlKey);
-	const dbDeleteResults: ResultSet = await runSQL(
-		true,
-		"DELETE FROM tVShows WHERE id = ?",
-		true,
-		[data.id],
-	);
-	return dbDeleteResults.rowsAffected > 0;
 }
-
-export { getTVShows, getTVShow, addTVShow, updateTVShow, deleteTVShow };

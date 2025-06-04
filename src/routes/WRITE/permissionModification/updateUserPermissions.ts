@@ -20,33 +20,14 @@ router.post("/updateUserPermissions", async (req, res) => {
 			).canModifyPermissions,
 		)
 	) {
-		try {
-			const status = await updateUserPermissions(req.body);
-			if (status) {
-				sendAnalyticsEvent(
-					req.body.userId as string,
-					"api.permissions.updateUserPermissions",
-				);
-				res.json({ status: "success" });
-			} else {
-				sendAnalyticsEvent(
-					req.body.userId as string,
-					"api.permissions.updateUserPermissions.failed",
-				);
-				res.status(409).json({ status: "user not found" });
-			}
-		} catch (error: any) {
-			sendAnalyticsEvent(
-				req.body.userId as string,
-				"api.permissions.updateUserPermissions.failed",
-			);
-			console.error("Error updating user permissions:", error);
-			res.status(500).json({ status: "server error" });
-		}
+		const result = await updateUserPermissions(req.body);
+
+		sendAnalyticsEvent(req.body.userId as string, result.analyticsEventType);
+		res.status(result.httpStatus).json({ status: result.status });
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,
-			"api.permissions.updateUserPermissions.failed",
+			"api.permissions.updateUserPermissions.invalidCredentials",
 		);
 		res.status(403).json({ status: "invalid credentials" });
 	}

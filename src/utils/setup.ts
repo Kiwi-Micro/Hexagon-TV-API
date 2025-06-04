@@ -20,7 +20,7 @@ import getTVShowsEndpoint from "../routes/READ/getTVShows";
 import { createRouteHandler } from "uploadthing/express";
 import config from "../../config.json";
 
-function createEndpoints(app: any) {
+export function createEndpoints(app: any) {
 	const endpoints = [
 		{
 			path: "/ageRatings",
@@ -110,5 +110,3 @@ function createEndpoints(app: any) {
 		app.use(endpoint.path, endpoint.handler);
 	}
 }
-
-export { createEndpoints };
