@@ -6,14 +6,10 @@ import { sendAnalyticsEvent } from "../../utils/database";
 const router = Router();
 
 router.get("/getWatchlist", async (req, res) => {
-	try {
-		res.json(await getWatchlist(req.query.userId as string));
-		sendAnalyticsEvent(req.query.userId as string, "api.watchlist.getWatchlist");
-	} catch (error: any) {
-		sendAnalyticsEvent(req.query.userId as string, "api.watchlist.getWatchlist.failed");
-		console.error("Error fetching watchlist:", error);
-		res.status(500).json({ status: "server error" });
-	}
+	const result = await getWatchlist(req.query.userId as string);
+
+	res.status(result.httpStatus).json({ ...result.data, status: result.status });
+	sendAnalyticsEvent(req.query.userId as string, result.analyticsEventType);
 	printEndpointReached(req, res);
 });
 

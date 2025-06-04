@@ -17,7 +17,7 @@ router.delete("/deleteVideo", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).canModifyVideos,
+			).data.canModifyVideos,
 		)
 	) {
 		const result = await deleteVideo(req.body);

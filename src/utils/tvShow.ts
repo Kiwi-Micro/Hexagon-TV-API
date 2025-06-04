@@ -9,9 +9,24 @@ import { runSQL } from "./database";
  * @returns An array of TV Shows.
  */
 
-export async function getTVShows(userId: string): Promise<TVShow[]> {
-	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM tvShows", false);
-	return parseTVShows(dbResults, userId);
+export async function getTVShows(userId: string): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(false, "SELECT * FROM tvShows", false);
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.tvShows.getTVShows",
+			data: parseTVShows(dbResults, userId),
+		};
+	} catch (error: any) {
+		console.error("Error getting TV Shows:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.tvShows.getTVShows.failed",
+			data: null,
+		};
+	}
 }
 
 /**
@@ -21,17 +36,37 @@ export async function getTVShows(userId: string): Promise<TVShow[]> {
  * @returns The TV Show or null if it doesn't exist.
  */
 
-export async function getTVShow(id: number, userId: string): Promise<TVShow | null> {
-	const dbResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM tvShows WHERE id = ?",
-		true,
-		[id],
-	);
-	if (dbResults.rows.length === 0) {
-		return null;
+export async function getTVShow(id: number, userId: string): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM tvShows WHERE id = ?",
+			true,
+			[id],
+		);
+		if (dbResults.rows.length === 0) {
+			return {
+				status: "tv show not found",
+				httpStatus: 404,
+				analyticsEventType: "api.tvShows.getTVShow.failed",
+				data: null,
+			};
+		}
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.tvShows.getTVShow",
+			data: (await parseTVShows(dbResults, userId))[0],
+		};
+	} catch (error: any) {
+		console.error("Error getting TV Show:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.tvShows.getTVShow.failed",
+			data: null,
+		};
 	}
-	return (await parseTVShows(dbResults, userId))[0];
 }
 
 /**
@@ -89,7 +124,7 @@ export async function addTVShow(data: TVShow): Promise<ReturnData> {
 
 export async function updateTVShow(data: TVShow): Promise<ReturnData> {
 	try {
-		const tvShowData = await getTVShow(data.id, "");
+		const tvShowData = (await getTVShow(data.id, "")).data;
 		if (tvShowData == null) {
 			return {
 				status: "tv show not found",

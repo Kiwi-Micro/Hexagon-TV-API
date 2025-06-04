@@ -7,14 +7,25 @@ import { parseCategories, ReturnData, type Category } from "./types";
  * @returns An array of categories.
  */
 
-export async function getCategories(): Promise<Category[] | null> {
-	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM categories", false);
+export async function getCategories(): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(false, "SELECT * FROM categories", false);
 
-	if (dbResults.rows.length === 0) {
-		throw new Error("Error getting categories (0 Rows Returned)");
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.categories.getCategories",
+			data: parseCategories(dbResults),
+		};
+	} catch (error: any) {
+		console.error("Error getting categories:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.categories.getCategories.failed",
+			data: null,
+		};
 	}
-
-	return parseCategories(dbResults);
 }
 
 /**
@@ -22,19 +33,37 @@ export async function getCategories(): Promise<Category[] | null> {
  * @returns An array of categories.
  */
 
-export async function getCategory(id: number): Promise<Category | null> {
-	const dbResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM categories WHERE id = ?",
-		true,
-		[id],
-	);
-
-	if (dbResults.rows.length === 0) {
-		throw new Error("Error getting category (0 Rows Returned)");
+export async function getCategory(id: number): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM categories WHERE id = ?",
+			true,
+			[id],
+		);
+		if (dbResults.rows.length === 0) {
+			return {
+				status: "category not found",
+				httpStatus: 404,
+				analyticsEventType: "api.categories.getCategory.failed",
+				data: null,
+			};
+		}
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.categories.getCategory",
+			data: parseCategories(dbResults)[0],
+		};
+	} catch (error: any) {
+		console.error("Error getting category:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.categories.getCategory.failed",
+			data: null,
+		};
 	}
-
-	return parseCategories(dbResults)[0];
 }
 
 /**
@@ -84,7 +113,7 @@ export async function addCategory(data: Category): Promise<ReturnData> {
 
 export async function updateCategory(data: Category): Promise<ReturnData> {
 	try {
-		const categoryData = await getCategory(data.id);
+		const categoryData = (await getCategory(data.id)).data;
 		if (categoryData == null) {
 			return {
 				status: "category not found",

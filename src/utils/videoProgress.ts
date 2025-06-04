@@ -74,12 +74,35 @@ export async function updateUserVideoProgress(data: VideoProgress): Promise<Retu
 export async function getUserVideoProgress(
 	userId: string,
 	videoId: string,
-): Promise<VideoProgress> {
-	const dbResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM continueWatching WHERE userId = ? AND videoId = ?",
-		true,
-		[userId, videoId],
-	);
-	return parseVideoProgress(dbResults)[0];
+): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM continueWatching WHERE userId = ? AND videoId = ?",
+			true,
+			[userId, videoId],
+		);
+		if (dbResults.rows.length === 0) {
+			return {
+				status: "video progress not found",
+				httpStatus: 404,
+				analyticsEventType: "api.videoProgress.getUserVideoProgress.failed",
+				data: null,
+			};
+		}
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.videoProgress.getUserVideoProgress",
+			data: parseVideoProgress(dbResults)[0],
+		};
+	} catch (error: any) {
+		console.error("Error getting user video progress:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.videoProgress.getUserVideoProgress.failed",
+			data: null,
+		};
+	}
 }

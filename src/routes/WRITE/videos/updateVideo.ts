@@ -17,7 +17,7 @@ router.post("/updateVideo", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).canModifyVideos,
+			).data.canModifyVideos,
 		)
 	) {
 		const result = await updateVideo(req.body);

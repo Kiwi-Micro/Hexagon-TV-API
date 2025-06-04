@@ -6,22 +6,13 @@ import { sendAnalyticsEvent } from "../../utils/database";
 const router = Router();
 
 router.get("/getUserVideoProgress", async (req, res) => {
-	try {
-		res.json(
-			await getUserVideoProgress(req.query.userId as string, req.query.videoId as string),
-		);
-		sendAnalyticsEvent(
-			req.query.userId as string,
-			"api.videoProgress.getUserVideoProgress",
-		);
-	} catch (error: any) {
-		sendAnalyticsEvent(
-			req.query.userId as string,
-			"api.videoProgress.getUserVideoProgress.failed",
-		);
-		console.error("Error fetching permissions:", error);
-		res.status(500).json({ status: "server error" });
-	}
+	const result = await getUserVideoProgress(
+		req.query.userId as string,
+		req.query.videoId as string,
+	);
+
+	res.status(result.httpStatus).json({ ...result.data, status: result.status });
+	sendAnalyticsEvent(req.query.userId as string, result.analyticsEventType);
 	printEndpointReached(req, res);
 });
 

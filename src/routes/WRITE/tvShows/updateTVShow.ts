@@ -17,7 +17,7 @@ router.post("/updateTVShow", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).canModifyTVShows,
+			).data.canModifyTVShows,
 		)
 	) {
 		const result = await updateTVShow(req.body);

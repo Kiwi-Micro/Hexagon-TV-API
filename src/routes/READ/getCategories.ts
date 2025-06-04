@@ -6,14 +6,10 @@ import { sendAnalyticsEvent } from "../../utils/database";
 const router = Router();
 
 router.get("/getCategories", async (req, res) => {
-	try {
-		res.json(await getCategories());
-		sendAnalyticsEvent(req.query.userId as string, "api.categories.getCategories");
-	} catch (error: any) {
-		sendAnalyticsEvent(req.query.userId as string, "api.categories.getCategories.failed");
-		console.error("Error fetching categories:", error.message);
-		res.status(500).json({ status: "server error" });
-	}
+	const result = await getCategories();
+
+	res.status(result.httpStatus).json({ ...result.data, status: result.status });
+	sendAnalyticsEvent(req.query.userId as string, result.analyticsEventType);
 	printEndpointReached(req, res);
 });
 

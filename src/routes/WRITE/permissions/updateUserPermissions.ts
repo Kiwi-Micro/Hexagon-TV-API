@@ -17,7 +17,7 @@ router.post("/updateUserPermissions", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).canModifyPermissions,
+			).data.canModifyPermissions,
 		)
 	) {
 		const result = await updateUserPermissions(req.body);

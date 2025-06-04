@@ -1,5 +1,5 @@
 import { ResultSet } from "@libsql/client";
-import { parseAgeRatings, type ageRating } from "./types";
+import { parseAgeRatings, ReturnData, type ageRating } from "./types";
 import { runSQL } from "./database";
 
 /**
@@ -7,13 +7,25 @@ import { runSQL } from "./database";
  * @returns All the age ratings.
  */
 
-export async function getAgeRatings(): Promise<ageRating[] | null> {
-	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM ageRatings", false);
-	if (dbResults.rows.length === 0) {
-		console.log("No age ratings found");
-		return null;
+export async function getAgeRatings(): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(false, "SELECT * FROM ageRatings", false);
+
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.ageRatings.getAgeRatings",
+			data: parseAgeRatings(dbResults),
+		};
+	} catch (error: any) {
+		console.error("Error getting age ratings:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.ageRatings.getAgeRatings.failed",
+			data: null,
+		};
 	}
-	return parseAgeRatings(dbResults);
 }
 
 /**
@@ -22,16 +34,36 @@ export async function getAgeRatings(): Promise<ageRating[] | null> {
  * @returns All the age ratings.
  */
 
-export async function getAgeRatingInfo(ageRating: string): Promise<string | null> {
-	const dbResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM ageRatings WHERE ageRating = ?",
-		true,
-		[ageRating],
-	);
-	if (dbResults.rows.length === 0) {
-		console.log("No age rating found");
-		return null;
+export async function getAgeRatingInfo(ageRating: string): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM ageRatings WHERE ageRating = ?",
+			true,
+			[ageRating],
+		);
+		if (dbResults.rows.length === 0) {
+			return {
+				status: "age rating not found",
+				httpStatus: 404,
+				analyticsEventType: "api.ageRatings.getAgeRatingInfo.failed",
+				data: null,
+			};
+		}
+
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.ageRatings.getAgeRatingInfo",
+			data: dbResults.rows[0].ageRatingInfo as string,
+		};
+	} catch (error: any) {
+		console.error("Error getting age rating info:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.ageRatings.getAgeRatingInfo.failed",
+			data: null,
+		};
 	}
-	return dbResults.rows[0].ageRatingInfo as string;
 }

@@ -72,8 +72,8 @@ export async function parseVideos(dbResults: any, userId: string): Promise<Video
 		thumbnailUrlKey: row.thumbnailURLKey,
 		isPartOfTVShow: row.isPartOfTVShow == 1 ? true : false,
 		tvShowId: row.tvShowId,
-		isInWatchlist: (await getWatchlist(userId)).find(
-			(watchlistVideo) => watchlistVideo.videoId === row.id,
+		isInWatchlist: ((await getWatchlist(userId)).data).find(
+			(watchlistVideo: Watchlist) => watchlistVideo.videoId === row.id,
 		)
 			? true
 			: false,
@@ -335,8 +335,8 @@ export async function parseTVShows(dbResults: any, userId: string): Promise<TVSh
 		ageRating: row.ageRating,
 		ageRatingInfo: (await getAgeRatingInfo(row.ageRating)) || "Age Rating not found",
 		category: row.category,
-		isInWatchlist: (await getWatchlist(userId)).find(
-			(watchlistVideo) => watchlistVideo.videoId === row.id,
+		isInWatchlist: ((await getWatchlist(userId)).data).find(
+			(watchlistVideo: Watchlist) => watchlistVideo.videoId === row.id,
 		)
 			? true
 			: false,

@@ -9,9 +9,24 @@ import { runSQL } from "./database";
  * @returns An array of videos.
  */
 
-export async function getVideos(userId: string): Promise<Video[]> {
-	const dbResults: ResultSet = await runSQL(false, "SELECT * FROM videos", false);
-	return parseVideos(dbResults, userId);
+export async function getVideos(userId: string): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(false, "SELECT * FROM videos", false);
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.videos.getVideos",
+			data: parseVideos(dbResults, userId),
+		};
+	} catch (error: any) {
+		console.error("Error getting videos:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.videos.getVideos.failed",
+			data: null,
+		};
+	}
 }
 
 /**
@@ -20,17 +35,37 @@ export async function getVideos(userId: string): Promise<Video[]> {
  * @returns The video or null if it doesn't exist.
  */
 
-export async function getVideo(id: number, userId: string): Promise<Video | null> {
-	const dbResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM videos WHERE id = ?",
-		true,
-		[id],
-	);
-	if (dbResults.rows.length === 0) {
-		return null;
+export async function getVideo(id: number, userId: string): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM videos WHERE id = ?",
+			true,
+			[id],
+		);
+		if (dbResults.rows.length === 0) {
+			return {
+				status: "video not found",
+				httpStatus: 404,
+				analyticsEventType: "api.videos.getVideo.failed",
+				data: null,
+			};
+		}
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.videos.getVideo",
+			data: (await parseVideos(dbResults, userId))[0],
+		};
+	} catch (error: any) {
+		console.error("Error getting video:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.videos.getVideo.failed",
+			data: null,
+		};
 	}
-	return (await parseVideos(dbResults, userId))[0];
 }
 
 /**
@@ -92,7 +127,7 @@ export async function addVideo(data: Video): Promise<ReturnData> {
 
 export async function updateVideo(data: Video): Promise<ReturnData> {
 	try {
-		const videoData = await getVideo(data.id, "");
+		const videoData = (await getVideo(data.id, "")).data;
 		if (videoData == null) {
 			return {
 				status: "video not found",

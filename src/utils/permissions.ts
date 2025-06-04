@@ -8,14 +8,36 @@ import { runSQL } from "./database";
  * @returns True if the user row was added, false otherwise.
  */
 
-export async function addUserRow(userId: string): Promise<boolean> {
-	const dbResults: ResultSet = await runSQL(
-		true,
-		"INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategories, canModifyTVShows, canModifyAgeRatings) VALUES (?, 0, 0, 0, 0, 0, 0) ON CONFLICT (userId) DO NOTHING;",
-		true,
-		[userId],
-	);
-	return dbResults.rowsAffected > 0;
+export async function addUserRow(userId: string): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(
+			true,
+			"INSERT INTO userPermissions (userId, isAdmin, canModifyPermissions, canModifyVideos, canModifyCategories, canModifyTVShows, canModifyAgeRatings) VALUES (?, 0, 0, 0, 0, 0, 0) ON CONFLICT (userId) DO NOTHING;",
+			true,
+			[userId],
+		);
+		return dbResults.rowsAffected > 0
+			? {
+					status: "success",
+					httpStatus: 200,
+					analyticsEventType: "api.permissions.addUserRow",
+					data: null,
+			  }
+			: {
+					status: "server error",
+					httpStatus: 500,
+					analyticsEventType: "api.permissions.addUserRow.failed",
+					data: null,
+			  };
+	} catch (error: any) {
+		console.error("Error adding user row:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.permissions.addUserRow.failed",
+			data: null,
+		};
+	}
 }
 
 /**
@@ -27,7 +49,7 @@ export async function addUserRow(userId: string): Promise<boolean> {
 export async function updateUserPermissions(data: Permission): Promise<ReturnData> {
 	try {
 		await addUserRow(data.userId);
-		const dbGetResults = await getUserPermissions(data.userId);
+		const dbGetResults = (await getUserPermissions(data.userId)).data;
 
 		const fields = [
 			"isAdmin",
@@ -85,12 +107,28 @@ export async function updateUserPermissions(data: Permission): Promise<ReturnDat
  * @returns The given user's permissions.
  */
 
-export async function getUserPermissions(userId: string): Promise<Permission> {
-	const dbResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM userPermissions WHERE userId = ?",
-		true,
-		[userId],
-	);
-	return parsePermissions(dbResults)[0];
+export async function getUserPermissions(userId: string): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM userPermissions WHERE userId = ?",
+			true,
+			[userId],
+		);
+
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.permissions.getUserPermissions",
+			data: parsePermissions(dbResults)[0],
+		};
+	} catch (error: any) {
+		console.error("Error getting user permissions:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.permissions.getUserPermissions.failed",
+			data: null,
+		};
+	}
 }

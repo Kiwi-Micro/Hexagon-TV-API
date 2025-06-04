@@ -8,30 +8,45 @@ import { runSQL } from "./database";
  * @returns The watchlist for the user.
  */
 
-export async function getWatchlist(userId: string): Promise<Watchlist[]> {
-	const dbResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM watchlist WHERE userId = ?",
-		true,
-		[userId],
-	);
+export async function getWatchlist(userId: string): Promise<ReturnData> {
+	try {
+		const dbResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM watchlist WHERE userId = ?",
+			true,
+			[userId],
+		);
 
-	const videoResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM videos WHERE id IN (SELECT videoId FROM watchlist WHERE userId = ?)",
-		true,
-		[userId],
-	);
+		const videoResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM videos WHERE id IN (SELECT videoId FROM watchlist WHERE userId = ?)",
+			true,
+			[userId],
+		);
 
-	const tvShowResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM tvShows WHERE id IN (SELECT tvShowId FROM watchlist WHERE userId = ?)",
-		true,
-		[userId],
-	);
+		const tvShowResults: ResultSet = await runSQL(
+			false,
+			"SELECT * FROM tvShows WHERE id IN (SELECT tvShowId FROM watchlist WHERE userId = ?)",
+			true,
+			[userId],
+		);
 
-	const videos = parseWatchlist(dbResults, videoResults, tvShowResults);
-	return videos;
+		const videos = parseWatchlist(dbResults, videoResults, tvShowResults);
+		return {
+			status: "success",
+			httpStatus: 200,
+			analyticsEventType: "api.watchlist.getWatchlist",
+			data: videos,
+		};
+	} catch (error: any) {
+		console.error("Error getting watchlist:", error);
+		return {
+			status: "server error",
+			httpStatus: 500,
+			analyticsEventType: "api.watchlist.getWatchlist.failed",
+			data: null,
+		};
+	}
 }
 
 /**

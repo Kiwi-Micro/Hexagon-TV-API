@@ -6,14 +6,10 @@ import { getTVShows } from "../../utils/tvShow";
 const router = Router();
 
 router.get("/getTVShows", async (req, res) => {
-	try {
-		res.json(await getTVShows(req.query.userId as string));
-		sendAnalyticsEvent(req.query.userId as string, "api.tvShows.getTVShows");
-	} catch (error: any) {
-		sendAnalyticsEvent(req.query.userId as string, "api.tvShows.getTVShows.failed");
-		console.error("Error fetching TV Shows:", error);
-		res.status(500).json({ status: "server error" });
-	}
+	const result = await getTVShows(req.query.userId as string);
+
+	res.status(result.httpStatus).json({ ...result.data, status: result.status });
+	sendAnalyticsEvent(req.query.userId as string, result.analyticsEventType);
 	printEndpointReached(req, res);
 });
 

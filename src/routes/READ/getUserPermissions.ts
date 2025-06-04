@@ -6,17 +6,10 @@ import { sendAnalyticsEvent } from "../../utils/database";
 const router = Router();
 
 router.get("/getUserPermissions", async (req, res) => {
-	try {
-		res.json(await getUserPermissions(req.query.userId as string));
-		sendAnalyticsEvent(req.query.userId as string, "api.permissions.getUserPermissions");
-	} catch (error: any) {
-		sendAnalyticsEvent(
-			req.query.userId as string,
-			"api.permissions.getUserPermissions.failed",
-		);
-		console.error("Error fetching permissions:", error);
-		res.status(500).json({ status: "server error" });
-	}
+	const result = await getUserPermissions(req.query.userId as string);
+
+	res.status(result.httpStatus).json({ ...result.data, status: result.status });
+	sendAnalyticsEvent(req.query.userId as string, result.analyticsEventType);
 	printEndpointReached(req, res);
 });
 

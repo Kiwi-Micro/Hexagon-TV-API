@@ -30,7 +30,7 @@ const uploadRouter = {
 					true,
 					(
 						await getUserPermissions((req.headers as any).userid)
-					).canModifyVideos,
+					).data.canModifyVideos,
 				)
 			) {
 				sendAnalyticsEvent((req.headers as any).userid as string, "api.upload.video");
@@ -67,7 +67,7 @@ const uploadRouter = {
 					true,
 					(
 						await getUserPermissions((req.headers as any).userid)
-					).canModifyVideos,
+					).data.canModifyVideos,
 				)
 			) {
 				sendAnalyticsEvent((req.headers as any).userid as string, "api.upload.thumbnail");

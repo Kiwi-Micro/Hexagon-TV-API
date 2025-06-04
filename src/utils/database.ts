@@ -89,7 +89,7 @@ export async function checkPermissionsAndAuthenticate(
 ): Promise<boolean> {
 	if (
 		((extraPermissions == true && shouldCheckExtraPermissions) ||
-			(await getUserPermissions(userId)).isAdmin == true) &&
+			(await getUserPermissions(userId)).data.isAdmin == true) &&
 		(await auth(sessionId, userId))
 	) {
 		return true;
