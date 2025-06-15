@@ -122,7 +122,7 @@ export async function deleteFromWatchlist(video: Watchlist): Promise<ReturnData>
 
 		const dbResults: ResultSet = await runSQL(
 			true,
-			"DELETE FROM watchlist11 WHERE id = ? AND userId = ?",
+			"DELETE FROM watchlist WHERE id = ? AND userId = ?",
 			true,
 			[video.id, video.userId],
 		);
