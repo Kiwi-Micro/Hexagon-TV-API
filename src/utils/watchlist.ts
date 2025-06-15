@@ -1,5 +1,11 @@
 import { ResultSet } from "@libsql/client";
-import { parseWatchlist, ReturnData, type Watchlist } from "./types";
+import {
+	parseTVShows,
+	parseVideos,
+	parseWatchlist,
+	ReturnData,
+	type Watchlist,
+} from "./types";
 import { runSQL } from "./database";
 
 /**
@@ -70,6 +76,56 @@ export async function addToWatchlist(item: Watchlist): Promise<ReturnData> {
 				analyticsEventType: "api.watchlist.addToWatchlist.failed",
 				data: null,
 			};
+		}
+
+		// If type is series, we need to check if the series exists.
+		if (item.type == "series") {
+			const seriesPromise = parseTVShows(
+				await runSQL(true, "SELECT * FROM tvShows WHERE id = ?", true, [item.tvShowId]),
+				item.userId,
+			);
+
+			const series = await Promise.all(await seriesPromise);
+
+			if (series.length == 0) {
+				return {
+					status: "tv show not found",
+					httpStatus: 404,
+					analyticsEventType: "api.watchlist.addToWatchlist.failed",
+					data: null,
+				};
+			}
+		}
+
+		// If type is video, we need to check if the video exists. Also we need to check if the video is part of a TV show and if so, we need to add the TV show to the watchlist instead.
+		if (item.type == "video") {
+			const videoPromise = parseVideos(
+				await runSQL(true, "SELECT * FROM videos WHERE id = ?", true, [item.videoId]),
+				item.userId,
+			);
+
+			const video = await Promise.all(await videoPromise);
+
+			if (video.length == 0) {
+				return {
+					status: "video not found",
+					httpStatus: 404,
+					analyticsEventType: "api.watchlist.addToWatchlist.failed",
+					data: null,
+				};
+			}
+
+			if (video[0].isPartOfTVShow) {
+				const tvShow: Watchlist = {
+					id: 0,
+					userId: item.userId,
+					type: "series",
+					videoId: 0,
+					tvShowId: video[0].tvShowId,
+				};
+				console.log("7");
+				return addToWatchlist(tvShow);
+			}
 		}
 
 		const dbResults: ResultSet = await runSQL(
