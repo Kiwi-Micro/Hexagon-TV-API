@@ -1,40 +1,41 @@
-import getWatchlistEndpoint from "../routes/userAPI/GET/watchlist";
-import getUserPermissionsEndpoint from "../routes/userAPI/GET/getUserPermissions";
-import addToWatchlistEndpoint from "../routes/userAPI/POST/watchlist/addToWatchlist";
-import deleteFromWatchlistEndpoint from "../routes/userAPI/POST/watchlist/deleteFromWatchlist";
-import getCategoriesEndpoint from "../routes/videoAPI/GET/getCategories";
-import categoryAddEndpoint from "../routes/videoAPI/POST/categoryModification/addCategory";
-import categoryUpdateEndpoint from "../routes/videoAPI/POST/categoryModification/updateCategory";
-import categoryDeleteEndpoint from "../routes/videoAPI/POST/categoryModification/deleteCategory";
-import getAgeRatingsEndpoint from "../routes/videoAPI/GET/getAgeRatings";
-import getVideosEndpoint from "../routes/videoAPI/GET/getVideos";
-import searchEndpoint from "../routes/videoAPI/GET/search";
-import videoDeleteEndpoint from "../routes/videoAPI/POST/videoModification/deleteVideo";
-import videoAddEndpoint from "../routes/videoAPI/POST/videoModification/addVideo";
-import videoUpdateEndpoint from "../routes/videoAPI/POST/videoModification/updateVideo";
-import uploadFilesEndpoint from "../routes/videoAPI/POST/videoModification/uploadFiles";
-import updateUserPermissionsEndpoint from "../routes/userAPI/POST/permissionModification/updateUserPermissions";
-import updateUserVideoProgressEndpoint from "../routes/userAPI/POST/videoProgressModification/updateUserVideoProgress";
-import getUserVideoProgressEndpoint from "../routes/userAPI/GET/getUserVideoProgress";
+import getWatchlistEndpoint from "../routes/READ/watchlist";
+import getUserPermissionsEndpoint from "../routes/READ/getUserPermissions";
+import addToWatchlistEndpoint from "../routes/WRITE/watchlists/addToWatchlist";
+import deleteFromWatchlistEndpoint from "../routes/WRITE/watchlists/deleteFromWatchlist";
+import getCategoriesEndpoint from "../routes/READ/getCategories";
+import categoryAddEndpoint from "../routes/WRITE/categories/addCategory";
+import categoryUpdateEndpoint from "../routes/WRITE/categories/updateCategory";
+import categoryDeleteEndpoint from "../routes/WRITE/categories/deleteCategory";
+import getAgeRatingsEndpoint from "../routes/READ/getAgeRatings";
+import getVideosEndpoint from "../routes/READ/getVideos";
+import searchEndpoint from "../routes/READ/search";
+import videoDeleteEndpoint from "../routes/WRITE/videos/deleteVideo";
+import videoAddEndpoint from "../routes/WRITE/videos/addVideo";
+import videoUpdateEndpoint from "../routes/WRITE/videos/updateVideo";
+import uploadFilesEndpoint from "../routes/WRITE/uploadFiles";
+import updateUserPermissionsEndpoint from "../routes/WRITE/permissions/updateUserPermissions";
+import updateUserVideoProgressEndpoint from "../routes/WRITE/videoProgress/updateUserVideoProgress";
+import getUserVideoProgressEndpoint from "../routes/READ/getUserVideoProgress";
+import getTVShowsEndpoint from "../routes/READ/getTVShows";
 import { createRouteHandler } from "uploadthing/express";
 import config from "../../config.json";
 
-function createEndpoints(app: any) {
+export function createEndpoints(app: any) {
 	const endpoints = [
 		{
-			path: "/videoAPI/ageRatings",
+			path: "/ageRatings",
 			handler: getAgeRatingsEndpoint,
 		},
 		{
-			path: "/videoAPI/categories",
+			path: "/categories",
 			handler: getCategoriesEndpoint,
 		},
 		{
-			path: "/videoAPI/videos",
+			path: "/videos",
 			handler: getVideosEndpoint,
 		},
 		{
-			path: "/videoAPI/videos",
+			path: "",
 			handler: searchEndpoint,
 		},
 		{
@@ -48,56 +49,60 @@ function createEndpoints(app: any) {
 			}),
 		},
 		{
-			path: "/videoAPI/videos",
+			path: "/videos",
 			handler: videoDeleteEndpoint,
 		},
 		{
-			path: "/videoAPI/videos",
+			path: "/videos",
 			handler: videoAddEndpoint,
 		},
 		{
-			path: "/videoAPI/videos",
+			path: "/videos",
 			handler: videoUpdateEndpoint,
 		},
 		{
-			path: "/videoAPI/categories",
+			path: "/categories",
 			handler: categoryAddEndpoint,
 		},
 		{
-			path: "/videoAPI/categories",
+			path: "/categories",
 			handler: categoryUpdateEndpoint,
 		},
 		{
-			path: "/videoAPI/categories",
+			path: "/categories",
 			handler: categoryDeleteEndpoint,
 		},
 		{
-			path: "/userAPI/permissions",
+			path: "/permissions",
 			handler: getUserPermissionsEndpoint,
 		},
 		{
-			path: "/userAPI/watchlist",
+			path: "/watchlist",
 			handler: getWatchlistEndpoint,
 		},
 		{
-			path: "/userAPI/permissions",
+			path: "/permissions",
 			handler: updateUserPermissionsEndpoint,
 		},
 		{
-			path: "/userAPI/watchlist",
+			path: "/watchlist",
 			handler: addToWatchlistEndpoint,
 		},
 		{
-			path: "/userAPI/watchlist",
+			path: "/watchlist",
 			handler: deleteFromWatchlistEndpoint,
 		},
 		{
-			path: "/userAPI/videoProgress",
+			path: "/videoProgress",
 			handler: getUserVideoProgressEndpoint,
 		},
 		{
-			path: "/userAPI/videoProgress",
+			path: "/videoProgress",
 			handler: updateUserVideoProgressEndpoint,
+		},
+		{
+			path: "/tvShows",
+			handler: getTVShowsEndpoint,
 		},
 	];
 
@@ -105,5 +110,3 @@ function createEndpoints(app: any) {
 		app.use(endpoint.path, endpoint.handler);
 	}
 }
-
-export { createEndpoints };

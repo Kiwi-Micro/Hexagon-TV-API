@@ -1,3 +1,3 @@
 # Hexagon TV API Documentation
 
-## Docs comming soon!
+## DOCS COMMING SOON!

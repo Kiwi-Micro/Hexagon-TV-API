@@ -1,7 +1,10 @@
 import { createUploadthing, type FileRouter, UploadThingError } from "uploadthing/server";
-import { printEndpointReached } from "../../../../utils/messages";
-import { checkPermissionsAndAuthenticate } from "../../../../utils/database";
-import { getUserPermissions } from "../../../../utils/permissions";
+import { printEndpointReached } from "../../utils/messages";
+import {
+	checkPermissionsAndAuthenticate,
+	sendAnalyticsEvent,
+} from "../../utils/database";
+import { getUserPermissions } from "../../utils/permissions";
 
 const f = createUploadthing();
 
@@ -27,11 +30,16 @@ const uploadRouter = {
 					true,
 					(
 						await getUserPermissions((req.headers as any).userid)
-					).canModifyVideos,
+					).data.canModifyVideos,
 				)
 			) {
+				sendAnalyticsEvent((req.headers as any).userid as string, "api.upload.video");
 				return {};
 			} else {
+				sendAnalyticsEvent(
+					(req.headers as any).userid as string,
+					"api.upload.video.invalidCredentials",
+				);
 				throw new UploadThingError("Unauthorized");
 			}
 		})
@@ -59,11 +67,16 @@ const uploadRouter = {
 					true,
 					(
 						await getUserPermissions((req.headers as any).userid)
-					).canModifyVideos,
+					).data.canModifyVideos,
 				)
 			) {
+				sendAnalyticsEvent((req.headers as any).userid as string, "api.upload.thumbnail");
 				return {};
 			} else {
+				sendAnalyticsEvent(
+					(req.headers as any).userid as string,
+					"api.upload.thumbnail.invalidCredentials",
+				);
 				throw new UploadThingError("Unauthorized");
 			}
 		})

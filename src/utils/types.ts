@@ -1,4 +1,4 @@
-import { ResultSet } from "@libsql/client";
+import { Row } from "@libsql/client";
 import { getAgeRatingInfo } from "./ageRating";
 import { runSQL } from "./database";
 import { getWatchlist } from "./watchlist";
@@ -22,7 +22,7 @@ import { getWatchlist } from "./watchlist";
  * @property isVideoCompleted: Whether the video is completed.
  */
 
-type Video = {
+export type Video = {
 	id: number;
 	name: string;
 	description: string;
@@ -35,8 +35,8 @@ type Video = {
 	ageRating: string;
 	ageRatingInfo: string;
 	urlName: string;
-	isPartOfTVShow: string;
-	tvShowId: string;
+	isPartOfTVShow: number;
+	tvShowId: number;
 	isInWatchlist: boolean;
 	progressThroughVideo: number;
 	isVideoCompleted: boolean;
@@ -45,14 +45,20 @@ type Video = {
 /**
  * This function parses the videos from the database.
  * @param dbResults The videos from the database.
+ * @returns The formatted videos and TV Shows.
  * @returns The formatted videos.
  */
 
-async function parseVideos(dbResults: any, userId: string): Promise<Video[]> {
-	const watchlist = await getWatchlist(userId);
-	const rows = dbResults.rows || [];
-	const results = rows.map(async (row: any) => ({
-		id: row.id as number,
+export async function parseVideos(dbResults: any, userId: string): Promise<Video[]> {
+	const dbUserProgressResults: Row[] =
+		(
+			await runSQL(false, "SELECT * FROM continueWatching WHERE userId = ?", true, [
+				userId,
+			])
+		).rows || [];
+
+	const results = (dbResults.rows || []).map(async (row: Video) => ({
+		id: row.id,
 		name: row.name,
 		description: row.description,
 		thumbnailURL: row.thumbnailURL,
@@ -60,37 +66,29 @@ async function parseVideos(dbResults: any, userId: string): Promise<Video[]> {
 		dateReleased: row.dateReleased,
 		urlName: row.urlName,
 		ageRating: row.ageRating,
-		ageRatingInfo: getAgeRatingInfo(row.ageRating) || "Age Rating not found",
+		ageRatingInfo: (await getAgeRatingInfo(row.ageRating)) || "Age Rating not found",
 		category: row.category,
 		videoUrlKey: row.videoURLKey,
 		thumbnailUrlKey: row.thumbnailURLKey,
 		isPartOfTVShow: row.isPartOfTVShow == 1 ? true : false,
 		tvShowId: row.tvShowId,
-		isInWatchlist: watchlist.find((watchlistVideo) => watchlistVideo.videoId === row.id)
+		isInWatchlist: (await getWatchlist(userId)).data.find(
+			(watchlistVideo: Watchlist) => watchlistVideo.videoId === row.id,
+		)
 			? true
 			: false,
-		progressThroughVideo: 0,
-		isVideoCompleted: false,
+		progressThroughVideo:
+			dbUserProgressResults.find(
+				(userVideoProgressResult) => userVideoProgressResult.videoId === row.id,
+			)?.progressThroughVideo || 0,
+		isVideoCompleted:
+			dbUserProgressResults.find(
+				(userVideoProgressResult) => userVideoProgressResult.videoId === row.id,
+			)?.isVideoCompleted == 1
+				? true
+				: false,
 	}));
-	const dbUserResults: ResultSet = await runSQL(
-		false,
-		"SELECT * FROM continueWatching WHERE userId = ?",
-		true,
-		[userId],
-	);
-	const userVideoProgressResults = dbUserResults.rows || [];
-	const resolvedResults = await Promise.all(results);
-	for (const userVideoProgressResult of userVideoProgressResults) {
-		const video = resolvedResults.find(
-			(result: any) => result.id === userVideoProgressResult.videoId,
-		);
-		if (video) {
-			video.progressThroughVideo = userVideoProgressResult.progressThroughVideo;
-			video.isVideoCompleted =
-				userVideoProgressResult.isVideoCompleted == 1 ? true : false;
-		}
-	}
-	return resolvedResults;
+	return await Promise.all(results);
 }
 
 /**
@@ -100,7 +98,7 @@ async function parseVideos(dbResults: any, userId: string): Promise<Video[]> {
  * @property ageRatingInfo: The age rating information.
  */
 
-type ageRating = {
+export type ageRating = {
 	id: number;
 	ageRating: string;
 	ageRatingInfo: string;
@@ -112,13 +110,13 @@ type ageRating = {
  * @returns The parsed age ratings.
  */
 
-function parseAgeRatings(dbResults: any): ageRating[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
+export function parseAgeRatings(dbResults: any): ageRating[] {
+	const results = (dbResults.rows || []).map((row: any) => ({
 		id: row.id,
 		ageRating: row.ageRating,
 		ageRatingInfo: row.ageRatingInfo,
 	}));
+
 	return results;
 }
 
@@ -126,34 +124,51 @@ function parseAgeRatings(dbResults: any): ageRating[] {
  * The type for all the watchlist Data.
  * @property id: The id of the watchlist.
  * @property userId: The userId of the user.
- * @property videoId: The id of the video.
- * @property video: The video data (See The `Video` Type).
+ * @property type: The type of the watchlist (video or TV Show).
+ * @property videoId: The id of the video (ONLY IF `type` is `video`).
+ * @property tvShowId: The id of the TV Show (ONLY IF `type` is `series`).
+ * @property video: The video data (See The `Video` Type), (ONLY IF `type` is `video`).
+ * @property tvShow: The TV Show data (See The `TVShow` Type), (ONLY IF `type` is `series`).
  */
 
-type Watchlist = {
+export type Watchlist = {
 	id: number;
 	userId: string;
-	videoId: string;
+	type: string;
+	videoId: number;
+	tvShowId: number;
 	video?: Video;
+	tvShow?: TVShow;
 };
 
 /**
  * This function parses the watchlist from the database.
  * @param dbResults The watchlist results from the database.
  * @param videoResults The video results from the database.
+ * @param tvShowResults The TV Show results from the database.
  * @returns The parsed watchlist.
  */
 
-function parseWatchlist(dbResults: any, videoResults: any): Watchlist[] {
-	const videoRows = videoResults.rows || [];
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => {
-		const video = videoRows.find((videoRow: any) => videoRow.id === row.videoId);
+export function parseWatchlist(
+	dbResults: any,
+	videoResults: any,
+	tvShowResults: any,
+): Watchlist[] {
+	const results = (dbResults.rows || []).map((row: any) => {
+		const video = (videoResults.rows || []).find(
+			(videoRow: any) => videoRow.id === row.videoId,
+		);
+		const tvShow = (tvShowResults.rows || []).find(
+			(tvShowRow: any) => tvShowRow.id === row.tvShowId,
+		);
 		return {
 			id: row.id,
 			userId: row.userId,
+			type: row.type,
 			videoId: row.videoId,
+			tvShowId: row.tvShowId,
 			video: video,
+			tvShow: tvShow,
 		};
 	});
 
@@ -170,11 +185,9 @@ function parseWatchlist(dbResults: any, videoResults: any): Watchlist[] {
  * @property canModifyCategorys: Whether the user can modify categories.
  * @property canModifyTVShows: Whether the user can modify TV shows.
  * @property canModifyAgeRatings: Whether the user can modify age ratings.
- * @property canModifyTiers: Whether the user can modify tiers.
- * @property (COMMING SOON, NOT AVAILABLE) canModifyUserTier: Whether the user can modify their what tier a user is on.
  */
 
-type Permission = {
+export type Permission = {
 	id: number;
 	userId: string;
 	isAdmin: boolean;
@@ -183,8 +196,6 @@ type Permission = {
 	canModifyCategories: boolean;
 	canModifyTVShows: boolean;
 	canModifyAgeRatings: boolean;
-	canModifyTiers: boolean;
-	/*canModifyUserTier: boolean;*/
 };
 
 /**
@@ -193,9 +204,8 @@ type Permission = {
  * @returns The parsed permissions.
  */
 
-function parsePermissions(dbResults: any): Permission[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
+export function parsePermissions(dbResults: any): Permission[] {
+	const results = (dbResults.rows || []).map((row: any) => ({
 		id: row.id,
 		userId: row.userId,
 		isAdmin: row.isAdmin == 1 ? true : false,
@@ -204,43 +214,8 @@ function parsePermissions(dbResults: any): Permission[] {
 		canModifyCategories: row.canModifyCategories == 1 ? true : false,
 		canModifyTVShows: row.canModifyTVShows == 1 ? true : false,
 		canModifyAgeRatings: row.canModifyAgeRatings == 1 ? true : false,
-		canModifyTiers: row.canModifyTiers == 1 ? true : false,
 	}));
-	return results;
-}
 
-/**
- * The type for all the tier Data.
- * @property id: The id of the tier.
- * @property tierName: The name of the tier.
- * @property tierPriceUSD: The price of the tier in USD.
- * @property tierImage: The image for the tier banner.
- * @property tierURLName: The name to use for the URL of the tier.
- */
-
-type Tier = {
-	id: number;
-	tierName: string;
-	tierPriceUSD: string;
-	tierImage: string;
-	tierURLName: string;
-};
-
-/**
- * This function parses the tiers from the database.
- * @param dbResults The tiers results from the database.
- * @returns The parsed tiers.
- */
-
-function parseTiers(dbResults: any): Tier[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
-		id: row.id,
-		tierName: row.tierName,
-		tierPriceUSD: row.tierPriceUSD,
-		tierImage: row.tierImage,
-		tierURLName: row.tierURLName,
-	}));
 	return results;
 }
 
@@ -251,7 +226,7 @@ function parseTiers(dbResults: any): Tier[] {
  * @property urlName: The id of the category (Like a URLName).
  */
 
-type Category = {
+export type Category = {
 	id: number;
 	categoryName: string;
 	urlName: string;
@@ -264,14 +239,14 @@ type Category = {
  * @returns The parsed categories.
  */
 
-function parseCategories(dbResults: any): Category[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
+export function parseCategories(dbResults: any): Category[] {
+	const results = (dbResults.rows || []).map((row: any) => ({
 		id: row.id,
 		categoryName: row.categoryName,
 		urlName: row.urlName,
 		isSeries: row.isSeries == 1 ? true : false,
 	}));
+
 	return results;
 }
 
@@ -283,7 +258,7 @@ function parseCategories(dbResults: any): Category[] {
  * @property isVideoCompleted: Whether the video is completed.
  */
 
-type VideoProgress = {
+export type VideoProgress = {
 	userId: string;
 	videoId: string;
 	progressThroughVideo: number;
@@ -296,24 +271,79 @@ type VideoProgress = {
  * @returns The parsed video progress.
  */
 
-function parseVideoProgress(dbResults: any): VideoProgress[] {
-	const rows = dbResults.rows || [];
-	const results = rows.map((row: any) => ({
+export function parseVideoProgress(dbResults: any): VideoProgress[] {
+	const results = (dbResults.rows || []).map((row: any) => ({
 		userId: row.userId,
 		videoId: row.videoId,
 		progressThroughVideo: row.progressThroughVideo,
 		isVideoCompleted: row.isVideoCompleted == 1 ? true : false,
 	}));
+
 	return results;
 }
 
-export type { Video, Watchlist, Permission, ageRating, Tier, Category, VideoProgress };
-export {
-	parseAgeRatings,
-	parseCategories,
-	parsePermissions,
-	parseTiers,
-	parseVideos,
-	parseWatchlist,
-	parseVideoProgress,
+/**
+ * The type for all the TV Show Data.
+ * @property id: The id of the TV Show.
+ * @property name: The name of the TV Show.
+ * @property description: The description of the TV Show.
+ * @property urlName: The name to use for the URL.
+ * @property thumbnailURL: The URL to get the thumbnail from.
+ * @property thumbnailURLKey: The key to use for the thumbnail.
+ * @property dateReleased: The date the TV Show was released.
+ * @property ageRating: The age rating of the TV Show.
+ * @property ageRatingInfo: The age rating information of the TV Show.
+ * @property category: The category of the TV Show.
+ * @property isInWatchlist: Whether the TV Show is in the user's watchlist.
+ * @property nextEpisodeId: The id of the next episode.
+ * @property episodeStatus: The episode status of the TV Show.
+ */
+
+export type TVShow = {
+	id: number;
+	name: string;
+	description: string;
+	urlName: string;
+	thumbnailURL: string;
+	thumbnailURLKey?: string;
+	dateReleased: string;
+	ageRating: string;
+	ageRatingInfo?: string;
+	category: string;
+	isInWatchlist?: boolean;
+};
+
+/**
+ * This function parses the TV Shows from the database.
+ * @param dbResults The TV Shows results from the database.
+ * @param userId The userId of the user to get the TV Shows for.
+ * @returns The parsed TV Shows.
+ */
+
+export async function parseTVShows(dbResults: any, userId: string): Promise<TVShow[]> {
+	const results = (dbResults.rows || []).map(async (row: TVShow) => ({
+		id: row.id,
+		name: row.name,
+		description: row.description,
+		urlName: row.urlName,
+		thumbnailURL: row.thumbnailURL,
+		thumbnailUrlKey: row.thumbnailURLKey,
+		dateReleased: row.dateReleased,
+		ageRating: row.ageRating,
+		ageRatingInfo: (await getAgeRatingInfo(row.ageRating)) || "Age Rating not found",
+		category: row.category,
+		isInWatchlist: (await getWatchlist(userId)).data.find(
+			(watchlistVideo: Watchlist) => watchlistVideo.videoId === row.id,
+		)
+			? true
+			: false,
+	}));
+	return await Promise.all(results);
+}
+
+export type ReturnData = {
+	status: string;
+	httpStatus: number;
+	analyticsEventType: string;
+	data: any;
 };
