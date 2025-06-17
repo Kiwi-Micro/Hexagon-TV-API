@@ -72,7 +72,7 @@ export async function parseVideos(dbResults: any, userId: string): Promise<Video
 		thumbnailUrlKey: row.thumbnailURLKey,
 		isPartOfTVShow: row.isPartOfTVShow == 1 ? true : false,
 		tvShowId: row.tvShowId,
-		isInWatchlist: ((await getWatchlist(userId)).data).find(
+		isInWatchlist: (await getWatchlist(userId)).data.find(
 			(watchlistVideo: Watchlist) => watchlistVideo.videoId === row.id,
 		)
 			? true
@@ -311,9 +311,6 @@ export type TVShow = {
 	ageRatingInfo?: string;
 	category: string;
 	isInWatchlist?: boolean;
-	nextEpisodeId?: number;
-	episodeStatus?: [id: number, isWatched: boolean];
-	isTVShowCompleted?: boolean;
 };
 
 /**
@@ -335,14 +332,11 @@ export async function parseTVShows(dbResults: any, userId: string): Promise<TVSh
 		ageRating: row.ageRating,
 		ageRatingInfo: (await getAgeRatingInfo(row.ageRating)) || "Age Rating not found",
 		category: row.category,
-		isInWatchlist: ((await getWatchlist(userId)).data).find(
+		isInWatchlist: (await getWatchlist(userId)).data.find(
 			(watchlistVideo: Watchlist) => watchlistVideo.videoId === row.id,
 		)
 			? true
 			: false,
-		nextEpisodeId: 0,
-		episodeStatus: [],
-		isTVShowCompleted: false,
 	}));
 	return await Promise.all(results);
 }
