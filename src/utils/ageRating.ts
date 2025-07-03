@@ -7,7 +7,7 @@ import { runSQL } from "./database";
  * @returns All the age ratings.
  */
 
-export async function getAgeRatings(): Promise<ReturnData> {
+export async function getAgeRatings(): Promise<ReturnData<ageRating[]>> {
 	try {
 		const dbResults: ResultSet = await runSQL(false, "SELECT * FROM ageRatings", false);
 
@@ -34,7 +34,7 @@ export async function getAgeRatings(): Promise<ReturnData> {
  * @returns All the age ratings.
  */
 
-export async function getAgeRatingInfo(ageRating: string): Promise<ReturnData> {
+export async function getAgeRatingInfo(ageRating: string): Promise<ReturnData<string>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			false,
@@ -42,6 +42,7 @@ export async function getAgeRatingInfo(ageRating: string): Promise<ReturnData> {
 			true,
 			[ageRating],
 		);
+
 		if (dbResults.rows.length === 0) {
 			return {
 				status: "age rating not found",

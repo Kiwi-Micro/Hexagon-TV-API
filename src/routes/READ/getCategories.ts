@@ -8,7 +8,7 @@ const router = Router();
 router.get("/getCategories", async (req, res) => {
 	const result = await getCategories();
 
-	res.status(result.httpStatus).json({ ...result.data, status: result.status });
+	res.status(result.httpStatus).json({ data: result.data, status: result.status });
 	sendAnalyticsEvent(req.query.userId as string, result.analyticsEventType);
 	printEndpointReached(req, res);
 });

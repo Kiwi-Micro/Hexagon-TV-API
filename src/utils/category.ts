@@ -7,7 +7,7 @@ import { parseCategories, ReturnData, type Category } from "./types";
  * @returns An array of categories.
  */
 
-export async function getCategories(): Promise<ReturnData> {
+export async function getCategories(): Promise<ReturnData<Category[]>> {
 	try {
 		const dbResults: ResultSet = await runSQL(false, "SELECT * FROM categories", false);
 
@@ -33,7 +33,7 @@ export async function getCategories(): Promise<ReturnData> {
  * @returns An array of categories.
  */
 
-export async function getCategory(id: number): Promise<ReturnData> {
+export async function getCategory(id: number): Promise<ReturnData<Category>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			false,
@@ -41,6 +41,7 @@ export async function getCategory(id: number): Promise<ReturnData> {
 			true,
 			[id],
 		);
+
 		if (dbResults.rows.length === 0) {
 			return {
 				status: "category not found",
@@ -49,6 +50,7 @@ export async function getCategory(id: number): Promise<ReturnData> {
 				data: null,
 			};
 		}
+
 		return {
 			status: "success",
 			httpStatus: 200,
@@ -72,7 +74,7 @@ export async function getCategory(id: number): Promise<ReturnData> {
  * @returns True if the video was added, throws error otherwise.
  */
 
-export async function addCategory(data: Category): Promise<ReturnData> {
+export async function addCategory(data: Category): Promise<ReturnData<null>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			true,
@@ -111,7 +113,7 @@ export async function addCategory(data: Category): Promise<ReturnData> {
  * @returns True if the category was updated, throws error otherwise.
  */
 
-export async function updateCategory(data: Category): Promise<ReturnData> {
+export async function updateCategory(data: Category): Promise<ReturnData<null>> {
 	try {
 		const categoryData = (await getCategory(data.id)).data;
 		if (categoryData == null) {
@@ -164,7 +166,7 @@ export async function updateCategory(data: Category): Promise<ReturnData> {
  * @returns True if the category was deleted, throws error otherwise.
  */
 
-export async function deleteCategory(data: any): Promise<ReturnData> {
+export async function deleteCategory(data: any): Promise<ReturnData<null>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			true,

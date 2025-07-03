@@ -1,11 +1,5 @@
 import { ResultSet } from "@libsql/client";
-import {
-	parseTVShows,
-	parseVideos,
-	parseWatchlist,
-	ReturnData,
-	type Watchlist,
-} from "./types";
+import { parseItems, parseWatchlist, ReturnData, type Watchlist } from "./types";
 import { runSQL } from "./database";
 
 /**
@@ -14,7 +8,7 @@ import { runSQL } from "./database";
  * @returns The watchlist for the user.
  */
 
-export async function getWatchlist(userId: string): Promise<ReturnData> {
+export async function getWatchlist(userId: string): Promise<ReturnData<Watchlist[]>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			false,
@@ -23,26 +17,18 @@ export async function getWatchlist(userId: string): Promise<ReturnData> {
 			[userId],
 		);
 
-		const videoResults: ResultSet = await runSQL(
+		const itemsResults: ResultSet = await runSQL(
 			false,
-			"SELECT * FROM videos WHERE id IN (SELECT videoId FROM watchlist WHERE userId = ?)",
+			"SELECT * FROM items WHERE id IN (SELECT itemId FROM watchlist WHERE userId = ?)",
 			true,
 			[userId],
 		);
 
-		const tvShowResults: ResultSet = await runSQL(
-			false,
-			"SELECT * FROM tvShows WHERE id IN (SELECT tvShowId FROM watchlist WHERE userId = ?)",
-			true,
-			[userId],
-		);
-
-		const videos = parseWatchlist(dbResults, videoResults, tvShowResults);
 		return {
 			status: "success",
 			httpStatus: 200,
 			analyticsEventType: "api.watchlist.getWatchlist",
-			data: videos,
+			data: parseWatchlist(dbResults, itemsResults),
 		};
 	} catch (error: any) {
 		console.error("Error getting watchlist:", error);
@@ -61,15 +47,9 @@ export async function getWatchlist(userId: string): Promise<ReturnData> {
  * @returns True if the video was added to the watchlist, false otherwise.
  */
 
-export async function addToWatchlist(item: Watchlist): Promise<ReturnData> {
+export async function addToWatchlist(item: Watchlist): Promise<ReturnData<null>> {
 	try {
-		// (item.type == "type" && !item.typeId) is to allow them user to not send the other ID if it will not be used (as set in the `type` flag).
-		if (
-			!item.userId ||
-			!item.type ||
-			(item.type == "video" && !item.videoId) ||
-			(item.type == "series" && !item.tvShowId)
-		) {
+		if (!item.userId || !item.itemId) {
 			return {
 				status: "missing parameters",
 				httpStatus: 400,
@@ -78,61 +58,36 @@ export async function addToWatchlist(item: Watchlist): Promise<ReturnData> {
 			};
 		}
 
-		// If type is series, we need to check if the series exists.
-		if (item.type == "series") {
-			const seriesPromise = parseTVShows(
-				await runSQL(true, "SELECT * FROM tvShows WHERE id = ?", true, [item.tvShowId]),
-				item.userId,
-			);
+		const itmPromise = parseItems(
+			await runSQL(true, "SELECT * FROM items WHERE id = ?", true, [item.itemId]),
+			item.userId,
+		);
 
-			const series = await Promise.all(await seriesPromise);
+		const itm = await Promise.all(await itmPromise);
 
-			if (series.length == 0) {
-				return {
-					status: "tv show not found",
-					httpStatus: 404,
-					analyticsEventType: "api.watchlist.addToWatchlist.failed",
-					data: null,
-				};
-			}
+		if (itm.length == 0) {
+			return {
+				status: "item not found",
+				httpStatus: 404,
+				analyticsEventType: "api.watchlist.addToWatchlist.failed",
+				data: null,
+			};
 		}
 
-		// If type is video, we need to check if the video exists. Also we need to check if the video is part of a TV show and if so, we need to add the TV show to the watchlist instead.
-		if (item.type == "video") {
-			const videoPromise = parseVideos(
-				await runSQL(true, "SELECT * FROM videos WHERE id = ?", true, [item.videoId]),
-				item.userId,
-			);
-
-			const video = await Promise.all(await videoPromise);
-
-			if (video.length == 0) {
-				return {
-					status: "video not found",
-					httpStatus: 404,
-					analyticsEventType: "api.watchlist.addToWatchlist.failed",
-					data: null,
-				};
-			}
-
-			if (video[0].isPartOfTVShow) {
-				const tvShow: Watchlist = {
-					id: 0,
-					userId: item.userId,
-					type: "series",
-					videoId: 0,
-					tvShowId: video[0].tvShowId,
-				};
-				console.log("7");
-				return addToWatchlist(tvShow);
-			}
+		if (itm[0].isPartOfTVShow) {
+			const tvShow: Watchlist = {
+				id: 0,
+				userId: item.userId,
+				itemId: itm[0].tvShowId,
+			};
+			return addToWatchlist(tvShow);
 		}
 
 		const dbResults: ResultSet = await runSQL(
 			true,
-			"INSERT INTO watchlist (userId, type, videoId, tvShowId) VALUES (?, ?, ?, ?)",
+			"INSERT INTO watchlist (userId, itemId) VALUES (?, ?)",
 			true,
-			[item.userId, item.type, item.videoId || 0, item.tvShowId || 0],
+			[item.userId, item.itemId || 0],
 		);
 
 		return dbResults.rowsAffected > 0
@@ -165,9 +120,9 @@ export async function addToWatchlist(item: Watchlist): Promise<ReturnData> {
  * @returns Returns true if the video was deleted from the watchlist, false otherwise.
  */
 
-export async function deleteFromWatchlist(video: Watchlist): Promise<ReturnData> {
+export async function deleteFromWatchlist(item: Watchlist): Promise<ReturnData<null>> {
 	try {
-		if (!video.id || !video.userId) {
+		if (!item.id || !item.userId) {
 			return {
 				status: "missing parameters",
 				httpStatus: 400,
@@ -180,7 +135,7 @@ export async function deleteFromWatchlist(video: Watchlist): Promise<ReturnData>
 			true,
 			"DELETE FROM watchlist WHERE id = ? AND userId = ?",
 			true,
-			[video.id, video.userId],
+			[item.id, item.userId],
 		);
 
 		return dbResults.rowsAffected > 0

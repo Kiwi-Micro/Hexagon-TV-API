@@ -17,7 +17,7 @@ router.delete("/deleteCategory", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).data.canModifyCategories,
+			).data?.canModifyCategories,
 		)
 	) {
 		const result = await deleteCategory(req.body);

@@ -8,7 +8,7 @@ import { runSQL } from "./database";
  * @returns True if the user row was added, false otherwise.
  */
 
-export async function addUserRow(userId: string): Promise<ReturnData> {
+export async function addUserRow(userId: string): Promise<ReturnData<null>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			true,
@@ -42,11 +42,13 @@ export async function addUserRow(userId: string): Promise<ReturnData> {
 
 /**
  * This function updates a user's permissions in the database.
+ * TODO: REWIRE THIS FUNCTION TO IMPROVE TYPE SAFETY.
+ * WARN: This function's return type's and data will change in the future.
  * @param data The data to update the user's permissions.
  * @returns True if the user's permissions were updated, false otherwise.
  */
 
-export async function updateUserPermissions(data: Permission): Promise<ReturnData> {
+export async function updateUserPermissions(data: Permission): Promise<ReturnData<null>> {
 	try {
 		await addUserRow(data.userId);
 		const dbGetResults = (await getUserPermissions(data.userId)).data;
@@ -54,25 +56,32 @@ export async function updateUserPermissions(data: Permission): Promise<ReturnDat
 		const fields = [
 			"isAdmin",
 			"canModifyPermissions",
-			"canModifyVideos",
+			"canModifyItems",
 			"canModifyCategories",
-			"canModifyTVShows",
 			"canModifyAgeRatings",
 		] as const;
 
+		if (dbGetResults == null) {
+			return {
+				status: "user not found",
+				httpStatus: 404,
+				analyticsEventType: "api.permissions.updateUserPermissions.failed",
+				data: null,
+			};
+		}
+
 		const inputs = Object.fromEntries(
-			fields.map((field) => [field, data[field] ?? dbGetResults[field]]),
+			fields.map((field) => [field, data[field] ?? dbGetResults![field]]),
 		);
 		const dbResults: ResultSet = await runSQL(
 			true,
-			"UPDATE userPermissions SET isAdmin = ?, canModifyPermissions = ?, canModifyVideos = ?, canModifyCategories = ?, canModifyTVShows = ?, canModifyAgeRatings = ? WHERE userId = ?;",
+			"UPDATE userPermissions SET isAdmin = ?, canModifyPermissions = ?, canModifyItems = ?, canModifyCategories = ?, canModifyAgeRatings = ? WHERE userId = ?;",
 			true,
 			[
 				inputs.isAdmin,
 				inputs.canModifyPermissions,
-				inputs.canModifyVideos,
+				inputs.canModifyItems,
 				inputs.canModifyCategories,
-				inputs.canModifyTVShows,
 				inputs.canModifyAgeRatings,
 				data.userId,
 			],
@@ -107,7 +116,9 @@ export async function updateUserPermissions(data: Permission): Promise<ReturnDat
  * @returns The given user's permissions.
  */
 
-export async function getUserPermissions(userId: string): Promise<ReturnData> {
+export async function getUserPermissions(
+	userId: string,
+): Promise<ReturnData<Permission>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			false,
@@ -115,6 +126,15 @@ export async function getUserPermissions(userId: string): Promise<ReturnData> {
 			true,
 			[userId],
 		);
+
+		if (dbResults.rows.length === 0) {
+			return {
+				status: "user not found",
+				httpStatus: 404,
+				analyticsEventType: "api.permissions.getUserPermissions.failed",
+				data: null,
+			};
+		}
 
 		return {
 			status: "success",

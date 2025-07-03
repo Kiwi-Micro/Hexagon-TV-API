@@ -4,12 +4,12 @@ import {
 	sendAnalyticsEvent,
 } from "../../../utils/database";
 import { getUserPermissions } from "../../../utils/permissions";
-import { addVideo } from "../../../utils/video";
+import { updateItem } from "../../../utils/items";
 import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
-router.post("/addVideo", async (req, res) => {
+router.post("/updateItem", async (req, res) => {
 	if (
 		await checkPermissionsAndAuthenticate(
 			req.body.userId,
@@ -17,17 +17,17 @@ router.post("/addVideo", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).data.canModifyVideos,
+			).data?.canModifyItems,
 		)
 	) {
-		const result = await addVideo(req.body);
+		const result = await updateItem(req.body);
 
 		sendAnalyticsEvent(req.body.userId as string, result.analyticsEventType);
 		res.status(result.httpStatus).json({ status: result.status });
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,
-			"api.videos.addVideo.invalidCredentials",
+			"api.items.updateItem.invalidCredentials",
 		);
 		res.status(403).json({ status: "invalid credentials" });
 	}

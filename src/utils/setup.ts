@@ -1,27 +1,49 @@
-import getWatchlistEndpoint from "../routes/READ/watchlist";
-import getUserPermissionsEndpoint from "../routes/READ/getUserPermissions";
+// -- ITEMS --
+import searchEndpoint from "../routes/READ/search";
+import getItemsEndpoint from "../routes/READ/getItems";
+import addItemsEndpoint from "../routes/WRITE/items/addItem";
+import updateItemsEndpoint from "../routes/WRITE/items/updateItem";
+import deleteItemsEndpoint from "../routes/WRITE/items/deleteItem";
+// -- WATCHLIST --
+import getWatchlistEndpoint from "../routes/READ/getWatchlist";
 import addToWatchlistEndpoint from "../routes/WRITE/watchlists/addToWatchlist";
 import deleteFromWatchlistEndpoint from "../routes/WRITE/watchlists/deleteFromWatchlist";
-import getCategoriesEndpoint from "../routes/READ/getCategories";
-import categoryAddEndpoint from "../routes/WRITE/categories/addCategory";
-import categoryUpdateEndpoint from "../routes/WRITE/categories/updateCategory";
-import categoryDeleteEndpoint from "../routes/WRITE/categories/deleteCategory";
-import getAgeRatingsEndpoint from "../routes/READ/getAgeRatings";
-import getVideosEndpoint from "../routes/READ/getVideos";
-import searchEndpoint from "../routes/READ/search";
-import videoDeleteEndpoint from "../routes/WRITE/videos/deleteVideo";
-import videoAddEndpoint from "../routes/WRITE/videos/addVideo";
-import videoUpdateEndpoint from "../routes/WRITE/videos/updateVideo";
-import uploadFilesEndpoint from "../routes/WRITE/uploadFiles";
+// -- PERMISSIONS --
+import getUserPermissionsEndpoint from "../routes/READ/getUserPermissions";
 import updateUserPermissionsEndpoint from "../routes/WRITE/permissions/updateUserPermissions";
-import updateUserVideoProgressEndpoint from "../routes/WRITE/videoProgress/updateUserVideoProgress";
+// -- CATEGORIES --
+import getCategoriesEndpoint from "../routes/READ/getCategories";
+import addCategoryEndpoint from "../routes/WRITE/categories/addCategory";
+import updateCategoryEndpoint from "../routes/WRITE/categories/updateCategory";
+import deleteCategoryEndpoint from "../routes/WRITE/categories/deleteCategory";
+// -- VIDEO PROGRESS --
 import getUserVideoProgressEndpoint from "../routes/READ/getUserVideoProgress";
-import getTVShowsEndpoint from "../routes/READ/getTVShows";
+import updateUserVideoProgressEndpoint from "../routes/WRITE/videoProgress/updateUserVideoProgress";
+// -- AGE RATINGS --
+import getAgeRatingsEndpoint from "../routes/READ/getAgeRatings";
+// -- UploadThing --
+import uploadFilesEndpoint from "../routes/WRITE/uploadFiles";
 import { createRouteHandler } from "uploadthing/express";
 import config from "../../config.json";
 
 export function createEndpoints(app: any) {
 	const endpoints = [
+		{
+			path: "/items",
+			handler: getItemsEndpoint,
+		},
+		{
+			path: "/items",
+			handler: addItemsEndpoint,
+		},
+		{
+			path: "/items",
+			handler: updateItemsEndpoint,
+		},
+		{
+			path: "/items",
+			handler: deleteItemsEndpoint,
+		},
 		{
 			path: "/ageRatings",
 			handler: getAgeRatingsEndpoint,
@@ -31,46 +53,20 @@ export function createEndpoints(app: any) {
 			handler: getCategoriesEndpoint,
 		},
 		{
-			path: "/videos",
-			handler: getVideosEndpoint,
-		},
-		{
-			path: "",
+			path: "/items",
 			handler: searchEndpoint,
 		},
 		{
-			path: "/api/uploadthing",
-			handler: createRouteHandler({
-				router: uploadFilesEndpoint,
-				config: {
-					token: config[0]["UPLOADTHING_TOKEN"],
-					logLevel: "Error",
-				},
-			}),
-		},
-		{
-			path: "/videos",
-			handler: videoDeleteEndpoint,
-		},
-		{
-			path: "/videos",
-			handler: videoAddEndpoint,
-		},
-		{
-			path: "/videos",
-			handler: videoUpdateEndpoint,
+			path: "/categories",
+			handler: addCategoryEndpoint,
 		},
 		{
 			path: "/categories",
-			handler: categoryAddEndpoint,
+			handler: updateCategoryEndpoint,
 		},
 		{
 			path: "/categories",
-			handler: categoryUpdateEndpoint,
-		},
-		{
-			path: "/categories",
-			handler: categoryDeleteEndpoint,
+			handler: deleteCategoryEndpoint,
 		},
 		{
 			path: "/permissions",
@@ -101,8 +97,14 @@ export function createEndpoints(app: any) {
 			handler: updateUserVideoProgressEndpoint,
 		},
 		{
-			path: "/tvShows",
-			handler: getTVShowsEndpoint,
+			path: "/api/uploadthing",
+			handler: createRouteHandler({
+				router: uploadFilesEndpoint,
+				config: {
+					token: config[0]["UPLOADTHING_TOKEN"],
+					logLevel: "Error",
+				},
+			}),
 		},
 	];
 

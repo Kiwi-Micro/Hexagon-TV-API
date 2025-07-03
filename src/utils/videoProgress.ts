@@ -5,7 +5,7 @@ import { runSQL } from "./database";
 export async function addUserVideoProgressRow(
 	userId: string,
 	videoId: string,
-): Promise<ReturnData> {
+): Promise<ReturnData<null>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			true,
@@ -37,7 +37,9 @@ export async function addUserVideoProgressRow(
 	}
 }
 
-export async function updateUserVideoProgress(data: VideoProgress): Promise<ReturnData> {
+export async function updateUserVideoProgress(
+	data: VideoProgress,
+): Promise<ReturnData<null>> {
 	try {
 		await addUserVideoProgressRow(data.userId, data.videoId);
 		const dbResults: ResultSet = await runSQL(
@@ -74,7 +76,7 @@ export async function updateUserVideoProgress(data: VideoProgress): Promise<Retu
 export async function getUserVideoProgress(
 	userId: string,
 	videoId: string,
-): Promise<ReturnData> {
+): Promise<ReturnData<VideoProgress>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			false,
@@ -82,6 +84,7 @@ export async function getUserVideoProgress(
 			true,
 			[userId, videoId],
 		);
+
 		if (dbResults.rows.length === 0) {
 			return {
 				status: "video progress not found",
@@ -90,6 +93,7 @@ export async function getUserVideoProgress(
 				data: null,
 			};
 		}
+
 		return {
 			status: "success",
 			httpStatus: 200,

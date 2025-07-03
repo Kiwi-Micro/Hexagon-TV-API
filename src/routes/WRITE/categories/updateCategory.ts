@@ -17,7 +17,7 @@ router.post("/updateCategory", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).data.canModifyCategories,
+			).data?.canModifyCategories,
 		)
 	) {
 		const result = await updateCategory(req.body);

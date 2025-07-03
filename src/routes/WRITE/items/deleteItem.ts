@@ -4,12 +4,12 @@ import {
 	sendAnalyticsEvent,
 } from "../../../utils/database";
 import { getUserPermissions } from "../../../utils/permissions";
-import { updateTVShow } from "../../../utils/tvShow";
+import { deleteItem } from "../../../utils/items";
 import { printEndpointReached } from "../../../utils/messages";
 
 const router = Router();
 
-router.post("/updateTVShow", async (req, res) => {
+router.delete("/deleteItem", async (req, res) => {
 	if (
 		await checkPermissionsAndAuthenticate(
 			req.body.userId,
@@ -17,17 +17,17 @@ router.post("/updateTVShow", async (req, res) => {
 			true,
 			(
 				await getUserPermissions(req.body.userId)
-			).data.canModifyTVShows,
+			).data?.canModifyItems,
 		)
 	) {
-		const result = await updateTVShow(req.body);
+		const result = await deleteItem(req.body);
 
 		sendAnalyticsEvent(req.body.userId as string, result.analyticsEventType);
 		res.status(result.httpStatus).json({ status: result.status });
 	} else {
 		sendAnalyticsEvent(
 			req.body.userId as string,
-			"api.tvShows.updateTVShow.invalidCredentials",
+			"api.items.deleteItem.invalidCredentials",
 		);
 		res.status(403).json({ status: "invalid credentials" });
 	}
