@@ -209,7 +209,7 @@ export function parsePermissions(dbResults: any): Permission[] {
 
 export type Category = {
 	id: number;
-	categoryName: string;
+	name: string;
 	urlName: string;
 	isSeries: boolean;
 };

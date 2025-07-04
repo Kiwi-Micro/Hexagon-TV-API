@@ -78,9 +78,9 @@ export async function addCategory(data: Category): Promise<ReturnData<null>> {
 	try {
 		const dbResults: ResultSet = await runSQL(
 			true,
-			"INSERT INTO categories (categoryName, urlName, isSeries) VALUES (?, ?, ?)",
+			"INSERT INTO categories (name, urlName, isSeries) VALUES (?, ?, ?)",
 			true,
-			[data.categoryName, data.urlName, data.isSeries],
+			[data.name, data.urlName, data.isSeries],
 		);
 
 		return dbResults.rowsAffected > 0
@@ -129,7 +129,7 @@ export async function updateCategory(data: Category): Promise<ReturnData<null>> 
 			"UPDATE categories SET categoryName = ?, urlName = ?, isSeries = ? WHERE id = ?",
 			true,
 			[
-				data.categoryName || categoryData.categoryName,
+				data.name || categoryData.name,
 				data.urlName || categoryData.urlName,
 				data.isSeries || categoryData.isSeries,
 				data.id,
