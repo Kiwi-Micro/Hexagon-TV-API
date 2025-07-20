@@ -1,33 +1,27 @@
 {
-	"name": "hexagon-tv-api",
-	"version": "1.0.0",
-	"main": "index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev": "npx tsc && node dist/index.js",
-		"lint": "npx eslint .",
-		"lint:fix": "npx eslint . --fix"
-	},
-	"author": "Malcolm Hauser (Mooshay105)",
-	"license": "MPL-2.0",
-	"description": "The API For Hexagon TV",
-	"homepage": "https://hexagon.kiwi-micro.com",
-	"dependencies": {
-		"@clerk/backend": "^1.26.0",
-		"@libsql/client": "^0.14.0",
-		"cors": "^2.8.5",
-		"express": "^5.1.0",
-		"posthog-node": "^4.17.1",
-		"uploadthing": "7.4.4"
-	},
-	"devDependencies": {
-		"@types/cors": "^2.8.17",
-		"@types/express": "^5.0.1",
-		"@types/node": "^22.14.0",
-		"@types/react": "^19.1.0",
-		"eslint": "^9.24.0",
-		"tsx": "^4.19.3",
-		"typescript": "^5.8.3",
-		"typescript-eslint": "^8.29.0"
-	}
+  "name": "hexagon-tv",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "next": "15.4.2"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.2",
+    "@eslint/eslintrc": "^3"
+  }
 }
