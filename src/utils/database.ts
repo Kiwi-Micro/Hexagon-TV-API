@@ -2,7 +2,7 @@ import { ResultSet } from "@libsql/client/.";
 import { clerkClient, getDbConnection } from "./connections";
 import { getUserPermissions } from "./permissions";
 import { PostHog } from "posthog-node";
-import config from "../../config.json";
+import { printErrorMessage } from "./messages";
 
 /**
  * This function runs a SQL query.
@@ -51,7 +51,6 @@ export async function auth(sessionId: string, userId: string): Promise<boolean> 
 		});
 
 		if (sessions.totalCount === 0) {
-			console.log("No sessions found");
 			return false;
 		}
 
@@ -60,13 +59,12 @@ export async function auth(sessionId: string, userId: string): Promise<boolean> 
 				return true;
 			}
 		}
-		console.log("No session found");
 		return false;
 	} catch (error: any) {
 		if (error.status === 404) {
 			return false;
 		}
-		console.error("Error authenticating:", error);
+		printErrorMessage(`Error authenticating: ${error}`);
 		return false;
 	}
 }
@@ -125,4 +123,30 @@ export function sendAnalyticsEvent(
 	});
 
 	client.flush();
+}
+
+export function getDateTime(): string {
+	const currentDate = new Date();
+
+	const formatter = new Intl.DateTimeFormat("en-US", {
+		year: "numeric",
+		month: "short",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+		hour12: false,
+		timeZone: "GMT",
+	});
+
+	const formattedParts = formatter.formatToParts(currentDate);
+
+	const month = formattedParts.find((p) => p.type === "month")?.value;
+	const day = formattedParts.find((p) => p.type === "day")?.value;
+	const year = formattedParts.find((p) => p.type === "year")?.value;
+	const hour = formattedParts.find((p) => p.type === "hour")?.value;
+	const minute = formattedParts.find((p) => p.type === "minute")?.value;
+	const second = formattedParts.find((p) => p.type === "second")?.value;
+
+	return `${month} ${day} ${year} ${hour}:${minute}:${second} GMT+0000`;
 }

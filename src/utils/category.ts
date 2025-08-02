@@ -1,6 +1,7 @@
 import { ResultSet } from "@libsql/client";
 import { runSQL } from "./database";
 import { parseCategories, ReturnData, type Category } from "./types";
+import { printErrorMessage } from "./messages";
 
 /**
  * Gets all categories from the database.
@@ -18,7 +19,7 @@ export async function getCategories(): Promise<ReturnData<Category[]>> {
 			data: parseCategories(dbResults),
 		};
 	} catch (error: any) {
-		console.error("Error getting categories:", error);
+		printErrorMessage(`Error getting categories: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -58,7 +59,7 @@ export async function getCategory(id: number): Promise<ReturnData<Category>> {
 			data: parseCategories(dbResults)[0],
 		};
 	} catch (error: any) {
-		console.error("Error getting category:", error);
+		printErrorMessage(`Error getting category: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -97,7 +98,7 @@ export async function addCategory(data: Category): Promise<ReturnData<null>> {
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error adding category:", error);
+		printErrorMessage(`Error adding category: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -150,7 +151,7 @@ export async function updateCategory(data: Category): Promise<ReturnData<null>> 
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error updating category:", error);
+		printErrorMessage(`Error updating category: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -189,7 +190,7 @@ export async function deleteCategory(data: any): Promise<ReturnData<null>> {
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error deleting category:", error);
+		printErrorMessage(`Error deleting category: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,

@@ -2,6 +2,7 @@ import { Item, parseItems, ReturnData } from "./types";
 import { ResultSet } from "@libsql/client";
 import { utapi } from "./connections";
 import { runSQL } from "./database";
+import { printErrorMessage } from "./messages";
 
 /**
  * This function searches for items that match the query.
@@ -30,7 +31,7 @@ export async function search(
 			data: await parseItems(dbResults, userId),
 		};
 	} catch (error: any) {
-		console.error("Error searching:", error);
+		printErrorMessage(`Error searching: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -65,7 +66,7 @@ export async function getItems(
 			data: await parseItems(dbResults, userId),
 		};
 	} catch (error: any) {
-		console.error("Error getting items:", error);
+		printErrorMessage(`Error getting items: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -106,7 +107,7 @@ export async function getItem(id: number, userId: string): Promise<ReturnData<It
 			data: (await parseItems(dbResults, userId))[0],
 		};
 	} catch (error: any) {
-		console.error("Error getting item:", error);
+		printErrorMessage(`Error getting item: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -158,7 +159,7 @@ export async function addItem(data: Item): Promise<ReturnData<null>> {
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error adding item:", error);
+		printErrorMessage(`Error adding item: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -225,7 +226,7 @@ export async function updateItem(data: Item): Promise<ReturnData<null>> {
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error updating item:", error);
+		printErrorMessage(`Error updating item: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -281,7 +282,7 @@ export async function deleteItem(data: Item): Promise<ReturnData<null>> {
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error deleting item:", error);
+		printErrorMessage(`Error deleting item: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,

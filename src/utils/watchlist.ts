@@ -1,6 +1,7 @@
 import { ResultSet } from "@libsql/client";
 import { parseItems, parseWatchlist, ReturnData, type Watchlist } from "./types";
 import { runSQL } from "./database";
+import { printErrorMessage } from "./messages";
 
 /**
  * Gets the watchlist for a given user.
@@ -31,7 +32,7 @@ export async function getWatchlist(userId: string): Promise<ReturnData<Watchlist
 			data: parseWatchlist(dbResults, itemsResults),
 		};
 	} catch (error: any) {
-		console.error("Error getting watchlist:", error);
+		printErrorMessage(`Error getting watchlist: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -104,7 +105,7 @@ export async function addToWatchlist(item: Watchlist): Promise<ReturnData<null>>
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error adding to watchlist:", error);
+		printErrorMessage(`Error adding to watchlist: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -152,7 +153,7 @@ export async function deleteFromWatchlist(item: Watchlist): Promise<ReturnData<n
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error removing from watchlist:", error);
+		printErrorMessage(`Error removing from watchlist: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,

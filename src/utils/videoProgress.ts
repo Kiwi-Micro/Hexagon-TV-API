@@ -1,6 +1,7 @@
 import { ResultSet } from "@libsql/client";
 import { parseVideoProgress, ReturnData, type VideoProgress } from "./types";
 import { runSQL } from "./database";
+import { printErrorMessage } from "./messages";
 
 export async function addUserVideoProgressRow(
 	userId: string,
@@ -27,7 +28,7 @@ export async function addUserVideoProgressRow(
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error adding user video progress row:", error);
+		printErrorMessage(`Error adding user video progress row: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -63,7 +64,7 @@ export async function updateUserVideoProgress(
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error updating user video progress:", error);
+		printErrorMessage(`Error updating user video progress: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -101,7 +102,7 @@ export async function getUserVideoProgress(
 			data: parseVideoProgress(dbResults)[0],
 		};
 	} catch (error: any) {
-		console.error("Error getting user video progress:", error);
+		printErrorMessage(`Error getting user video progress: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,

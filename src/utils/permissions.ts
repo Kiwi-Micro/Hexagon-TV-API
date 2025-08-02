@@ -1,6 +1,7 @@
 import { ResultSet } from "@libsql/client";
 import { parsePermissions, ReturnData, type Permission } from "./types";
 import { runSQL } from "./database";
+import { printErrorMessage } from "./messages";
 
 /**
  * This function adds a user row to the database.
@@ -30,7 +31,7 @@ export async function addUserRow(userId: string): Promise<ReturnData<null>> {
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error adding user row:", error);
+		printErrorMessage(`Error adding user row: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -100,7 +101,7 @@ export async function updateUserPermissions(data: Permission): Promise<ReturnDat
 					data: null,
 			  };
 	} catch (error: any) {
-		console.error("Error updating user permissions:", error);
+		printErrorMessage(`Error updating user permissions: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -143,7 +144,7 @@ export async function getUserPermissions(
 			data: parsePermissions(dbResults)[0],
 		};
 	} catch (error: any) {
-		console.error("Error getting user permissions:", error);
+		printErrorMessage(`Error getting user permissions: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,

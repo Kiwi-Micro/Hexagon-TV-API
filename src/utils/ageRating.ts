@@ -1,6 +1,7 @@
 import { ResultSet } from "@libsql/client";
 import { parseAgeRatings, ReturnData, type ageRating } from "./types";
 import { runSQL } from "./database";
+import { printErrorMessage } from "./messages";
 
 /**
  * This function gets all age ratings from the database.
@@ -18,7 +19,7 @@ export async function getAgeRatings(): Promise<ReturnData<ageRating[]>> {
 			data: parseAgeRatings(dbResults),
 		};
 	} catch (error: any) {
-		console.error("Error getting age ratings:", error);
+		printErrorMessage(`Error getting age ratings: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
@@ -59,7 +60,7 @@ export async function getAgeRatingInfo(ageRating: string): Promise<ReturnData<st
 			data: dbResults.rows[0].ageRatingInfo as string,
 		};
 	} catch (error: any) {
-		console.error("Error getting age rating info:", error);
+		printErrorMessage(`Error getting age rating info: ${error}`);
 		return {
 			status: "server error",
 			httpStatus: 500,
