@@ -1,14 +1,13 @@
 import { Client, createClient } from "@libsql/client";
-import config from "../../config.json";
 import { createClerkClient } from "@clerk/backend";
 import { UTApi } from "uploadthing/server";
 
 // Get the config values.
-const TURSO_DB_URL = config[0]["TURSO_DB_URL"] || "";
-const TURSO_DB_AUTH_TOKEN_R = config[0]["TURSO_DB_AUTH_TOKEN_R"] || "";
-const TURSO_DB_AUTH_TOKEN_RW = config[0]["TURSO_DB_AUTH_TOKEN_RW"] || "";
-const UPLOADTHING_TOKEN = config[0]["UPLOADTHING_TOKEN"] || "";
-const CLERK_SECRET_KEY = config[0]["CLERK_SECRET_KEY"] || "";
+const TURSO_DB_URL = process.env.TURSO_DB_URL || "";
+const TURSO_DB_AUTH_TOKEN_R = process.env.TURSO_DB_AUTH_TOKEN_R || "";
+const TURSO_DB_AUTH_TOKEN_RW = process.env.TURSO_DB_AUTH_TOKEN_RW || "";
+const UPLOADTHING_TOKEN = process.env.UPLOADTHING_TOKEN || "";
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || "";
 
 // Create an instance of the UploadThing API.
 export const utapi = new UTApi({

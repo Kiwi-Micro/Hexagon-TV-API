@@ -102,7 +102,7 @@ export async function checkPermissionsAndAuthenticate(
  * The PostHog client.
  */
 
-const client = new PostHog(config[0]["POSTHOG_KEY"] || "", {
+const client = new PostHog(process.env.POSTHOG_KEY || "", {
 	host: "https://us.i.posthog.com",
 });
 

@@ -24,7 +24,6 @@ import getAgeRatingsEndpoint from "../routes/READ/getAgeRatings";
 // -- UploadThing --
 import uploadFilesEndpoint from "../routes/WRITE/uploadFiles";
 import { createRouteHandler } from "uploadthing/express";
-import config from "../../config.json";
 
 export function createEndpoints(app: any) {
 	const endpoints = [
@@ -101,7 +100,7 @@ export function createEndpoints(app: any) {
 			handler: createRouteHandler({
 				router: uploadFilesEndpoint,
 				config: {
-					token: config[0]["UPLOADTHING_TOKEN"],
+					token: process.env.UPLOADTHING_TOKEN || "",
 					logLevel: "Error",
 				},
 			}),
