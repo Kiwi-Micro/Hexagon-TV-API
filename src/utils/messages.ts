@@ -22,7 +22,7 @@ export function printEndpointReached(req: any, res?: any) {
 export function printErrorMessage(errorText: string) {
 	if (process.env.SHOW_ERROR_MESSAGES === "true") {
 		if (process.env.NODE_ENV === "development") {
-			console.log(`[ERROR] ${getDateTime()}: ${errorText}`);
+			console.error(`[ERROR] ${getDateTime()}: ${errorText}`);
 		}
 	}
 }
